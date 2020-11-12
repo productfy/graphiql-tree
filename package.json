@@ -1,0 +1,44 @@
+{
+  "name": "graphiql-explorer",
+  "version": "0.1",
+  "private": true,
+  "dependencies": {
+    "@types/react": "^16.9.34",
+    "@types/react-dom": "^16.9.6",
+    "classnames": "^2.2.6",
+    "graphiql": "^1.0.5",
+    "graphql": "^15.0.0",
+    "lodash": "^4.17.20",
+    "prettier": "^2.1.2",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "react-scripts": "3.4.1"
+  },
+  "devDependencies": {
+    "@types/classnames": "^2.2.10",
+    "@types/lodash": "^4.14.165",
+    "@types/prettier": "^2.1.5",
+    "eslint-config-react-app": "^5.2.1",
+    "node-sass": "^4.14.1",
+    "worker-loader": "^2.0.0"
+  },
+  "scripts": {
+    "start": "react-scripts start --no-cache",
+    "build": "react-scripts build"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

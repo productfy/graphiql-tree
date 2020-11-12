@@ -1,0 +1,176 @@
+:root {
+  --monospace-font: Menlo, Consolas, monospace;
+}
+
+:global {
+  .graphiql-container .historyPaneWrap:local(.graphiQLExplorer) {
+    min-width: 50%;
+
+    .history-contents {
+      font-family: system, -apple-system, San Francisco, \.SFNSDisplay-Regular, Segoe UI, Segoe,
+        Segoe WP, Helvetica Neue, helvetica, Lucida Grande, arial, sans-serif;
+      font-size: 14px;
+      line-height: 22px;
+      padding: 5vw;
+      overflow-x: auto;
+      color: #4f566b;
+
+      input {
+        margin: 0;
+        vertical-align: baseline;
+      }
+
+      input[type='checkbox'] {
+        cursor: pointer;
+        vertical-align: middle;
+      }
+    }
+
+    :local(.argInput) {
+    }
+
+    :local(.argument) {
+      padding-top: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e3e8ee;
+
+      .arg-name {
+        font-family: var(--monospace-font);
+        font-size: 13px;
+        font-weight: 600;
+      }
+    }
+
+    :local(.checkbox) {
+      display: inline-block;
+      width: 1em;
+      margin-right: 0.5em;
+    }
+
+    :local(.description) {
+    }
+
+    :local(.fieldNode) {
+      padding-top: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e3e8ee;
+    }
+
+    :local(.indented) {
+      padding-left: 1.6em;
+    }
+
+    :local(.inputText) {
+      display: inline-block;
+
+      &:focus,
+      &:local(.focusBorder) {
+        border-bottom: 1px solid;
+        margin-bottom: -1px;
+        outline: none;
+      }
+
+      &:focus {
+        min-width: 1ch;
+      }
+    }
+
+    :local(.operation) {
+      :local(.operationTypeAndName) {
+        display: inline-block;
+      }
+
+      :local(.operationInput) {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        overflow: hidden;
+
+        > select {
+          cursor: pointer;
+        }
+      }
+    }
+
+    :local(.nameLine) {
+      display: inline-block;
+    }
+
+    :local(.node) {
+      white-space: nowrap;
+
+      .cm-number {
+        :local(.inputText) {
+          &:empty {
+            border-bottom: 1px solid;
+            margin-bottom: -1px;
+            min-width: 1ch;
+          }
+        }
+      }
+
+      .cm-string {
+        &::before,
+        &::after {
+          content: '"';
+          cursor: text;
+        }
+      }
+
+      .CodeMirror-foldgutter-folded,
+      .CodeMirror-foldgutter-open {
+        display: inline-block;
+        width: 14px;
+        text-align: center;
+        margin-right: 4px;
+        color: #999;
+        margin-left: -16px;
+      }
+    }
+
+    :local(.parameters),
+    :local(.returns) {
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e3e8ee;
+      margin-bottom: 0;
+
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    :local(.returns) {
+      padding-top: 24px;
+    }
+
+    :local(.selectable) {
+      cursor: pointer;
+    }
+
+    :local(.spacer) {
+      display: inline-block;
+      width: 1.5em;
+    }
+
+    :local(.spacer2) {
+      display: inline-block;
+      width: 3em;
+    }
+
+    :local(.typeName) {
+      color: #8792a2;
+      font-size: 13px;
+      font-weight: 500;
+      -webkit-font-smoothing: antialiased;
+      margin-left: 4px;
+    }
+
+    .depth-4 {
+      > :local(.nameLine) {
+        .field-name {
+          font-size: 18px;
+        }
+      }
+    }
+  }
+}
