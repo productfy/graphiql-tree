@@ -65,12 +65,12 @@ export default [
     external: ['react'],
     output: [
       {
-        file: 'dist/index.js',
+        file: 'build/dist/index.js',
         format: 'cjs',
         exports: 'named',
       },
       {
-        file: 'dist/index.es.js',
+        file: 'build/dist/index.es.js',
         format: 'esm',
         exports: 'named',
       },
@@ -81,7 +81,7 @@ export default [
       commonjs(),
       typescript(),
       postcss({
-        extract: false,
+        extract: true,
         modules: true,
         use: ['sass'],
       }),
