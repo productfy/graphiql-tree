@@ -1,12 +1,10 @@
 {
-  "name": "graphiql-tree",
+  "name": "@productfy/graphiql-tree",
   "version": "0.0.1",
-  "main": "dist/index.js",
-  "module": "dist/index.es.js",
-  "files": [
-    "dist"
-  ],
-  "types": "dist/index.d.ts",
+  "license": "MIT",
+  "main": "index.js",
+  "module": "index.es.js",
+  "types": "index.d.ts",
   "private": false,
   "release": {
     "branches": [
