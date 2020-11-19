@@ -49,6 +49,9 @@
   "eslintConfig": {
     "extends": "react-app"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "browserslist": {
     "production": [
       ">0.2%",
