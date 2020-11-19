@@ -7,6 +7,11 @@
     "dist"
   ],
   "types": "dist/index.d.ts",
+  "release": {
+    "branches": [
+      "main"
+    ]
+  },
   "dependencies": {
     "@types/react": "^16.9.34",
     "@types/react-dom": "^16.9.6",
