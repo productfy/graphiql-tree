@@ -67,6 +67,9 @@ const Field: React.FC<FieldProps> = React.memo(function Field({
   );
 
   const onToggleField = useCallback(() => {
+    if (depth === 4) {
+      return;
+    }
     if (!selectionNodeRef.current) {
       const nextFieldNode: FieldNode = {
         kind: 'Field',
@@ -91,8 +94,14 @@ const Field: React.FC<FieldProps> = React.memo(function Field({
 
   return (
     <div className={classnames(styles.node, styles.fieldNode, `depth-${depth}`)}>
-      <div className={classnames(styles.nameLine, styles.selectable)} onClick={onToggleField}>
+      <div
+        className={classnames(styles.nameLine, {
+          [styles.selectable]: depth !== 4,
+        })}
+        onClick={onToggleField}
+      >
         {hasFields &&
+          depth !== 4 &&
           (selected ? (
             <>
               <span className="CodeMirror-foldgutter-open" />
@@ -133,7 +142,13 @@ const Field: React.FC<FieldProps> = React.memo(function Field({
         {selected && hasFields && !hasArgs && <span className="cm-punctuation">{' {'}</span>} */}
       </div>
       {field.description && (
-        <div className={classnames(styles.description, styles.indented)}>{field.description}</div>
+        <div
+          className={classnames(styles.description, {
+            [styles.indented]: depth !== 4,
+          })}
+        >
+          {field.description}
+        </div>
       )}
 
       {selected && (
@@ -268,6 +283,9 @@ const Type: React.FC<TypeProps> = React.memo(function Type({
             const selection = (selectionSetNode?.selections as FieldNode[])?.find(
               selection => selection.name?.value === field.name,
             );
+            if (depth === 3 && field.name !== 'personAddress') {
+              return null;
+            }
             return (
               <Field
                 depth={depth + 1}

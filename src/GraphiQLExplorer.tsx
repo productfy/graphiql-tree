@@ -65,9 +65,9 @@ export default React.memo(function GraphiQLExplorer({
       className={classnames('historyPaneWrap', styles.graphiQLExplorer)}
       style={{ ...(!open ? { display: 'none' } : {}) }}
     >
-      <section aria-label="Explorer">
+      <section aria-label="API Definition">
         <div className="history-title-bar">
-          <div className="history-title">Explorer</div>
+          <div className="history-title">API Definition</div>
           <div className="doc-explorer-rhs">
             <button
               className="docExplorerHide"

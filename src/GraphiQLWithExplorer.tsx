@@ -5,6 +5,10 @@ import React, { useCallback, useState } from 'react';
 
 import GraphiQLExplorer from './GraphiQLExplorer';
 
+import classnames from 'classnames';
+
+import styles from './GraphiQLExplorer.module.scss';
+
 import 'graphiql/graphiql.min.css';
 
 export type { FetcherParams } from 'graphiql/dist/components/GraphiQL';
@@ -22,7 +26,7 @@ const GraphiQLWithExplorer: React.FC<GraphiQLWithExplorerProps> = ({ fetcher, sc
   const onEditQuery = useCallback((query?: string) => setQuery(query || ''), [setQuery]);
 
   return (
-    <div className="graphiql-container">
+    <div className={classnames('graphiql-container', styles.graphiqlTree)}>
       <GraphiQLExplorer onEdit={onEditQuery} query={query} schema={schema} />
       <GraphiQL fetcher={fetcher} query={query} onEditQuery={onEditQuery} schema={schema} />
     </div>

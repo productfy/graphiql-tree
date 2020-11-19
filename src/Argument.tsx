@@ -9,6 +9,7 @@ import {
   StringValueNode,
   isInputObjectType,
   isNonNullType,
+  BooleanValueNode,
 } from 'graphql';
 import React, { ChangeEvent, useCallback, useEffect, useRef } from 'react';
 
@@ -90,7 +91,11 @@ export default React.memo(function Argument({
       )} */}
       {hasFields && (
         <span
-          className={selected ? 'CodeMirror-foldgutter-open' : 'CodeMirror-foldgutter-folded'}
+          className={classnames(
+            styles.selectable,
+            selected ? 'CodeMirror-foldgutter-open' : 'CodeMirror-foldgutter-folded',
+          )}
+          onClick={onToggleArgument}
         />
       )}
 
@@ -118,6 +123,30 @@ export default React.memo(function Argument({
         <div className={classnames(styles.argInput, styles.indented)}>
           {(() => {
             switch (unwrappedType.name) {
+              case 'Boolean':
+                const booleanValue: boolean = (argumentNode?.value as BooleanValueNode)?.value;
+                return (
+                  <div className={classnames('cm-builtin', styles.boolean)}>
+                    <label>
+                      <input
+                        checked={booleanValue === true}
+                        name={name}
+                        onChange={onEditArgument}
+                        type="radio"
+                      />
+                      <span>true</span>
+                    </label>
+                    <label>
+                      <input
+                        checked={booleanValue === false}
+                        name={name}
+                        onChange={onEditArgument}
+                        type="radio"
+                      />
+                      <span>false</span>
+                    </label>
+                  </div>
+                );
               case 'Float':
               case 'Int':
               case 'ID':

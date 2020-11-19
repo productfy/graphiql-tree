@@ -3,7 +3,10 @@
 }
 
 :global {
-  .graphiql-container .historyPaneWrap:local(.graphiQLExplorer) {
+  .graphiql-container:local(.graphiqlTree) .CodeMirror {
+    font-family: var(--monospace-font);
+  }
+  .graphiql-container:local(.graphiqlTree) .historyPaneWrap:local(.graphiQLExplorer) {
     min-width: 50%;
 
     .history-contents {
@@ -11,17 +14,17 @@
         Segoe WP, Helvetica Neue, helvetica, Lucida Grande, arial, sans-serif;
       font-size: 14px;
       line-height: 22px;
-      padding: 5vw;
+      padding: 2.5vw 5vw;
       overflow-x: auto;
       color: #4f566b;
 
       input {
-        margin: 0;
         vertical-align: baseline;
       }
 
-      input[type='checkbox'] {
+      input[type=checkbox] {
         cursor: pointer;
+        margin: 0;
         vertical-align: middle;
       }
     }
@@ -38,6 +41,35 @@
         font-family: var(--monospace-font);
         font-size: 13px;
         font-weight: 600;
+      }
+    }
+
+    :local(.boolean) {
+      input[type=radio] {
+        display: none;
+
+        & + span {
+          display: inline-block;
+          padding: 0 8px;
+          width: 3em;
+          text-align: center;
+          border: 1px solid #d47509;
+        }
+
+        &:checked + span {
+          background-color: #d47509;
+          color: white;
+        }
+      }
+
+      > label:first-child span {
+        border-top-left-radius: 4px;
+        border-bottom-left-radius: 4px;
+      }
+      > label:last-child span {
+        border-top-right-radius: 4px;
+        border-bottom-right-radius: 4px;
+        border-left: none;
       }
     }
 
@@ -62,13 +94,23 @@
 
     :local(.inputText) {
       display: inline-block;
+      font-family: var(--monospace-font);
+      box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px,
+        rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(60, 66, 87, 0.16) 0px 0px 0px 1px,
+        rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px,
+        rgba(0, 0, 0, 0) 0px 0px 0px 0px;
+      margin: 4px 0;
+      padding: 4px 8px;
+      border-radius: 4px;
+      width: 100%;
+      box-sizing: border-box;
 
-      &:focus,
-      &:local(.focusBorder) {
-        border-bottom: 1px solid;
-        margin-bottom: -1px;
-        outline: none;
-      }
+      // &:focus,
+      // &:local(.focusBorder) {
+      //   border-bottom: 1px solid;
+      //   margin-bottom: -1px;
+      //   outline: none;
+      // }
 
       &:focus {
         min-width: 1ch;
@@ -78,6 +120,7 @@
     :local(.operation) {
       :local(.operationTypeAndName) {
         display: inline-block;
+        font-family: var(--monospace-font);
       }
 
       :local(.operationInput) {
@@ -89,6 +132,19 @@
 
         > select {
           cursor: pointer;
+        }
+      }
+
+      :local(.operationName) {
+        box-shadow: none;
+        padding: 0;
+        margin: 0;
+        border-radius: 0;
+
+        &:focus {
+          border-bottom: 1px solid;
+          margin-bottom: -1px;
+          outline: none;
         }
       }
     }
@@ -110,13 +166,13 @@
         }
       }
 
-      .cm-string {
-        &::before,
-        &::after {
-          content: '"';
-          cursor: text;
-        }
-      }
+      // .cm-string {
+      //   &::before,
+      //   &::after {
+      //     content: '"';
+      //     cursor: text;
+      //   }
+      // }
 
       .CodeMirror-foldgutter-folded,
       .CodeMirror-foldgutter-open {

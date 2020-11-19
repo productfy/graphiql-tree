@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import GraphiQLWithExplorer, { FetcherParams } from './GraphiQLWithExplorer';
 
-const url = 'https://stage-user-api.productfy.io/graphql/api/public';
+const url = 'https://user-api.productfy.io/graphql/api/public';
 
 const fetcher = ({ signal }: AbortController) => async (graphQLParams: FetcherParams) => {
   const response = await fetch(url, {

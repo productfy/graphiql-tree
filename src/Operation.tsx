@@ -93,14 +93,14 @@ export default React.memo(function Operation({
             name="name"
             onChange={onEditOperation}
             value={name}
-            className={classnames(styles.inputText, {
+            className={classnames(styles.inputText, styles.operationName, {
               [styles.focusBorder]: name.length === 0,
             })}
             style={{ width: `calc(1px + ${name.length || 1}ch)` }}
           />
         </span>
 
-        <span className="cm-punctuation">{' {'}</span>
+        {/* <span className="cm-punctuation">{' {'}</span> */}
       </div>
 
       <Type
