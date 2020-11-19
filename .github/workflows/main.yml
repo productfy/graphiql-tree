@@ -12,7 +12,9 @@ jobs:
         with:
           node-version: '12'
       - name: Build
-        run: yarn build
+        run: |
+          yarn
+          yarn build
       - name: Release
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
