@@ -1,3 +1,4 @@
+import classnames from 'classnames';
 import GraphiQL from 'graphiql';
 import { Fetcher } from 'graphiql/dist/components/GraphiQL';
 import { GraphQLSchema } from 'graphql';
@@ -5,10 +6,7 @@ import React, { useCallback, useState } from 'react';
 
 import GraphiQLTree from './GraphiQLTree';
 
-import classnames from 'classnames';
-
 import styles from './GraphiQLTree.module.scss';
-
 import 'graphiql/graphiql.min.css';
 
 export type { FetcherParams } from 'graphiql/dist/components/GraphiQL';
