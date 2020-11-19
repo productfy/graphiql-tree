@@ -6,7 +6,7 @@
   .graphiql-container:local(.graphiqlTree) .CodeMirror {
     font-family: var(--monospace-font);
   }
-  .graphiql-container:local(.graphiqlTree) .historyPaneWrap:local(.graphiQLExplorer) {
+  .graphiql-container:local(.graphiqlTree) .historyPaneWrap:local(.graphiqlTree) {
     min-width: 50%;
 
     .history-contents {

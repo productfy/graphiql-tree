@@ -1,7 +1,7 @@
 import { buildClientSchema, getIntrospectionQuery, GraphQLSchema } from 'graphql';
 import React, { useEffect, useRef, useState } from 'react';
 
-import GraphiQLWithExplorer, { FetcherParams } from './GraphiQLWithExplorer';
+import GraphiQLWithExplorer, { FetcherParams } from './GraphiQLWithTree';
 
 const url = 'https://user-api.productfy.io/graphql/api/public';
 

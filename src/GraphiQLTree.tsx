@@ -5,10 +5,10 @@ import React, { useCallback, useEffect, useState } from 'react';
 import Document from './Document';
 import { transformDocumentNodeToQueryString } from './graphqlHelper';
 
-import styles from './GraphiQLExplorer.module.scss';
+import styles from './GraphiQLTree.module.scss';
 import { SchemaContext } from './Context';
 
-interface GraphiQLExplorerProps {
+interface GraphiQLTreeProps {
   onEdit: (queryString: string) => void;
   query: string;
   schema?: GraphQLSchema;
@@ -27,11 +27,11 @@ function parseQuery(queryString: string): DocumentNode | undefined {
   }
 }
 
-export default React.memo(function GraphiQLExplorer({
+export default React.memo(function GraphiQLTree({
   onEdit,
   query,
   schema,
-}: GraphiQLExplorerProps) {
+}: GraphiQLTreeProps) {
   const [open, setOpen] = useState<boolean>(true);
   const [documentNode, setDocumentNode] = useState<DocumentNode>(
     parseQuery(query) || DEFAULT_DOCUMENT,
@@ -62,7 +62,7 @@ export default React.memo(function GraphiQLExplorer({
 
   return (
     <div
-      className={classnames('historyPaneWrap', styles.graphiQLExplorer)}
+      className={classnames('historyPaneWrap', styles.graphiqlTree)}
       style={{ ...(!open ? { display: 'none' } : {}) }}
     >
       <section aria-label="API Definition">

@@ -9,60 +9,60 @@ import resolve from '@rollup/plugin-node-resolve';
 import typescript from 'rollup-plugin-typescript2';
 
 export default [
+  // {
+  //   input: ['src/GraphiQLWithTree.tsx'],
+  //   external: ['react'],
+  //   preserveModules: true,
+  //   output: [
+  //     {
+  //       dir: 'dist',
+  //       format: 'cjs',
+  //       exports: 'named',
+  //     },
+  //   ],
+  //   plugins: [
+  //     peerDepsExternal(),
+  //     resolve(),
+  //     commonjs(),
+  //     typescript(),
+  //     postcss({
+  //       extract: false,
+  //       modules: true,
+  //       use: ['sass'],
+  //     }),
+  //     json(),
+  //     babel({ babelHelpers: 'bundled' }),
+  //     analyze(),
+  //   ],
+  // },
+  // {
+  //   input: ['src/GraphiQLWithTree.tsx'],
+  //   external: ['react'],
+  //   preserveModules: true,
+  //   output: [
+  //     {
+  //       dir: 'dist',
+  //       format: 'esm',
+  //       exports: 'named',
+  //     },
+  //   ],
+  //   plugins: [
+  //     peerDepsExternal(),
+  //     resolve(),
+  //     commonjs(),
+  //     typescript(),
+  //     postcss({
+  //       extract: false,
+  //       modules: true,
+  //       use: ['sass'],
+  //     }),
+  //     json(),
+  //     babel({ babelHelpers: 'bundled' }),
+  //     analyze(),
+  //   ],
+  // },
   {
-    input: ['src/index.tsx'],
-    external: ['react'],
-    preserveModules: true,
-    output: [
-      {
-        dir: 'dist',
-        format: 'cjs',
-        exports: 'named',
-      },
-    ],
-    plugins: [
-      peerDepsExternal(),
-      resolve(),
-      commonjs(),
-      typescript(),
-      postcss({
-        extract: false,
-        modules: true,
-        use: ['sass'],
-      }),
-      json(),
-      babel({ babelHelpers: 'bundled' }),
-      analyze(),
-    ],
-  },
-  {
-    input: ['src/index.tsx'],
-    external: ['react'],
-    preserveModules: true,
-    output: [
-      {
-        dir: 'dist',
-        format: 'esm',
-        exports: 'named',
-      },
-    ],
-    plugins: [
-      peerDepsExternal(),
-      resolve(),
-      commonjs(),
-      typescript(),
-      postcss({
-        extract: false,
-        modules: true,
-        use: ['sass'],
-      }),
-      json(),
-      babel({ babelHelpers: 'bundled' }),
-      analyze(),
-    ],
-  },
-  {
-    input: ['src/index.tsx'],
+    input: ['src/GraphiQLWithTree.tsx'],
     external: ['react'],
     output: [
       {

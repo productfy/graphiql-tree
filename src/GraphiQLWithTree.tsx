@@ -3,11 +3,11 @@ import { Fetcher } from 'graphiql/dist/components/GraphiQL';
 import { GraphQLSchema } from 'graphql';
 import React, { useCallback, useState } from 'react';
 
-import GraphiQLExplorer from './GraphiQLExplorer';
+import GraphiQLTree from './GraphiQLTree';
 
 import classnames from 'classnames';
 
-import styles from './GraphiQLExplorer.module.scss';
+import styles from './GraphiQLTree.module.scss';
 
 import 'graphiql/graphiql.min.css';
 
@@ -27,7 +27,7 @@ const GraphiQLWithExplorer: React.FC<GraphiQLWithExplorerProps> = ({ fetcher, sc
 
   return (
     <div className={classnames('graphiql-container', styles.graphiqlTree)}>
-      <GraphiQLExplorer onEdit={onEditQuery} query={query} schema={schema} />
+      <GraphiQLTree onEdit={onEditQuery} query={query} schema={schema} />
       <GraphiQL fetcher={fetcher} query={query} onEditQuery={onEditQuery} schema={schema} />
     </div>
   );

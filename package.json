@@ -34,13 +34,17 @@
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "rollup-plugin-postcss": "^3.1.8",
     "rollup-plugin-typescript2": "^0.29.0",
+    "semantic-release": "^17.2.3",
     "typescript": "^4.0.5",
     "worker-loader": "^2.0.0"
   },
   "scripts": {
     "start": "react-scripts start --no-cache",
-    "build": "react-scripts build",
-    "build:rollup": "rollup -c ./config/rollup.config.js"
+    "build": "npm run build:clean && npm run build:rollup && npm run build:copyfiles",
+    "build:clean": "rm -rf ./dist",
+    "build:copyfiles": "cp -rf package.json ./dist",
+    "build:rollup": "rollup -c ./config/rollup.config.js",
+    "semantic-release": "cd dist && semantic-release"
   },
   "eslintConfig": {
     "extends": "react-app"

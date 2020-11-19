@@ -10,7 +10,7 @@ import {
 import { SchemaContext } from './Context';
 import { Type } from './Node';
 
-import styles from './GraphiQLExplorer.module.scss';
+import styles from './GraphiQLTree.module.scss';
 
 interface OperationProps {
   depth: number;

@@ -2,7 +2,7 @@ import classnames from 'classnames';
 import { GraphQLList, GraphQLNonNull, GraphQLType } from 'graphql';
 import React from 'react';
 
-import styles from './GraphiQLExplorer.module.scss';
+import styles from './GraphiQLTree.module.scss';
 
 type TypeNameProps = {
   className?: string;

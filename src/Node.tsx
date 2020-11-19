@@ -21,7 +21,7 @@ import {
 import { SchemaContext } from './Context';
 import TypeName from './TypeName';
 
-import styles from './GraphiQLExplorer.module.scss';
+import styles from './GraphiQLTree.module.scss';
 
 export interface FieldProps {
   depth: number;

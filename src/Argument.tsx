@@ -16,7 +16,7 @@ import React, { ChangeEvent, useCallback, useEffect, useRef } from 'react';
 import { sourcesAreEqual, unwrapType } from './graphqlHelper';
 import TypeName from './TypeName';
 
-import styles from './GraphiQLExplorer.module.scss';
+import styles from './GraphiQLTree.module.scss';
 
 export interface ArgumentProps {
   arg: GraphQLArgument;
