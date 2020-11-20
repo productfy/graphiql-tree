@@ -54,7 +54,7 @@
     "build": "npm run build:clean && npm run build:rollup",
     "build:clean": "rm -rf ./build",
     "build:rollup": "rollup -c ./config/rollup.config.js",
-    "semantic-release": "cd build && semantic-release"
+    "semantic-release": "semantic-release"
   },
   "eslintConfig": {
     "extends": "react-app"
