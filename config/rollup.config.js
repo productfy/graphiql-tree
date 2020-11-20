@@ -65,12 +65,12 @@ export default [
     external: ['react'],
     output: [
       {
-        file: 'build/dist/index.js',
+        file: 'dist/index.js',
         format: 'cjs',
         exports: 'named',
       },
       {
-        file: 'build/dist/index.es.js',
+        file: 'dist/index.es.js',
         format: 'esm',
         exports: 'named',
       },

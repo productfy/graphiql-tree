@@ -12,7 +12,7 @@
     ]
   },
   "files": [
-    "build"
+    "dist"
   ],
   "dependencies": {
     "@types/react": "^16.9.34",
