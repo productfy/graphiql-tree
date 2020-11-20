@@ -12,6 +12,7 @@ import 'graphiql/graphiql.min.css';
 export type { FetcherParams } from 'graphiql/dist/components/GraphiQL';
 
 export interface GraphiQLWithTreeProps {
+  customizeNode?: (params: any) => JSX.Element | void;
   fetcher: Fetcher;
   schema?: GraphQLSchema;
 }
@@ -19,13 +20,18 @@ export interface GraphiQLWithTreeProps {
 const DEFAULT_QUERY =
   'mutation myEnums {\n  personAddress(primary: true, personId: "ABC123") {\n    address {\n      id\n      name\n      usTerritory\n    }\n    primary\n  }\n}\n';
 
-const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({ fetcher, schema }) => {
+const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({ customizeNode, fetcher, schema }) => {
   const [query, setQuery] = useState<string>(DEFAULT_QUERY);
   const onEditQuery = useCallback((query?: string) => setQuery(query || ''), [setQuery]);
 
   return (
     <div className={classnames('graphiql-container', styles.graphiqlTree)}>
-      <GraphiQLTree onEdit={onEditQuery} query={query} schema={schema} />
+      <GraphiQLTree
+        customizeNode={customizeNode}
+        onEdit={onEditQuery}
+        query={query}
+        schema={schema}
+      />
       <GraphiQL fetcher={fetcher} query={query} onEditQuery={onEditQuery} schema={schema} />
     </div>
   );

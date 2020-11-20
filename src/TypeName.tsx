@@ -28,7 +28,11 @@ const TypeName = React.memo(function TypeName({ className, onClick, type }: Type
       </span>
     );
   }
-  return <span className={classnames(className, styles.typeName, 'type-name')}>{type?.name}</span>;
+  return (
+    <span className={classnames(className, styles.typeName, 'type-name')} onClick={onClick}>
+      {type?.name}
+    </span>
+  );
 });
 
 export default TypeName;

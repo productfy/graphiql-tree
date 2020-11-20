@@ -2,13 +2,14 @@ import classnames from 'classnames';
 import { DocumentNode, GraphQLSchema, parse } from 'graphql';
 import React, { useCallback, useEffect, useState } from 'react';
 
+import { CustomNodeContext, SchemaContext } from './Context';
 import Document from './Document';
 import { transformDocumentNodeToQueryString } from './graphqlHelper';
 
 import styles from './GraphiQLTree.module.scss';
-import { SchemaContext } from './Context';
 
 interface GraphiQLTreeProps {
+  customizeNode?: (params: any) => JSX.Element | void;
   onEdit: (queryString: string) => void;
   query: string;
   schema?: GraphQLSchema;
@@ -28,6 +29,7 @@ function parseQuery(queryString: string): DocumentNode | undefined {
 }
 
 export default React.memo(function GraphiQLTree({
+  customizeNode = () => {},
   onEdit,
   query,
   schema,
@@ -86,7 +88,9 @@ export default React.memo(function GraphiQLTree({
           )}
           {schema && (
             <SchemaContext.Provider value={schema}>
-              <Document documentNode={documentNode} onEdit={onEditDocument} />
+              <CustomNodeContext.Provider value={customizeNode}>
+                <Document documentNode={documentNode} onEdit={onEditDocument} />
+              </CustomNodeContext.Provider>
             </SchemaContext.Provider>
           )}
         </div>

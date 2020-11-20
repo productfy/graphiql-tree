@@ -1,56 +1,118 @@
 import classnames from 'classnames';
 import {
   ArgumentNode,
+  BooleanValueNode,
+  FieldNode,
   FloatValueNode,
   GraphQLArgument,
-  GraphQLEnumType,
+  GraphQLInputField,
   IntValueNode,
   NullValueNode,
   StringValueNode,
+  isEnumType,
   isInputObjectType,
   isNonNullType,
-  BooleanValueNode,
+  isScalarType,
 } from 'graphql';
-import React, { ChangeEvent, useCallback, useEffect, useRef } from 'react';
+import React, { ChangeEvent, useCallback, useContext, useEffect, useRef } from 'react';
 
+import { CustomNodeContext } from './Context';
 import { sourcesAreEqual, unwrapType } from './graphqlHelper';
 import TypeName from './TypeName';
 
 import styles from './GraphiQLTree.module.scss';
 
+export interface InputFieldProps {
+  depth: number;
+  field: GraphQLInputField;
+  onEdit: (prevSelectionNode?: FieldNode, nextSelectionNode?: FieldNode) => void;
+  selectionNode?: FieldNode;
+}
+
+const InputField = React.memo(function InputField({
+  depth,
+  field,
+  onEdit,
+  selectionNode,
+}: InputFieldProps) {
+  const { description, name, type } = field;
+  return (
+    <div className={styles.inputField}>
+      <div>
+        <span className={styles.checkbox}>
+          <input
+            // checked={selected}
+            // disabled={isRequired}
+            // onChange={onToggleArgument}
+            type="checkbox"
+            // value={selected.toString()}
+          />
+        </span>
+
+        <span className={classnames('arg-name', styles.selectable)} onClick={() => {}}>
+          {name}
+        </span>
+
+        <TypeName className={styles.selectable} onClick={() => {}} type={type} />
+      </div>
+      {description && (
+        <div className={classnames(styles.description, styles.indented)}>{description}</div>
+      )}
+    </div>
+  );
+},
+sourcesAreEqual('selectionNode'));
+
 export interface ArgumentProps {
-  arg: GraphQLArgument;
-  argumentNode?: ArgumentNode;
+  arg: GraphQLArgument; // Schema
+  argumentNode?: ArgumentNode; // Selection
   depth: number;
   onEdit: (prevArgumentNode?: ArgumentNode, nextArgumentNode?: ArgumentNode) => void;
 }
 
-export default React.memo(function Argument({
-  arg: { description, name, type },
-  argumentNode,
-  depth,
-  onEdit,
-}: ArgumentProps) {
+const Argument = React.memo(function Argument({ arg, argumentNode, depth, onEdit }: ArgumentProps) {
+  const { description, name, type } = arg;
+  const customizeNode = useContext(CustomNodeContext);
   const inputRef = useRef<HTMLInputElement>(null);
-  const selectRef = useRef<HTMLSelectElement>(null);
   const argumentNodeRef = useRef(argumentNode);
 
   useEffect(() => {
     argumentNodeRef.current = argumentNode;
   }, [argumentNode]);
 
-  const onEditArgument = (e: ChangeEvent<HTMLInputElement>) => {
+  const onEditArgument = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const nextValue = e.target.value;
-    const nextValueNode: StringValueNode = {
-      kind: 'StringValue',
-      value: nextValue,
-    };
+    const unwrappedType = unwrapType(type);
+    let nextValueNode;
+    switch (unwrappedType.name) {
+      case 'Boolean':
+        if (['true', 'false'].includes(nextValue)) {
+          nextValueNode = {
+            kind: 'BooleanValue',
+            value: nextValue === 'true',
+          } as BooleanValueNode;
+        } else {
+          nextValueNode = {
+            kind: 'NullValue',
+          } as NullValueNode;
+        }
+        break;
+      default:
+        nextValueNode = {
+          kind: 'StringValue',
+          value: nextValue,
+        } as StringValueNode;
+    }
     const nextArgumentNode: ArgumentNode = {
       ...argumentNodeRef.current!,
       value: nextValueNode,
     };
     onEdit(argumentNodeRef.current, nextArgumentNode);
   };
+
+  const onEditInputField = useCallback(() => {
+    onEdit(argumentNodeRef.current, argumentNodeRef.current);
+  }, [onEdit]);
 
   const onToggleArgument = useCallback(() => {
     if (isNonNullType(type)) {
@@ -113,9 +175,9 @@ export default React.memo(function Argument({
         {name}
       </span>
 
-      <span className={classnames('cm-puncutation', styles.selectable)} onClick={onToggleArgument}>
+      {/* <span className={classnames('cm-puncutation', styles.selectable)} onClick={onToggleArgument}>
         :{' '}
-      </span>
+      </span> */}
 
       <TypeName className={styles.selectable} onClick={onToggleArgument} type={type} />
 
@@ -133,6 +195,7 @@ export default React.memo(function Argument({
                         name={name}
                         onChange={onEditArgument}
                         type="radio"
+                        value="true"
                       />
                       <span>true</span>
                     </label>
@@ -142,6 +205,7 @@ export default React.memo(function Argument({
                         name={name}
                         onChange={onEditArgument}
                         type="radio"
+                        value="false"
                       />
                       <span>false</span>
                     </label>
@@ -172,11 +236,11 @@ export default React.memo(function Argument({
                   </div>
                 );
               default:
-                if (unwrappedType instanceof GraphQLEnumType) {
+                if (isEnumType(unwrappedType)) {
                   const options = unwrappedType.getValues();
                   return (
-                    <div>
-                      <select ref={selectRef}>
+                    <div className={classnames('cm-string', styles.select)}>
+                      <select onChange={onEditArgument}>
                         <option
                           value=""
                           disabled={isRequired}
@@ -192,6 +256,37 @@ export default React.memo(function Argument({
                     </div>
                   );
                 }
+                if (isScalarType(unwrappedType)) {
+                  const customScalarArgumentResult = customizeNode({
+                    arg,
+                    argumentNode,
+                    depth,
+                    onEditArgument,
+                  });
+                  if (customScalarArgumentResult) {
+                    return customScalarArgumentResult;
+                  }
+
+                  let value: string | undefined =
+                    (argumentNode?.value as StringValueNode)?.value ?? '';
+                  if ((argumentNode?.value as NullValueNode)?.kind === 'NullValue') {
+                    value = '';
+                  }
+                  return (
+                    <div className="cm-string" onClick={() => inputRef.current?.focus()}>
+                      <input
+                        type="text"
+                        ref={inputRef}
+                        value={value}
+                        onChange={onEditArgument}
+                        className={classnames(styles.inputText, {
+                          [styles.focusBorder]: String(value ?? '').length === 0,
+                        })}
+                        // style={{ width: `calc(1px + ${String(value ?? '').length}ch)` }}
+                      />
+                    </div>
+                  );
+                }
                 break;
             }
             return null;
@@ -202,7 +297,26 @@ export default React.memo(function Argument({
       {description && (
         <div className={classnames(styles.description, styles.indented)}>{description}</div>
       )}
+
+      {(() => {
+        if (isInputObjectType(unwrappedType) && selected) {
+          const fields = unwrappedType.getFields();
+          return (
+            <div className={classnames(styles.argumentFields)}>
+              {Object.values(fields).map(field => (
+                <InputField
+                  depth={depth + 1}
+                  field={field}
+                  key={field.name}
+                  onEdit={onEditInputField}
+                />
+              ))}
+            </div>
+          );
+        }
+      })()}
     </div>
   );
-},
-sourcesAreEqual('argumentNode'));
+}, sourcesAreEqual('argumentNode'));
+
+export { Argument };

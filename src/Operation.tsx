@@ -8,7 +8,7 @@ import {
   sourcesAreEqual,
 } from './graphqlHelper';
 import { SchemaContext } from './Context';
-import { Type } from './Node';
+import { Type } from './OutputType';
 
 import styles from './GraphiQLTree.module.scss';
 
@@ -110,7 +110,7 @@ export default React.memo(function Operation({
         type={type}
       />
 
-      <div className="cm-punctuation">{'}'}</div>
+      {/* <div className="cm-punctuation">{'}'}</div> */}
     </div>
   );
 },

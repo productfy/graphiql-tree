@@ -3,14 +3,14 @@ import {
   ArgumentNode,
   FieldNode,
   GraphQLField,
-  GraphQLType,
+  GraphQLOutputType,
   isInterfaceType,
   isObjectType,
   SelectionSetNode,
 } from 'graphql';
 import React, { useCallback, useContext, useEffect, useRef } from 'react';
 
-import Argument from './Argument';
+import { Argument } from './InputType';
 import {
   mergeArgumentIntoSelection,
   mergeSelectionIntoSelectionSet,
@@ -30,12 +30,7 @@ export interface FieldProps {
   selectionNode?: FieldNode;
 }
 
-const Field: React.FC<FieldProps> = React.memo(function Field({
-  depth,
-  field,
-  onEdit,
-  selectionNode,
-}) {
+const Field = React.memo(function Field({ depth, field, onEdit, selectionNode }: FieldProps) {
   const selectionNodeRef = useRef(selectionNode);
 
   useEffect(() => {
@@ -100,23 +95,19 @@ const Field: React.FC<FieldProps> = React.memo(function Field({
         })}
         onClick={onToggleField}
       >
-        {hasFields &&
-          depth !== 4 &&
-          (selected ? (
-            <>
-              <span className="CodeMirror-foldgutter-open" />
-              <span className={styles.checkbox}>
-                <input
-                  checked={selected}
-                  onChange={onToggleField}
-                  type="checkbox"
-                  value={selected.toString()}
-                />
-              </span>
-            </>
-          ) : (
-            <span className="CodeMirror-foldgutter-folded" />
-          ))}
+        {hasFields && depth !== 4 && (
+          <>
+            <span className={`CodeMirror-foldgutter-${selected ? 'open' : 'folded'}`} />
+            <span className={styles.checkbox}>
+              <input
+                checked={selected}
+                onChange={onToggleField}
+                type="checkbox"
+                value={selected.toString()}
+              />
+            </span>
+          </>
+        )}
 
         {!hasFields && (
           <span className={styles.checkbox}>
@@ -194,29 +185,28 @@ const Field: React.FC<FieldProps> = React.memo(function Field({
             </>
           )}
 
-          {hasFields && <div className="cm-punctuation">{'}'}</div>}
+          {/* {hasFields && <div className="cm-punctuation">{'}'}</div>} */}
         </>
       )}
     </div>
   );
-},
-sourcesAreEqual('selectionNode'));
+}, sourcesAreEqual('selectionNode'));
 
 export interface TypeProps {
   depth: number;
   isImplementation?: boolean;
   onEdit: (prevSelectionSet?: SelectionSetNode, nextSelectionSet?: SelectionSetNode) => void;
   selectionSetNode: SelectionSetNode;
-  type?: GraphQLType | null;
+  type?: GraphQLOutputType | null;
 }
 
-const Type: React.FC<TypeProps> = React.memo(function Type({
+const Type = React.memo(function Type({
   depth,
   isImplementation,
   onEdit,
   selectionSetNode,
   type,
-}) {
+}: TypeProps) {
   const schema = useContext(SchemaContext);
   const selectionSetNodeRef = useRef(selectionSetNode);
 
