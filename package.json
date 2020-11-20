@@ -11,6 +11,9 @@
       "main"
     ]
   },
+  "files": [
+    "build"
+  ],
   "dependencies": {
     "@types/react": "^16.9.34",
     "@types/react-dom": "^16.9.6",
@@ -48,9 +51,8 @@
   },
   "scripts": {
     "start": "react-scripts start --no-cache",
-    "build": "npm run build:clean && npm run build:rollup && npm run build:copyfiles",
+    "build": "npm run build:clean && npm run build:rollup",
     "build:clean": "rm -rf ./build",
-    "build:copyfiles": "cp -rf package.json ./build",
     "build:rollup": "rollup -c ./config/rollup.config.js",
     "semantic-release": "cd build && semantic-release"
   },

@@ -1,7 +1,7 @@
 import { buildClientSchema, getIntrospectionQuery, GraphQLSchema } from 'graphql';
 import React, { useEffect, useRef, useState } from 'react';
 
-import GraphiQLWithExplorer, { FetcherParams } from './GraphiQLWithTree';
+import GraphiQLWithTree, { FetcherParams } from './GraphiQLWithTree';
 
 const url = 'https://user-api.productfy.io/graphql/api/public';
 
@@ -41,7 +41,7 @@ const App = () => {
     return () => controller.abort();
   }, []);
 
-  return <GraphiQLWithExplorer fetcher={fetcher(abortController.current)} schema={schema} />;
+  return <GraphiQLWithTree fetcher={fetcher(abortController.current)} schema={schema} />;
 };
 
 export default App;

@@ -11,7 +11,7 @@ import 'graphiql/graphiql.min.css';
 
 export type { FetcherParams } from 'graphiql/dist/components/GraphiQL';
 
-export interface GraphiQLWithExplorerProps {
+export interface GraphiQLWithTreeProps {
   fetcher: Fetcher;
   schema?: GraphQLSchema;
 }
@@ -19,7 +19,7 @@ export interface GraphiQLWithExplorerProps {
 const DEFAULT_QUERY =
   'mutation myEnums {\n  personAddress(primary: true, personId: "ABC123") {\n    address {\n      id\n      name\n      usTerritory\n    }\n    primary\n  }\n}\n';
 
-const GraphiQLWithExplorer: React.FC<GraphiQLWithExplorerProps> = ({ fetcher, schema }) => {
+const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({ fetcher, schema }) => {
   const [query, setQuery] = useState<string>(DEFAULT_QUERY);
   const onEditQuery = useCallback((query?: string) => setQuery(query || ''), [setQuery]);
 
@@ -31,4 +31,4 @@ const GraphiQLWithExplorer: React.FC<GraphiQLWithExplorerProps> = ({ fetcher, sc
   );
 };
 
-export default GraphiQLWithExplorer;
+export default GraphiQLWithTree;
