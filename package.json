@@ -52,7 +52,7 @@
   "scripts": {
     "start": "react-scripts start --no-cache",
     "build": "npm run build:clean && npm run build:rollup",
-    "build:clean": "rm -rf ./build",
+    "build:clean": "rm -rf ./dist",
     "build:rollup": "rollup -c ./config/rollup.config.js",
     "semantic-release": "semantic-release"
   },
