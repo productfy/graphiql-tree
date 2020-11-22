@@ -15,7 +15,7 @@ import { unwrapType } from './graphqlHelper';
 
 import styles from './GraphiQLTree.module.scss';
 
-const url = 'https://user-api.productfy.io/graphql/api/public';
+const url = 'https://stage-user-api.productfy.io/graphql/api/public';
 
 const GET_ENUMS = '{ enums { left right { code description name }}}';
 

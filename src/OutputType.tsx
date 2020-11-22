@@ -62,9 +62,9 @@ const Field = React.memo(function Field({ depth, field, onEdit, selectionNode }:
   );
 
   const onToggleField = useCallback(() => {
-    if (depth === 4) {
-      return;
-    }
+    // if (depth === 4) {
+    //   return;
+    // }
     if (!selectionNodeRef.current) {
       const nextFieldNode: FieldNode = {
         kind: 'Field',
@@ -77,7 +77,7 @@ const Field = React.memo(function Field({ depth, field, onEdit, selectionNode }:
     } else {
       onEdit(selectionNodeRef.current, undefined);
     }
-  }, [field.name, onEdit, selectionNodeRef]);
+  }, [field.name, depth, onEdit, selectionNodeRef]);
 
   const { args, name, type } = field;
   const unwrappedType = unwrapType(type);
@@ -109,7 +109,7 @@ const Field = React.memo(function Field({ depth, field, onEdit, selectionNode }:
           </>
         )}
 
-        {!hasFields && (
+        {!hasFields && depth !== 4 && (
           <span className={styles.checkbox}>
             <input
               checked={selected}
@@ -269,23 +269,22 @@ const Type = React.memo(function Type({
           </div>
         )}
         {selected &&
-          Object.values(fields).map(field => {
-            const selection = (selectionSetNode?.selections as FieldNode[])?.find(
-              selection => selection.name?.value === field.name,
-            );
-            if (depth === 3 && field.name !== 'personAddress') {
-              return null;
-            }
-            return (
-              <Field
-                depth={depth + 1}
-                key={field.name}
-                field={field}
-                onEdit={onEditField}
-                selectionNode={selection}
-              />
-            );
-          })}
+          Object.values(fields)
+            .sort((a, b) => a.name === 'id' ? -1 : a.name.localeCompare(b.name))
+            .map(field => {
+              const selection = (selectionSetNode?.selections as FieldNode[])?.find(
+                selection => selection.name?.value === field.name,
+              );
+              return (
+                <Field
+                  depth={depth + 1}
+                  key={field.name}
+                  field={field}
+                  onEdit={onEditField}
+                  selectionNode={selection}
+                />
+              );
+            })}
       </div>
     );
   }
@@ -295,9 +294,11 @@ const Type = React.memo(function Type({
     const fields = unwrappedType.getFields();
     return (
       <div className={classnames(styles.typeNode, `depth-${depth}`)}>
-        {Object.values(fields).map(field => (
-          <Field depth={depth + 1} field={field} key={field.name} onEdit={onEditField} />
-        ))}
+        {Object.values(fields)
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map(field => (
+            <Field depth={depth + 1} field={field} key={field.name} onEdit={onEditField} />
+          ))}
         {types.map(type => (
           <Type
             depth={depth + 1}

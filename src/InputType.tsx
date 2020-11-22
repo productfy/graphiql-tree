@@ -303,14 +303,16 @@ const Argument = React.memo(function Argument({ arg, argumentNode, depth, onEdit
           const fields = unwrappedType.getFields();
           return (
             <div className={classnames(styles.argumentFields)}>
-              {Object.values(fields).map(field => (
-                <InputField
-                  depth={depth + 1}
-                  field={field}
-                  key={field.name}
-                  onEdit={onEditInputField}
-                />
-              ))}
+              {Object.values(fields)
+                .sort((a, b) => (a.name === 'id' ? -1 : a.name.localeCompare(b.name)))
+                .map(field => (
+                  <InputField
+                    depth={depth + 1}
+                    field={field}
+                    key={field.name}
+                    onEdit={onEditInputField}
+                  />
+                ))}
             </div>
           );
         }

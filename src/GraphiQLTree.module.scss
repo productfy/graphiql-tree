@@ -30,6 +30,11 @@
       }
     }
 
+    .arg-name + :local(.typeName),
+    .field-name + :local(.typeName) {
+      margin-left: 4px;
+    }
+
     :local(.argument) {
       padding-top: 16px;
       padding-bottom: 16px;
@@ -282,7 +287,6 @@
       font-size: 13px;
       font-weight: 500;
       -webkit-font-smoothing: antialiased;
-      margin-left: 4px;
     }
 
     .depth-4 {
