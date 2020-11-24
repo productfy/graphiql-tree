@@ -72,7 +72,12 @@ const Field = React.memo(function Field({ depth, field, onEdit, selectionNode }:
     } else {
       onEdit(selectionNodeRef.current, undefined);
     }
-  }, [depth, field, onEdit, selectionNodeRef]);
+  }, [
+    // depth,
+    field,
+    onEdit,
+    selectionNodeRef,
+  ]);
 
   const { args, name, type } = field;
   const unwrappedType = unwrapType(type);

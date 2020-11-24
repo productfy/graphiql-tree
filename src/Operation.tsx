@@ -105,6 +105,7 @@ export default React.memo(function Operation({
 
       <Type
         depth={depth + 1}
+        key={operation}
         onEdit={onEditType}
         selectionSetNode={operationDefinitionNode.selectionSet}
         type={type}
