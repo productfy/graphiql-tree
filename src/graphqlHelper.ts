@@ -26,6 +26,7 @@ import {
   isObjectType,
   isWrappingType,
   print,
+  isRequiredArgument,
 } from 'graphql';
 import unionBy from 'lodash/unionBy';
 import parserGraphql from 'prettier/parser-graphql';
@@ -72,7 +73,7 @@ export function generateObjectFieldNodeFromInputField(field: GraphQLInputField):
 }
 
 export function generateOutputFieldSelectionFromType(field: GraphQLField<any, any>): FieldNode {
-  const { name, type } = field;
+  const { args = [], name, type } = field;
   let selectionSet: SelectionSetNode | undefined = undefined;
   if (isObjectType(type)) {
     selectionSet = {
@@ -86,6 +87,22 @@ export function generateOutputFieldSelectionFromType(field: GraphQLField<any, an
       kind: 'Name',
       value: name,
     },
+    arguments: args
+      .filter((arg: GraphQLArgument) => isRequiredArgument(arg))
+      .map(
+        (arg: GraphQLArgument) =>
+          ({
+            kind: 'Argument',
+            name: {
+              kind: 'Name',
+              value: arg.name,
+            },
+            value: {
+              kind: 'StringValue',
+              value: '',
+            },
+          } as ArgumentNode),
+      ),
     selectionSet,
   };
 }

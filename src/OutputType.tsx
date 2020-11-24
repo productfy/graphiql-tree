@@ -63,9 +63,9 @@ const Field = React.memo(function Field({ depth, field, onEdit, selectionNode }:
   );
 
   const onToggleField = useCallback(() => {
-    if (depth === 4) {
-      return;
-    }
+    // if (depth === 4) {
+    //   return;
+    // }
     if (!selectionNodeRef.current) {
       const nextFieldNode = generateOutputFieldSelectionFromType(field);
       onEdit(selectionNodeRef.current, nextFieldNode);
@@ -252,12 +252,13 @@ const Type = React.memo(function Type({
   }
   const isSelected = Boolean(selectionSetNode);
   const unwrappedType = unwrapType(type);
+
   if (isObjectType(unwrappedType)) {
     const fields = unwrappedType.getFields();
     return (
       <div className={classnames(styles.typeNode, `depth-${depth}`)}>
         {isImplementation && (
-          <div className={classnames('type-name', styles.selectable)} onClick={onToggleType}>
+          <label className={classnames('type-name', styles.selectable)} onClick={onToggleType}>
             <span className={styles.checkbox}>
               <input
                 checked={isSelected}
@@ -267,26 +268,26 @@ const Type = React.memo(function Type({
               />
             </span>
             {unwrappedType.name}
-          </div>
+          </label>
         )}
         {isSelected && (
           <div className={depth > 6 ? styles.typeFields : undefined}>
             {Object.values(fields)
               .sort((a, b) => (a.name === 'id' ? -1 : a.name.localeCompare(b.name)))
               .map(field => {
-                if (depth === 3 && field.name !== 'personAddress') {
-                  return null;
-                }
-                const selection = (selectionSetNode?.selections as FieldNode[])?.find(
+                // if (depth === 3 && field.name !== 'personAddress') {
+                //   return null;
+                // }
+                const selectionNode = (selectionSetNode?.selections as FieldNode[])?.find(
                   selection => selection.name?.value === field.name,
                 );
                 return (
                   <Field
                     depth={depth + 1}
-                    key={field.name}
                     field={field}
+                    key={field.name}
                     onEdit={onEditField}
-                    selectionNode={selection}
+                    selectionNode={selectionNode}
                   />
                 );
               })}
@@ -302,15 +303,27 @@ const Type = React.memo(function Type({
     return (
       <div className={classnames(styles.typeNode, `depth-${depth}`)}>
         {Object.values(fields)
-          .sort((a, b) => a.name.localeCompare(b.name))
-          .map(field => (
-            <Field depth={depth + 1} field={field} key={field.name} onEdit={onEditField} />
-          ))}
+          .sort((a, b) => (a.name === 'id' ? -1 : a.name.localeCompare(b.name)))
+          .map(field => {
+            const selectionNode = (selectionSetNode?.selections as FieldNode[])?.find(
+              selection => selection.name?.value === field.name,
+            );
+            return (
+              <Field
+                depth={depth + 1}
+                field={field}
+                key={field.name}
+                onEdit={onEditField}
+                selectionNode={selectionNode}
+              />
+            );
+          })}
+
         {types.map(type => (
           <Type
             depth={depth + 1}
-            isImplementation
             key={type.name}
+            isImplementation
             onEdit={onEditType}
             selectionSetNode={selectionSetNode}
             type={type}
