@@ -12,6 +12,7 @@ import React, { useCallback, useContext, useEffect, useRef } from 'react';
 
 import { Argument } from './InputType';
 import {
+  generateOutputFieldSelectionFromType,
   mergeArgumentIntoSelection,
   mergeSelectionIntoSelectionSet,
   mergeSelectionSetIntoSelection,
@@ -62,22 +63,16 @@ const Field = React.memo(function Field({ depth, field, onEdit, selectionNode }:
   );
 
   const onToggleField = useCallback(() => {
-    // if (depth === 4) {
-    //   return;
-    // }
+    if (depth === 4) {
+      return;
+    }
     if (!selectionNodeRef.current) {
-      const nextFieldNode: FieldNode = {
-        kind: 'Field',
-        name: {
-          kind: 'Name',
-          value: field.name,
-        },
-      };
+      const nextFieldNode = generateOutputFieldSelectionFromType(field);
       onEdit(selectionNodeRef.current, nextFieldNode);
     } else {
       onEdit(selectionNodeRef.current, undefined);
     }
-  }, [field.name, depth, onEdit, selectionNodeRef]);
+  }, [depth, field, onEdit, selectionNodeRef]);
 
   const { args, name, type } = field;
   const unwrappedType = unwrapType(type);
@@ -85,7 +80,7 @@ const Field = React.memo(function Field({ depth, field, onEdit, selectionNode }:
   const hasFields =
     isObjectType(unwrappedType) ||
     (isInterfaceType(unwrappedType) && Object.keys(unwrappedType.getFields()).length > 0);
-  const selected = Boolean(selectionNode);
+  const isSelected = Boolean(selectionNode);
 
   return (
     <div className={classnames(styles.node, styles.fieldNode, `depth-${depth}`)}>
@@ -97,13 +92,13 @@ const Field = React.memo(function Field({ depth, field, onEdit, selectionNode }:
       >
         {hasFields && depth !== 4 && (
           <>
-            <span className={`CodeMirror-foldgutter-${selected ? 'open' : 'folded'}`} />
+            <span className={`CodeMirror-foldgutter-${isSelected ? 'open' : 'folded'}`} />
             <span className={styles.checkbox}>
               <input
-                checked={selected}
+                checked={isSelected}
                 onChange={onToggleField}
                 type="checkbox"
-                value={selected.toString()}
+                value={isSelected.toString()}
               />
             </span>
           </>
@@ -112,10 +107,10 @@ const Field = React.memo(function Field({ depth, field, onEdit, selectionNode }:
         {!hasFields && depth !== 4 && (
           <span className={styles.checkbox}>
             <input
-              checked={selected}
+              checked={isSelected}
               onChange={onToggleField}
               type="checkbox"
-              value={selected.toString()}
+              value={isSelected.toString()}
             />
           </span>
         )}
@@ -142,24 +137,26 @@ const Field = React.memo(function Field({ depth, field, onEdit, selectionNode }:
         </div>
       )}
 
-      {selected && (
+      {isSelected && (
         <>
           {hasArgs && (
             <>
               <h5 className={styles.parameters}>Parameters</h5>
 
               <div className={styles.arguments}>
-                {(args || []).map(arg => (
-                  <Argument
-                    arg={arg}
-                    argumentNode={(selectionNode as FieldNode)?.arguments?.find(
-                      argument => argument.name.value === arg.name,
-                    )}
-                    depth={depth + 1}
-                    key={arg.name}
-                    onEdit={onEditArgument}
-                  />
-                ))}
+                {(args || [])
+                  .sort((a, b) => (a.name === 'id' ? -1 : a.name.localeCompare(b.name)))
+                  .map(arg => (
+                    <Argument
+                      argument={arg}
+                      argumentNode={(selectionNode as FieldNode)?.arguments?.find(
+                        argument => argument.name.value === arg.name,
+                      )}
+                      depth={depth + 1}
+                      key={arg.name}
+                      onEdit={onEditArgument}
+                    />
+                  ))}
               </div>
               {/* <div>
                   <span className={styles.spacer} />
@@ -173,15 +170,19 @@ const Field = React.memo(function Field({ depth, field, onEdit, selectionNode }:
           {hasFields && (
             <>
               {depth === 4 && <h5 className={styles.returns}>Returns</h5>}
-
-              <div className={styles.indented}>
-                <Type
-                  depth={depth + 1}
-                  onEdit={onEditType}
-                  selectionSetNode={(selectionNode as FieldNode)?.selectionSet!}
-                  type={type}
-                />
-              </div>
+              <Type
+                depth={depth + 1}
+                onEdit={onEditType}
+                selectionSetNode={
+                  (selectionNode as FieldNode)?.selectionSet || /*
+                   * This will allow opening object fields without selecting any of its fields
+                   */ {
+                    kind: 'SelectionSet',
+                    selections: [],
+                  }
+                }
+                type={type}
+              />
             </>
           )}
 
@@ -235,7 +236,7 @@ const Type = React.memo(function Type({
 
   const onToggleType = useCallback(() => {
     if (!selectionSetNodeRef.current) {
-      // TODO: Add required arguments and
+      // TODO: Add required arguments nested fields
       const nextSelectionSet: SelectionSetNode = {
         kind: 'SelectionSet',
         selections: [],
@@ -249,7 +250,7 @@ const Type = React.memo(function Type({
   if (!type) {
     return null;
   }
-  const selected = Boolean(selectionSetNode);
+  const isSelected = Boolean(selectionSetNode);
   const unwrappedType = unwrapType(type);
   if (isObjectType(unwrappedType)) {
     const fields = unwrappedType.getFields();
@@ -259,32 +260,38 @@ const Type = React.memo(function Type({
           <div className={classnames('type-name', styles.selectable)} onClick={onToggleType}>
             <span className={styles.checkbox}>
               <input
-                checked={selected}
+                checked={isSelected}
                 onChange={onToggleType}
                 type="checkbox"
-                value={selected.toString()}
+                value={isSelected.toString()}
               />
             </span>
             {unwrappedType.name}
           </div>
         )}
-        {selected &&
-          Object.values(fields)
-            .sort((a, b) => a.name === 'id' ? -1 : a.name.localeCompare(b.name))
-            .map(field => {
-              const selection = (selectionSetNode?.selections as FieldNode[])?.find(
-                selection => selection.name?.value === field.name,
-              );
-              return (
-                <Field
-                  depth={depth + 1}
-                  key={field.name}
-                  field={field}
-                  onEdit={onEditField}
-                  selectionNode={selection}
-                />
-              );
-            })}
+        {isSelected && (
+          <div className={depth > 6 ? styles.typeFields : undefined}>
+            {Object.values(fields)
+              .sort((a, b) => (a.name === 'id' ? -1 : a.name.localeCompare(b.name)))
+              .map(field => {
+                if (depth === 3 && field.name !== 'personAddress') {
+                  return null;
+                }
+                const selection = (selectionSetNode?.selections as FieldNode[])?.find(
+                  selection => selection.name?.value === field.name,
+                );
+                return (
+                  <Field
+                    depth={depth + 1}
+                    key={field.name}
+                    field={field}
+                    onEdit={onEditField}
+                    selectionNode={selection}
+                  />
+                );
+              })}
+          </div>
+        )}
       </div>
     );
   }

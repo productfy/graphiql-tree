@@ -32,12 +32,12 @@
 
     .arg-name + :local(.typeName),
     .field-name + :local(.typeName) {
-      margin-left: 4px;
+      margin-left: 8px;
     }
 
     :local(.argument) {
-      padding-top: 16px;
-      padding-bottom: 16px;
+      padding-top: 12px;
+      padding-bottom: 12px;
       border-bottom: 1px solid #e3e8ee;
 
       .arg-name {
@@ -47,7 +47,8 @@
       }
     }
 
-    :local(.argumentFields) {
+    :local(.argumentFields),
+    :local(.typeFields) {
       border: 1px solid var(--gray100);
       margin-left: 1.6em;
       margin-top: 8px;
@@ -91,14 +92,21 @@
     }
 
     :local(.description) {
-      white-space: normal;
       line-height: 1.5;
     }
 
     :local(.fieldNode) {
-      padding-top: 16px;
-      padding-bottom: 16px;
+      padding: 12px 12px 12px 24px;
       border-bottom: 1px solid var(--gray100);
+
+      &.depth-6 {
+        padding-left: 0;
+        padding-right: 0;
+      }
+
+      &:last-child {
+        border-bottom: none;
+      }
     }
 
     :local(.indented) {
@@ -179,8 +187,6 @@
     }
 
     :local(.node) {
-      white-space: nowrap;
-
       .cm-number {
         :local(.inputText) {
           &:empty {
@@ -222,6 +228,10 @@
 
     :local(.returns) {
       padding-top: 24px;
+    }
+
+    :local(.required) {
+      color: #e56f4a;
     }
 
     :local(.select) {
@@ -280,6 +290,14 @@
     :local(.spacer2) {
       display: inline-block;
       width: 3em;
+    }
+
+    :local(.tag) {
+      font-size: 10px;
+      letter-spacing: 0.12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-left: 8px;
     }
 
     :local(.typeName) {

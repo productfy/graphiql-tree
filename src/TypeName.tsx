@@ -6,16 +6,24 @@ import styles from './GraphiQLTree.module.scss';
 
 type TypeNameProps = {
   className?: string;
+  isInputType?: boolean;
   onClick?: () => void;
   type?: GraphQLType | null;
 };
 
-const TypeName = React.memo(function TypeName({ className, onClick, type }: TypeNameProps) {
+const TypeName = React.memo(function TypeName({
+  className,
+  isInputType = false,
+  onClick,
+  type,
+}: TypeNameProps) {
   if (type instanceof GraphQLNonNull) {
     return (
       <span className={classnames(className, styles.typeName)} onClick={onClick}>
         <TypeName {...{ className, onClick, type: type.ofType }} />
-        <span className="cm-punctuation">{'!'}</span>
+        {isInputType && <span className={classnames(styles.required, styles.tag)}>Required</span>}
+        {!isInputType && <span className={styles.tag}>Non-null</span>}
+        {/* {!isInputType && <span className="cm-punctuation">{'!'}</span>} */}
       </span>
     );
   }

@@ -3,10 +3,15 @@ import {
   ArgumentNode,
   GraphQLArgument,
   GraphQLSchema,
+  StringValueNode,
+  ValueNode,
   buildClientSchema,
   getIntrospectionQuery,
-  isNonNullType,
+  isRequiredArgument,
   isScalarType,
+  GraphQLInputField,
+  ObjectFieldNode,
+  isRequiredInputField,
 } from 'graphql';
 import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 
@@ -72,24 +77,41 @@ const App = () => {
 
   // Returning undefined will fallback to default node handlers
   const customizeNode = ({
-    arg,
-    onEditArgument,
+    argument,
+    argumentNode,
+    inputField,
+    objectFieldNode,
+    onEdit,
   }: {
-    arg: GraphQLArgument; // Schema
-    argumentNode: ArgumentNode; // Selection
+    argument?: GraphQLArgument; // Schema
+    argumentNode?: ArgumentNode; // Selection
     depth: number;
-    onEditArgument: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+    inputField?: GraphQLInputField;
+    objectFieldNode?: ObjectFieldNode;
+    onEdit: (prevValueNode?: ValueNode, nextValueNode?: ValueNode) => void;
   }) => {
-    const { type } = arg;
+    const { type } = argument || inputField!;
     const unwrappedType = unwrapType(type);
     const productfyEnum = enums.find(({ left }) => left === unwrappedType.name);
+
     if (isScalarType(unwrappedType) && productfyEnum) {
-      const isRequired = isNonNullType(type);
+      const isRequired =
+        (argument && isRequiredArgument(argument)) ||
+        (inputField && isRequiredInputField(inputField));
+      const onEditInput = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const nextValueNode = {
+          kind: 'StringValue',
+          value: e.target.value,
+        } as StringValueNode;
+        onEdit(value, nextValueNode);
+      };
       const options = productfyEnum.right;
+      const { value } = argumentNode || objectFieldNode!;
+
       return (
         <div className={classnames('cm-string', styles.select)}>
-          <select onChange={onEditArgument}>
-            <option value="" disabled={isRequired} selected hidden={isRequired}></option>
+          <select onChange={onEditInput} value={(value as StringValueNode).value || ''}>
+            <option value="" disabled={isRequired} hidden={isRequired}></option>
             {options.map(({ code, description }) => (
               <option key={code} value={code}>
                 {code} - {description}

@@ -6,22 +6,89 @@ import {
   ASTNode,
   DocumentNode,
   FieldNode,
+  FragmentSpreadNode,
+  GraphQLArgument,
+  GraphQLField,
+  GraphQLInputField,
   GraphQLList,
   GraphQLNamedType,
   GraphQLNonNull,
   GraphQLType,
+  InlineFragmentNode,
+  ObjectFieldNode,
+  ObjectValueNode,
   OperationDefinitionNode,
   OperationTypeNode,
   SelectionNode,
   SelectionSetNode,
+  ValueNode,
+  isInputObjectType,
+  isObjectType,
   isWrappingType,
   print,
-  InlineFragmentNode,
-  FragmentSpreadNode,
 } from 'graphql';
 import unionBy from 'lodash/unionBy';
 import parserGraphql from 'prettier/parser-graphql';
 import prettier from 'prettier/standalone';
+
+export function generateArgumentSelectionFromType(arg: GraphQLArgument): ArgumentNode {
+  const { name, type } = arg;
+
+  let value: ValueNode = {
+    kind: 'StringValue',
+    value: '',
+  };
+
+  if (isInputObjectType(type)) {
+    value = {
+      kind: 'ObjectValue',
+      fields: [],
+    };
+  }
+
+  return {
+    kind: 'Argument',
+    name: {
+      kind: 'Name',
+      value: name,
+    },
+    value,
+  };
+}
+
+export function generateObjectFieldNodeFromInputField(field: GraphQLInputField): ObjectFieldNode {
+  const { name } = field;
+  return {
+    kind: 'ObjectField',
+    name: {
+      kind: 'Name',
+      value: name,
+    },
+    value: {
+      kind: 'StringValue',
+      value: '',
+    },
+  };
+}
+
+export function generateOutputFieldSelectionFromType(field: GraphQLField<any, any>): FieldNode {
+  const { name, type } = field;
+  let selectionSet: SelectionSetNode | undefined = undefined;
+  if (isObjectType(type)) {
+    selectionSet = {
+      kind: 'SelectionSet',
+      selections: [],
+    };
+  }
+  return {
+    kind: 'Field',
+    name: {
+      kind: 'Name',
+      value: name,
+    },
+    selectionSet,
+  };
+}
 
 export function getTypeName(type?: GraphQLType): string {
   if (!type) {
@@ -58,13 +125,63 @@ export function mergeArgumentIntoSelection(
   if (!prevArgumentNode && nextArgumentNode) {
     return {
       ...selectionNode,
-      arguments: [...(selectionNode.arguments || []), nextArgumentNode!],
+      arguments: [...(selectionNode.arguments || []), nextArgumentNode!].sort((a, b) =>
+        a.name.value.localeCompare(b.name.value),
+      ),
     };
   }
   // Update
   return {
     ...selectionNode,
     arguments: unionBy([nextArgumentNode!], selectionNode.arguments, 'name.value'),
+  };
+}
+
+export function mergeInputFieldIntoArgument(
+  argumentNode: ArgumentNode,
+  prevObjectFieldNode?: ObjectFieldNode,
+  nextObjectFieldNode?: ObjectFieldNode,
+): ArgumentNode {
+  // No-op
+  if (prevObjectFieldNode === nextObjectFieldNode) {
+    return argumentNode;
+  }
+  // Remove
+  if (prevObjectFieldNode && !nextObjectFieldNode) {
+    return {
+      ...argumentNode,
+      value: {
+        ...argumentNode.value,
+        fields: (argumentNode.value as ObjectValueNode).fields.filter(
+          field => field.name.value !== prevObjectFieldNode.name.value,
+        ),
+      } as ObjectValueNode,
+    };
+  }
+  // Add
+  if (!prevObjectFieldNode && nextObjectFieldNode) {
+    return {
+      ...argumentNode,
+      value: {
+        ...argumentNode.value,
+        fields: [
+          ...(argumentNode.value as ObjectValueNode).fields,
+          nextObjectFieldNode,
+        ].sort((a, b) => a.name.value.localeCompare(b.name.value)),
+      } as ObjectValueNode,
+    };
+  }
+  // Update
+  return {
+    ...argumentNode,
+    value: {
+      ...argumentNode.value,
+      fields: unionBy(
+        [nextObjectFieldNode!],
+        (argumentNode.value as ObjectValueNode).fields,
+        'name.value',
+      ),
+    } as ObjectValueNode,
   };
 }
 
