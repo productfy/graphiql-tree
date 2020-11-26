@@ -3,7 +3,10 @@ import {
   ArgumentNode,
   FieldNode,
   GraphQLField,
+  // GraphQLInterfaceType,
+  GraphQLObjectType,
   GraphQLOutputType,
+  InlineFragmentNode,
   isInterfaceType,
   isObjectType,
   SelectionSetNode,
@@ -12,8 +15,10 @@ import React, { useCallback, useContext, useEffect, useRef } from 'react';
 
 import { Argument } from './InputType';
 import {
+  generateInlineFragmentFromType,
   generateOutputFieldSelectionFromType,
-  mergeArgumentIntoSelection,
+  mergeArgumentIntoField,
+  mergeFieldIntoInlineFragment,
   mergeSelectionIntoSelectionSet,
   mergeSelectionSetIntoSelection,
   sourcesAreEqual,
@@ -27,7 +32,7 @@ import styles from './GraphiQLTree.module.scss';
 export interface FieldProps {
   depth: number;
   field: GraphQLField<any, any>;
-  onEdit: (prevSelectionNode?: FieldNode, nextSelectionNode?: FieldNode) => void;
+  onEdit: (prevField?: FieldNode, nextField?: FieldNode) => void;
   selectionNode?: FieldNode;
 }
 
@@ -40,7 +45,7 @@ const Field = React.memo(function Field({ depth, field, onEdit, selectionNode }:
 
   const onEditArgument = useCallback(
     (prevArgumentNode?: ArgumentNode, nextArgumentNode?: ArgumentNode) => {
-      const nextSelectionNode = mergeArgumentIntoSelection(
+      const nextSelectionNode = mergeArgumentIntoField(
         selectionNodeRef.current!,
         prevArgumentNode,
         nextArgumentNode,
@@ -67,8 +72,8 @@ const Field = React.memo(function Field({ depth, field, onEdit, selectionNode }:
     //   return;
     // }
     if (!selectionNodeRef.current) {
-      const nextFieldNode = generateOutputFieldSelectionFromType(field);
-      onEdit(selectionNodeRef.current, nextFieldNode);
+      const nextSelectionNode = generateOutputFieldSelectionFromType(field);
+      onEdit(selectionNodeRef.current, nextSelectionNode as FieldNode);
     } else {
       onEdit(selectionNodeRef.current, undefined);
     }
@@ -142,13 +147,12 @@ const Field = React.memo(function Field({ depth, field, onEdit, selectionNode }:
         </div>
       )}
 
-      {isSelected && (
-        <>
+      {isSelected && (hasArgs || hasFields) && (
+        <div className={classnames(styles.fieldNodeBody, `depth-${depth}`)}>
           {hasArgs && (
             <>
-              <h5 className={styles.parameters}>Parameters</h5>
-
-              <div className={styles.arguments}>
+              {depth === 4 && <h5 className={styles.parameters}>Parameters</h5>}
+              <div className={classnames(styles.arguments, `depth-${depth}`)}>
                 {(args || [])
                   .sort((a, b) => (a.name === 'id' ? -1 : a.name.localeCompare(b.name)))
                   .map(arg => (
@@ -174,45 +178,132 @@ const Field = React.memo(function Field({ depth, field, onEdit, selectionNode }:
 
           {hasFields && (
             <>
-              {depth === 4 && <h5 className={styles.returns}>Returns</h5>}
+              {depth === 4 && (
+                <h5 className={styles.returns}>
+                  <span>Returns</span> <TypeName type={type} />
+                </h5>
+              )}
               <Type
                 depth={depth + 1}
                 onEdit={onEditType}
-                selectionSetNode={
-                  (selectionNode as FieldNode)?.selectionSet || /*
-                   * This will allow opening object fields without selecting any of its fields
-                   */ {
-                    kind: 'SelectionSet',
-                    selections: [],
-                  }
-                }
+                selectionSetNode={selectionNode!.selectionSet!}
                 type={type}
               />
             </>
           )}
 
           {/* {hasFields && <div className="cm-punctuation">{'}'}</div>} */}
-        </>
+        </div>
       )}
     </div>
   );
 }, sourcesAreEqual('selectionNode'));
 
-export interface TypeProps {
+export interface ImplementationTypeProps {
   depth: number;
-  isImplementation?: boolean;
-  onEdit: (prevSelectionSet?: SelectionSetNode, nextSelectionSet?: SelectionSetNode) => void;
-  selectionSetNode: SelectionSetNode;
-  type?: GraphQLOutputType | null;
+  onEdit: (prevSelection?: InlineFragmentNode, nextSelection?: InlineFragmentNode) => void;
+  selectionNode?: InlineFragmentNode;
+  type: GraphQLObjectType;
 }
 
-const Type = React.memo(function Type({
+const ImplementationType = React.memo(function Type({
   depth,
-  isImplementation,
   onEdit,
-  selectionSetNode,
+  selectionNode,
   type,
-}: TypeProps) {
+}: ImplementationTypeProps) {
+  const unwrappedType = unwrapType(type);
+  const selectionNodeRef = useRef(selectionNode);
+
+  useEffect(() => {
+    selectionNodeRef.current = selectionNode;
+  }, [selectionNode]);
+
+  const onEditField = useCallback(
+    (prevField?: FieldNode, nextField?: FieldNode) => {
+      const nextSelection = mergeFieldIntoInlineFragment(
+        selectionNodeRef.current!,
+        prevField,
+        nextField,
+      );
+      onEdit(selectionNodeRef.current, nextSelection);
+    },
+    [onEdit, selectionNodeRef],
+  );
+
+  const onToggleType = useCallback(() => {
+    if (!selectionNodeRef.current) {
+      const nextSelectionNode: InlineFragmentNode = generateInlineFragmentFromType(unwrappedType);
+      onEdit(selectionNodeRef.current, nextSelectionNode);
+    } else {
+      onEdit(selectionNodeRef.current, undefined);
+    }
+  }, [onEdit, selectionNodeRef, unwrappedType]);
+
+  const isSelected = Boolean(selectionNode);
+  // const interfaces: GraphQLInterfaceType[] = type.getInterfaces();
+  return (
+    <div className={classnames(styles.node, styles.implementationType, `depth-${depth}`)}>
+      <label className={classnames('type-name', styles.selectable)}>
+        <span className={`CodeMirror-foldgutter-${isSelected ? 'open' : 'folded'}`} />
+        <span className={styles.checkbox}>
+          <input
+            checked={isSelected}
+            onChange={onToggleType}
+            type="checkbox"
+            value={isSelected.toString()}
+          />
+        </span>
+        {unwrappedType.name}
+        {/* <ul className={styles.interfaceList}>
+          {interfaces.map((i: GraphQLInterfaceType) => (
+            <li>
+              <TypeName type={i} />
+            </li>
+          ))}
+        </ul> */}
+      </label>
+
+      {(() => {
+        if (!isSelected || !isObjectType(unwrappedType)) {
+          return null;
+        }
+        const fields = unwrappedType.getFields();
+        const selectionSetNode = selectionNode?.selectionSet;
+        return (
+          <div className={classnames({ [styles.typeFields]: depth > 5 })}>
+            {Object.values(fields)
+              .sort((a, b) => (a.name === 'id' ? -1 : a.name.localeCompare(b.name)))
+              .map(field => {
+                const subSelectionNode = (selectionSetNode?.selections as FieldNode[])?.find(
+                  selection => selection.name?.value === field.name,
+                );
+                return (
+                  <Field
+                    depth={depth + 1}
+                    field={field}
+                    key={field.name}
+                    onEdit={onEditField}
+                    selectionNode={subSelectionNode}
+                  />
+                );
+              })}
+          </div>
+        );
+      })()}
+    </div>
+  );
+},
+sourcesAreEqual('selectionNode'));
+
+export interface TypeProps {
+  depth: number;
+  onEdit: (prevSelectionSet?: SelectionSetNode, nextSelectionSet?: SelectionSetNode) => void;
+  selectionSetNode: SelectionSetNode;
+  type?: GraphQLOutputType;
+}
+
+const Type = React.memo(function Type({ depth, onEdit, selectionSetNode, type }: TypeProps) {
   const schema = useContext(SchemaContext);
   const selectionSetNodeRef = useRef(selectionSetNode);
 
@@ -233,24 +324,16 @@ const Type = React.memo(function Type({
   );
 
   const onEditType = useCallback(
-    (prevSelectionSetNode?: SelectionSetNode, nextSelectionSetNode?: SelectionSetNode) => {
-      console.log(prevSelectionSetNode, nextSelectionSetNode);
-    },
-    [],
-  );
-
-  const onToggleType = useCallback(() => {
-    if (!selectionSetNodeRef.current) {
-      // TODO: Add required arguments nested fields
-      const nextSelectionSet: SelectionSetNode = {
-        kind: 'SelectionSet',
-        selections: [],
-      };
+    (prevSelectionNode?: InlineFragmentNode, nextSelectionNode?: InlineFragmentNode) => {
+      const nextSelectionSet = mergeSelectionIntoSelectionSet(
+        selectionSetNodeRef.current,
+        prevSelectionNode,
+        nextSelectionNode,
+      );
       onEdit(selectionSetNodeRef.current, nextSelectionSet);
-    } else {
-      onEdit(selectionSetNodeRef.current, undefined);
-    }
-  }, [onEdit, selectionSetNodeRef]);
+    },
+    [onEdit, selectionSetNodeRef],
+  );
 
   if (!type) {
     return null;
@@ -258,55 +341,60 @@ const Type = React.memo(function Type({
   const isSelected = Boolean(selectionSetNode);
   const unwrappedType = unwrapType(type);
 
-  if (isObjectType(unwrappedType)) {
-    const fields = unwrappedType.getFields();
-    return (
-      <div className={classnames(styles.typeNode, `depth-${depth}`)}>
-        {isImplementation && (
-          <label className={classnames('type-name', styles.selectable)} onClick={onToggleType}>
-            <span className={styles.checkbox}>
-              <input
-                checked={isSelected}
-                onChange={onToggleType}
-                type="checkbox"
-                value={isSelected.toString()}
-              />
-            </span>
-            {unwrappedType.name}
-          </label>
-        )}
-        {isSelected && (
-          <div className={depth > 6 ? styles.typeFields : undefined}>
-            {Object.values(fields)
-              .sort((a, b) => (a.name === 'id' ? -1 : a.name.localeCompare(b.name)))
-              .map(field => {
-                // if (depth === 3 && field.name !== 'personAddress') {
-                //   return null;
-                // }
-                const selectionNode = (selectionSetNode?.selections as FieldNode[])?.find(
-                  selection => selection.name?.value === field.name,
-                );
-                return (
-                  <Field
-                    depth={depth + 1}
-                    field={field}
-                    key={field.name}
-                    onEdit={onEditField}
-                    selectionNode={selectionNode}
-                  />
-                );
-              })}
-          </div>
-        )}
-      </div>
-    );
-  }
-
   if (isInterfaceType(unwrappedType)) {
     const types = schema?.getPossibleTypes(unwrappedType) || [];
     const fields = unwrappedType.getFields();
     return (
-      <div className={classnames(styles.typeNode, `depth-${depth}`)}>
+      <>
+        {
+          // Interface part
+          Object.values(fields)
+            .sort((a, b) => (a.name === 'id' ? -1 : a.name.localeCompare(b.name)))
+            .map(field => {
+              const selectionNode = selectionSetNode?.selections?.find(
+                selection => selection.kind === 'Field' && selection.name?.value === field.name,
+              ) as FieldNode | undefined;
+              return (
+                <Field
+                  depth={depth + 1}
+                  field={field}
+                  key={field.name}
+                  onEdit={onEditField}
+                  selectionNode={selectionNode}
+                />
+              );
+            })
+        }
+
+        {
+          // Implementations part
+          types.map(type => {
+            const selectionNode = selectionSetNode?.selections?.find(
+              sel => sel.kind === 'InlineFragment' && sel.typeCondition?.name.value === type.name,
+            ) as InlineFragmentNode | undefined;
+            return (
+              <ImplementationType
+                depth={depth + 1}
+                key={type.name}
+                onEdit={onEditType}
+                selectionNode={selectionNode}
+                type={type}
+              />
+            );
+          })
+        }
+      </>
+    );
+  }
+
+  if (!isSelected) {
+    return null;
+  }
+
+  if (isObjectType(unwrappedType)) {
+    const fields = unwrappedType.getFields();
+    return (
+      <>
         {Object.values(fields)
           .sort((a, b) => (a.name === 'id' ? -1 : a.name.localeCompare(b.name)))
           .map(field => {
@@ -323,22 +411,11 @@ const Type = React.memo(function Type({
               />
             );
           })}
-
-        {types.map(type => (
-          <Type
-            depth={depth + 1}
-            key={type.name}
-            isImplementation
-            onEdit={onEditType}
-            selectionSetNode={selectionSetNode}
-            type={type}
-          />
-        ))}
-      </div>
+      </>
     );
   }
-  return <div>Unknown type</div>;
-},
-sourcesAreEqual('selectionSetNode'));
+
+  return <div>Unhandled type {unwrappedType.name}</div>;
+}, sourcesAreEqual('selectionSetNode'));
 
 export { Field, Type };

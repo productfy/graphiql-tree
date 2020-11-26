@@ -26,7 +26,7 @@
       input[type='checkbox'] {
         cursor: pointer;
         margin: 0;
-        vertical-align: middle;
+        vertical-align: -1px;
       }
     }
 
@@ -36,9 +36,14 @@
     }
 
     :local(.argument) {
-      padding-top: 12px;
-      padding-bottom: 12px;
+      padding: 12px 12px 12px 24px;
       border-bottom: 1px solid #e3e8ee;
+
+      &.depth-5 {
+        margin-left: 24px;
+        padding-left: 0;
+        padding-right: 0;
+      }
 
       .arg-name {
         font-family: var(--monospace-font);
@@ -47,11 +52,14 @@
       }
     }
 
+    :local(.arguments).depth-4 {
+      margin-left: -24px;
+    }
+
     :local(.argumentFields),
     :local(.typeFields) {
       border: 1px solid var(--gray100);
-      margin-left: 1.6em;
-      margin-top: 8px;
+      margin: 8px 8px 8px 1.6em;
     }
 
     :local(.boolean) {
@@ -99,9 +107,39 @@
       padding: 12px 12px 12px 24px;
       border-bottom: 1px solid var(--gray100);
 
+      &.depth-4 {
+        padding-left: 0;
+        padding-right: 0;
+        margin-left: 24px;
+      }
+
+      &.depth-5 {
+        padding-left: 0;
+        margin-left: 24px;
+      }
+
       &.depth-6 {
         padding-left: 0;
         padding-right: 0;
+      }
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      :local(.fieldNodeBody):not(.depth-4) {
+        border: 1px solid var(--gray100);
+        margin-top: 12px;
+        margin-left: 24px;
+      }
+    }
+
+    :local(.implementationType) {
+      padding: 12px 0 12px 24px;
+      border-bottom: 1px solid #e3e8ee;
+
+      &.depth-6 {
+        padding-left: 0;
       }
 
       &:last-child {
@@ -150,6 +188,20 @@
       }
     }
 
+    :local(.interfaceList) {
+      display: inline;
+      padding: 0;
+      margin: 0;
+      list-style-type: none;
+
+      li {
+        display: inline;
+        margin-left: 20px;
+        padding: 0;
+        border: 0;
+      }
+    }
+
     :local(.operation) {
       :local(.operationTypeAndName) {
         display: inline-block;
@@ -184,6 +236,7 @@
 
     :local(.nameLine) {
       display: inline-block;
+      white-space: nowrap;
     }
 
     :local(.node) {
@@ -227,7 +280,11 @@
     }
 
     :local(.returns) {
-      padding-top: 24px;
+      padding-top: 12px;
+
+      > span + :local(.typeName) {
+        margin-left: 8px;
+      }
     }
 
     :local(.required) {
