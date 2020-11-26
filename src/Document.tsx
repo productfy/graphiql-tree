@@ -1,7 +1,7 @@
 import { DefinitionNode, DocumentNode, OperationDefinitionNode } from 'graphql';
 import React, { useCallback, useEffect, useRef } from 'react';
 
-import { mergeOperationIntoDocument, sourcesAreEqual } from './graphqlHelper';
+import { mergeOperationDefinitionIntoDocument, sourcesAreEqual } from './graphqlHelper';
 import Operation from './Operation';
 
 interface DocumentProps {
@@ -23,7 +23,7 @@ export default React.memo(function Document({ documentNode, onEdit }: DocumentPr
       prevOperationDefinitionNode: OperationDefinitionNode,
       nextOperationDefinitionNode: OperationDefinitionNode,
     ) => {
-      const nextDocumentNode = mergeOperationIntoDocument(
+      const nextDocumentNode = mergeOperationDefinitionIntoDocument(
         documentNodeRef.current,
         prevOperationDefinitionNode,
         nextOperationDefinitionNode,

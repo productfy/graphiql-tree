@@ -13,6 +13,7 @@ import {
   ObjectFieldNode,
   isRequiredInputField,
 } from 'graphql';
+import pickBy from 'lodash/pickBy';
 import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 
 import GraphiQLWithTree, { FetcherParams } from './GraphiQLWithTree';
@@ -48,6 +49,73 @@ const fetcher = ({ signal }: AbortController) => async (graphQLParams: FetcherPa
   return response.json().catch(() => response.text());
 };
 
+const mutationWhitelist = [
+  'activatePaymentCard',
+  'applyFinancialAccountGroupFinancialTransactions',
+  'applySingleBalanceFinancialTransaction',
+  'cancelAchTransferRequest',
+  'closeFinancialAccount',
+  'createAchTransferRequest',
+  'createManuallyEnteredExternalFinancialAccountWithOwnerIds',
+  'createPhysicalCommercialCreditCardProduct',
+  'createPhysicalCommercialDebitCardProduct',
+  'createPhysicalCommercialPrepaidCardProduct',
+  'createVirtualCommercialCreditCardProduct',
+  'createVirtualCommercialDebitCardProduct',
+  'createVirtualCommercialPrepaidCardProduct',
+  'createVirtualGenericFinancialAccount',
+  'deactivatePaymentCard',
+  'downloadPersonProfessionalData',
+  'financialAccountKvpData',
+  'initiateMicroDeposits',
+  'invalidateLoginSession',
+  'issueCommercialCreditCard',
+  'issueCommercialDebitCard',
+  'issueCommercialPrepaidCard',
+  'kbaAnswers',
+  'loginKvpData',
+  'logIn',
+  'organizationAddress',
+  'organizationKvpData',
+  'personAddress',
+  'personEmailAddress',
+  'personKvpData',
+  'personPhoneNumber',
+  'removeFinancialAccount',
+  'requestEquifaxConsumerCreditData',
+  'resetPassword',
+  'reverseFinancialTransaction',
+  'saveCompany',
+  'saveOrganizationPersonAssociation',
+  'settlePendingFinancialTransaction',
+  'signUp',
+  'updateLoginAccountStatus',
+  'updatePerson',
+  'updateCardSpendingLimits',
+  'verifyMicroDeposits',
+];
+
+const queryWhitelist = [
+  'achTransferRequests',
+  'decrypt',
+  'documents',
+  'enums',
+  'financialAccount',
+  'financialAccounts',
+  'financialProducts',
+  'financialStatementCycles',
+  'financialTransactions',
+  'finsightProfile',
+  'kbaQuestionnaire',
+  'latestFinancialStatementCycle',
+  'loginKvpDataSet',
+  'organization',
+  'organizationKvpDataSet',
+  'personKvpDataSet',
+  'tenantOperatingAccounts',
+  'whoAmI',
+];
+
 const App = () => {
   const abortController = useRef<AbortController>(new AbortController());
   const [enums, setEnums] = useState<ProductfyEnum[]>([]);
@@ -65,7 +133,16 @@ const App = () => {
           operationName: 'getEnums',
           query: GET_ENUMS,
         });
-        setSchema(buildClientSchema(schemaResult.data));
+        const schema: GraphQLSchema = buildClientSchema(schemaResult.data);
+        // @ts-expect-error
+        schema._mutationType._fields = pickBy(schema._mutationType._fields, (_value, key) =>
+          mutationWhitelist.includes(key),
+        );
+        // @ts-expect-error
+        schema._queryType._fields = pickBy(schema._queryType._fields, (_value, key) =>
+          queryWhitelist.includes(key),
+        );
+        setSchema(schema);
         setEnums(enumResult.data.enums);
       } catch (error) {
         // Probably should render error in output panel

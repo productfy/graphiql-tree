@@ -9,13 +9,15 @@ import {
   isInputObjectType,
   isRequiredArgument,
   isRequiredInputField,
+  isScalarType,
+  isEnumType,
 } from 'graphql';
 import React, { useCallback, useEffect, useRef } from 'react';
 
 import {
   generateArgumentSelectionFromType,
   generateObjectFieldNodeFromInputField,
-  mergeInputFieldIntoArgument,
+  mergeObjectFieldIntoArgument,
   sourcesAreEqual,
   unwrapType,
 } from './graphqlHelper';
@@ -40,6 +42,7 @@ const InputField = React.memo(function InputField({
   const objectFieldNodeRef = useRef(objectFieldNode);
   const { description, name, type } = inputField;
   const isRequired = isRequiredInputField(inputField);
+  const unwrappedType = unwrapType(type);
 
   useEffect(() => {
     objectFieldNodeRef.current = objectFieldNode;
@@ -52,6 +55,21 @@ const InputField = React.memo(function InputField({
         value: nextValueNode!,
       };
       onEdit(objectFieldNodeRef.current, nextObjectFieldNode);
+    },
+    [objectFieldNodeRef, onEdit],
+  );
+
+  const onEditInputObjectField = useCallback(
+    (_prevObjectFieldNode?: ObjectFieldNode, nextObjectFieldNode?: ObjectFieldNode) => {
+      // Merge
+      const nextParentObjectFieldNode: ObjectFieldNode = {
+        ...objectFieldNodeRef.current!,
+        value: {
+          kind: 'ObjectValue',
+          fields: [nextObjectFieldNode!],
+        },
+      };
+      onEdit(objectFieldNodeRef.current, nextParentObjectFieldNode);
     },
     [objectFieldNodeRef, onEdit],
   );
@@ -91,7 +109,7 @@ const InputField = React.memo(function InputField({
         <TypeName className={styles.selectable} isInputType type={type} />
       </label>
 
-      {objectFieldNode && (
+      {isSelected && (
         <InputElement
           depth={depth}
           inputField={inputField}
@@ -103,6 +121,31 @@ const InputField = React.memo(function InputField({
       {description && (
         <div className={classnames(styles.description, styles.indented)}>{description}</div>
       )}
+
+      {(() => {
+        if (isInputObjectType(unwrappedType) && isSelected) {
+          const fields = unwrappedType.getFields();
+          const objectFieldNodes: readonly ObjectFieldNode[] = (objectFieldNode!
+            .value as ObjectValueNode)?.fields;
+          return (
+            <div className={classnames(styles.argumentFields)}>
+              {Object.values(fields)
+                .sort((a, b) => (a.name === 'id' ? -1 : a.name.localeCompare(b.name)))
+                .map(field => (
+                  <InputField
+                    depth={depth + 1}
+                    inputField={field}
+                    key={field.name}
+                    onEdit={onEditInputObjectField}
+                    objectFieldNode={objectFieldNodes?.find(
+                      ({ name }) => name.value === field.name,
+                    )}
+                  />
+                ))}
+            </div>
+          );
+        }
+      })()}
     </div>
   );
 },
@@ -139,7 +182,7 @@ const Argument = React.memo(function Argument({
 
   const onEditInputField = useCallback(
     (prevObjectFieldNode?: ObjectFieldNode, nextObjectFieldNode?: ObjectFieldNode) => {
-      const nextArgumentNode = mergeInputFieldIntoArgument(
+      const nextArgumentNode = mergeObjectFieldIntoArgument(
         argumentNodeRef.current!,
         prevObjectFieldNode,
         nextObjectFieldNode,
@@ -204,7 +247,7 @@ const Argument = React.memo(function Argument({
         <TypeName className={styles.selectable} isInputType type={type} />
       </label>
 
-      {argumentNode && (
+      {(isScalarType(unwrappedType) || isEnumType(unwrappedType)) && isSelected && (
         <InputElement
           argument={argument}
           argumentNode={argumentNode}

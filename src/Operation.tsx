@@ -3,7 +3,7 @@ import { OperationDefinitionNode, OperationTypeNode, SelectionSetNode } from 'gr
 import React, { ChangeEvent, useCallback, useContext, useEffect, useRef } from 'react';
 
 import {
-  mergeSelectionSetIntoOperation,
+  mergeSelectionSetIntoOperationDefinition,
   updateOperationDefinition,
   sourcesAreEqual,
 } from './graphqlHelper';
@@ -52,7 +52,7 @@ export default React.memo(function Operation({
 
   const onEditType = useCallback(
     (prevSelectionSetNode?: SelectionSetNode, nextSelectionSetNode?: SelectionSetNode) => {
-      const nextOperationDefinitionNode = mergeSelectionSetIntoOperation(
+      const nextOperationDefinitionNode = mergeSelectionSetIntoOperationDefinition(
         operationDefinitionNodeRef.current,
         prevSelectionSetNode,
         nextSelectionSetNode,
@@ -67,15 +67,15 @@ export default React.memo(function Operation({
   const schema = useContext(SchemaContext);
   const type =
     operation === 'query'
-      ? schema?.getQueryType()
+      ? schema?.getQueryType() || undefined
       : operation === 'mutation'
-      ? schema?.getMutationType()
-      : schema?.getSubscriptionType();
+      ? schema?.getMutationType() || undefined
+      : schema?.getSubscriptionType() || undefined;
 
   return (
     <div className={classnames(styles.operation, `depth-${depth}`)}>
       <div className={styles.operationTypeAndName}>
-        <span className="cm-keyword" style={{ position: 'relative' }}>
+        <span className="cm-keyword" style={{ display: 'inline-block', position: 'relative' }}>
           <div className={styles.operationInput}>
             <select name="operation" onChange={onEditOperation} value={operation}>
               <option>mutation</option>
