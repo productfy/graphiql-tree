@@ -58,7 +58,8 @@ export function generateArgumentSelectionFromType(
   const unwrappedType = unwrapType(type);
 
   let value: ValueNode =
-    customizeDefaultValue(arg, parentDefinition) || getDefaultValueByType(unwrappedType);
+    customizeDefaultValue(arg, parentDefinition) ||
+    getDefaultValueByType(unwrappedType, parentDefinition, customizeDefaultValue);
 
   if (isInputObjectType(unwrappedType)) {
     const fields = unwrappedType.getFields();
@@ -74,7 +75,11 @@ export function generateArgumentSelectionFromType(
           },
           value:
             customizeDefaultValue(field, { definition: arg, parentDefinition }) ||
-            getDefaultValueByType(unwrapType(field.type)),
+            getDefaultValueByType(
+              unwrapType(field.type),
+              { definition: arg, parentDefinition },
+              customizeDefaultValue,
+            ),
         })),
     } as ObjectValueNode;
   }
@@ -117,7 +122,8 @@ export function generateObjectFieldNodeFromInputField(
   const unwrappedType = unwrapType(type);
 
   let value: ValueNode =
-    customizeDefaultValue(field, parentDefinition) || getDefaultValueByType(unwrappedType);
+    customizeDefaultValue(field, parentDefinition) ||
+    getDefaultValueByType(unwrappedType, parentDefinition, customizeDefaultValue);
 
   if (isInputObjectType(unwrappedType)) {
     value = {
@@ -132,7 +138,11 @@ export function generateObjectFieldNodeFromInputField(
           },
           value:
             customizeDefaultValue(f, { definition: field, parentDefinition }) ||
-            getDefaultValueByType(unwrapType(f.type)),
+            getDefaultValueByType(
+              unwrapType(f.type),
+              { definition: field, parentDefinition },
+              customizeDefaultValue,
+            ),
         })),
     };
   }
@@ -252,7 +262,11 @@ export function getDefaultValueByType(
               },
               value:
                 customizeDefaultValue(field, { definition: type, parentDefinition }) ||
-                getDefaultValueByType(unwrapType(field.type)),
+                getDefaultValueByType(
+                  unwrapType(field.type),
+                  { definition: type, parentDefinition },
+                  customizeDefaultValue,
+                ),
             } as ObjectFieldNode),
         ),
     };
