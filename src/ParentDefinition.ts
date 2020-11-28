@@ -2,6 +2,7 @@ import {
   GraphQLArgument,
   GraphQLField,
   GraphQLInputField,
+  GraphQLNamedType,
   GraphQLObjectType,
   GraphQLOutputType,
 } from 'graphql';
@@ -12,6 +13,7 @@ export default interface ParentDefinition {
     | GraphQLArgument
     | GraphQLInputField
     | GraphQLField<any, any>
+    | GraphQLNamedType
     | GraphQLObjectType<any, any>
     | GraphQLOutputType;
 }

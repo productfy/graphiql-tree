@@ -72,7 +72,9 @@ export function generateArgumentSelectionFromType(
             kind: 'Name',
             value: field.name,
           },
-          value: getDefaultValueByType(unwrapType(field.type)),
+          value:
+            customizeDefaultValue(field, { definition: arg, parentDefinition }) ||
+            getDefaultValueByType(unwrapType(field.type)),
         })),
     } as ObjectValueNode;
   }
@@ -230,7 +232,11 @@ export function generateOutputFieldSelectionFromType(
   } as FieldNode;
 }
 
-export function getDefaultValueByType(type: GraphQLNamedType): ValueNode {
+export function getDefaultValueByType(
+  type: GraphQLNamedType,
+  parentDefinition?: ParentDefinition,
+  customizeDefaultValue: DefaultValueCustomizer = () => undefined,
+): ValueNode {
   if (isInputObjectType(type)) {
     return {
       kind: 'ObjectValue',
@@ -244,7 +250,9 @@ export function getDefaultValueByType(type: GraphQLNamedType): ValueNode {
                 kind: 'Name',
                 value: field.name,
               },
-              value: getDefaultValueByType(unwrapType(field.type)),
+              value:
+                customizeDefaultValue(field, { definition: type, parentDefinition }) ||
+                getDefaultValueByType(unwrapType(field.type)),
             } as ObjectFieldNode),
         ),
     };
