@@ -114,7 +114,8 @@ export function generateObjectFieldNodeFromInputField(
   const { name, type } = field;
   const unwrappedType = unwrapType(type);
 
-  let value: ValueNode = getDefaultValueByType(unwrappedType);
+  let value: ValueNode =
+    customizeDefaultValue(field, parentDefinition) || getDefaultValueByType(unwrappedType);
 
   if (isInputObjectType(unwrappedType)) {
     value = {
