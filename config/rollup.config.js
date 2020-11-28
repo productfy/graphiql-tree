@@ -4,62 +4,11 @@ import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 import postcss from 'rollup-plugin-postcss';
+import svg from 'rollup-plugin-svg';
 import resolve from '@rollup/plugin-node-resolve';
 import typescript from 'rollup-plugin-typescript2';
 
 export default [
-  // {
-  //   input: ['src/GraphiQLWithTree.tsx'],
-  //   external: ['react'],
-  //   preserveModules: true,
-  //   output: [
-  //     {
-  //       dir: 'dist',
-  //       format: 'cjs',
-  //       exports: 'named',
-  //     },
-  //   ],
-  //   plugins: [
-  //     peerDepsExternal(),
-  //     resolve(),
-  //     commonjs(),
-  //     typescript(),
-  //     postcss({
-  //       extract: false,
-  //       modules: true,
-  //       use: ['sass'],
-  //     }),
-  //     json(),
-  //     babel({ babelHelpers: 'bundled' }),
-  //     analyze(),
-  //   ],
-  // },
-  // {
-  //   input: ['src/GraphiQLWithTree.tsx'],
-  //   external: ['react'],
-  //   preserveModules: true,
-  //   output: [
-  //     {
-  //       dir: 'dist',
-  //       format: 'esm',
-  //       exports: 'named',
-  //     },
-  //   ],
-  //   plugins: [
-  //     peerDepsExternal(),
-  //     resolve(),
-  //     commonjs(),
-  //     typescript(),
-  //     postcss({
-  //       extract: false,
-  //       modules: true,
-  //       use: ['sass'],
-  //     }),
-  //     json(),
-  //     babel({ babelHelpers: 'bundled' }),
-  //     analyze(),
-  //   ],
-  // },
   {
     input: ['src/GraphiQLWithTree.tsx'],
     external: ['react'],
@@ -86,6 +35,7 @@ export default [
         use: ['sass'],
       }),
       json(),
+      svg(),
       babel({ babelHelpers: 'bundled' }),
       analyze(),
     ],
