@@ -404,8 +404,8 @@ const Argument = React.memo(function Argument({
       {(() => {
         if (isInputObjectType(unwrappedType) && isSelected) {
           const fields: GraphQLInputFieldMap = (unwrappedType as GraphQLInputObjectType).getFields();
-          const objectFieldNodes: readonly ObjectFieldNode[] = (argumentNode!
-            .value as ObjectValueNode)?.fields;
+          const objectFieldNodes: readonly ObjectFieldNode[] = (argumentNode?.value as ObjectValueNode)
+            ?.fields;
           return (
             <div className={classnames(styles.argumentFields)}>
               {Object.values(fields)

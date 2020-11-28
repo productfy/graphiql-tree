@@ -38,12 +38,7 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
         query={query}
         schema={schema}
       />
-      <GraphiQL
-        fetcher={fetcher}
-        query={query}
-        onEditQuery={onEditQuery}
-        schema={schema}
-      />
+      <GraphiQL fetcher={fetcher} query={query} onEditQuery={onEditQuery} schema={schema} />
     </div>
   );
 };
