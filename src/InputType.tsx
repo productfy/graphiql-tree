@@ -28,6 +28,7 @@ import {
   unwrapType,
 } from './graphqlHelper';
 import InputElement from './InputElement';
+import ParentDefinition from './ParentDefinition';
 import trashIcon from './icons/trash.svg';
 import TypeName from './TypeName';
 
@@ -38,6 +39,7 @@ export interface InputFieldProps {
   inputField: GraphQLInputField;
   onEdit: (prevObjectFieldNode?: ObjectFieldNode, nextObjectFieldNode?: ObjectFieldNode) => void;
   objectFieldNode?: ObjectFieldNode;
+  parentDefinition: ParentDefinition;
 }
 
 const InputField = React.memo(function InputField({
@@ -45,8 +47,10 @@ const InputField = React.memo(function InputField({
   inputField,
   onEdit,
   objectFieldNode,
+  parentDefinition,
 }: InputFieldProps) {
   const objectFieldNodeRef = useRef(objectFieldNode);
+  const parentDefinitionRef = useRef({ definition: inputField, parentDefinition });
   const { description, name, type } = inputField;
   const isRequired = isRequiredInputField(inputField);
   const unwrappedType = unwrapType(type);
@@ -154,6 +158,7 @@ const InputField = React.memo(function InputField({
           isRequired={isRequiredInputField(inputField)}
           name={inputField.name}
           onEdit={onEditInputField}
+          parentDefinition={parentDefinitionRef.current}
           type={type}
           value={objectFieldNode?.value}
         />
@@ -194,6 +199,7 @@ const InputField = React.memo(function InputField({
                           objectFieldNode={(v as ObjectValueNode)?.fields?.find(
                             ({ name }) => name.value === field.name,
                           )}
+                          parentDefinition={parentDefinitionRef.current}
                         />
                       ))}
                     </div>
@@ -213,6 +219,7 @@ const InputField = React.memo(function InputField({
                   key={field.name}
                   onEdit={onEditInputObjectField()}
                   objectFieldNode={objectFieldNodes?.find(({ name }) => name.value === field.name)}
+                  parentDefinition={parentDefinitionRef.current}
                 />
               ))}
             </div>
@@ -229,6 +236,7 @@ export interface ArgumentProps {
   argumentNode?: ArgumentNode; // Selection
   depth: number;
   onEdit: (prevArgumentNode?: ArgumentNode, nextArgumentNode?: ArgumentNode) => void;
+  parentDefinition: ParentDefinition;
 }
 
 const Argument = React.memo(function Argument({
@@ -236,10 +244,12 @@ const Argument = React.memo(function Argument({
   argumentNode,
   depth,
   onEdit,
+  parentDefinition,
 }: ArgumentProps) {
   const { description, name, type } = argument;
   const isRequired = isRequiredArgument(argument);
   const argumentNodeRef = useRef(argumentNode);
+  const parentDefinitionRef = useRef({ definition: argument, parentDefinition });
 
   useEffect(() => {
     argumentNodeRef.current = argumentNode;
@@ -367,6 +377,7 @@ const Argument = React.memo(function Argument({
                   name={name}
                   isRequired={isRequiredArgument(argument)}
                   onEdit={onEditArgument(i)}
+                  parentDefinition={parentDefinitionRef.current}
                   type={unwrappedType}
                   value={v}
                 />
@@ -391,6 +402,7 @@ const Argument = React.memo(function Argument({
             name={name}
             isRequired={isRequiredArgument(argument)}
             onEdit={onEditArgument()}
+            parentDefinition={parentDefinitionRef.current}
             type={unwrappedType}
             value={argumentNode?.value}
           />
@@ -418,6 +430,7 @@ const Argument = React.memo(function Argument({
                     objectFieldNode={objectFieldNodes?.find(
                       ({ name }) => name.value === field.name,
                     )}
+                    parentDefinition={parentDefinitionRef.current}
                   />
                 ))}
             </div>

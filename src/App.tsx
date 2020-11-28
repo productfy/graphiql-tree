@@ -1,9 +1,7 @@
 import classnames from 'classnames';
 import {
-  GraphQLInputType,
   GraphQLSchema,
   StringValueNode,
-  ValueNode,
   buildClientSchema,
   getIntrospectionQuery,
   isScalarType,
@@ -13,6 +11,7 @@ import pickBy from 'lodash/pickBy';
 import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 
 import GraphiQLWithTree from './GraphiQLWithTree';
+import { NodeCustomizer } from './GraphiQLTree';
 import { unwrapType } from './graphqlHelper';
 
 import styles from './GraphiQLTree.module.scss';
@@ -149,20 +148,7 @@ const App = () => {
   }, []);
 
   // Returning undefined will fallback to default node handlers
-  const customizeNode = ({
-    isRequired = false,
-    name,
-    onEdit,
-    type,
-    value,
-  }: {
-    depth: number;
-    isRequired?: boolean;
-    name: string;
-    onEdit: (prevValueNode?: ValueNode, nextValueNode?: ValueNode) => void;
-    type: GraphQLInputType;
-    value?: ValueNode;
-  }) => {
+  const customizeNode = ({ isRequired = false, name, onEdit, type, value }: NodeCustomizer) => {
     const unwrappedType = unwrapType(type);
     const productfyEnum = enums.find(({ left }) => left === unwrappedType.name);
 

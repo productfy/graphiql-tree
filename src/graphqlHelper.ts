@@ -137,22 +137,24 @@ export function generateObjectFieldNodeFromInputField(field: GraphQLInputField):
 
 export function generateDefaultQueryByQueryOrMutationName({
   name,
+  operationType = 'query',
   schema,
 }: {
   name: string;
+  operationType?: OperationTypeNode;
   schema: GraphQLSchema;
 }): string {
   const queryType = schema.getQueryType();
   const mutationType = schema.getMutationType();
   const field: GraphQLField<any, any> | undefined =
-    queryType?.getFields()[name] || mutationType?.getFields()[name];
+    operationType === 'query' ? queryType?.getFields()[name] : mutationType?.getFields()[name];
   if (field) {
     const doc: DocumentNode = {
       kind: 'Document',
       definitions: [
         {
           kind: 'OperationDefinition',
-          operation: 'mutation',
+          operation: operationType,
           name: {
             kind: 'Name',
             value: name,
@@ -225,7 +227,7 @@ export function getDefaultValueByType(type: GraphQLNamedType): ValueNode {
       value: true,
     };
   }
-  if (type.name === 'Float') {
+  if (type.name === 'BigDecimal' || type.name === 'Float') {
     return {
       kind: 'FloatValue',
       value: '0',

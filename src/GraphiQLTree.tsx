@@ -1,9 +1,10 @@
 import classnames from 'classnames';
-import { DocumentNode, GraphQLSchema, parse } from 'graphql';
+import { DocumentNode, GraphQLInputType, GraphQLSchema, ValueNode, parse } from 'graphql';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { CustomNodeContext, SchemaContext } from './Context';
 import Document from './Document';
+import ParentDefinition from './ParentDefinition';
 import { transformDocumentNodeToQueryString } from './graphqlHelper';
 
 import styles from './GraphiQLTree.module.scss';
@@ -11,8 +12,18 @@ import styles from './GraphiQLTree.module.scss';
 import * as graphqlHelper from './graphqlHelper';
 export { graphqlHelper };
 
-interface GraphiQLTreeProps {
-  customizeNode?: (params: any) => JSX.Element | void;
+export interface NodeCustomizer {
+  depth: number;
+  isRequired?: boolean;
+  name: string;
+  onEdit: (prevValueNode?: ValueNode, nextValueNode?: ValueNode) => void;
+  parentDefinition: ParentDefinition;
+  type: GraphQLInputType;
+  value?: ValueNode;
+}
+
+export interface GraphiQLTreeProps {
+  customizeNode?: (params: NodeCustomizer) => JSX.Element | void;
   onEdit: (queryString: string) => void;
   query: string;
   schema?: GraphQLSchema;

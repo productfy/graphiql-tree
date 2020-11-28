@@ -24,6 +24,7 @@ import {
   sourcesAreEqual,
   unwrapType,
 } from './graphqlHelper';
+import ParentDefinition from './ParentDefinition';
 import { SchemaContext } from './Context';
 import TypeName from './TypeName';
 
@@ -34,9 +35,17 @@ export interface FieldProps {
   field: GraphQLField<any, any>;
   onEdit: (prevField?: FieldNode, nextField?: FieldNode) => void;
   selectionNode?: FieldNode;
+  parentDefinition: ParentDefinition;
 }
 
-const Field = React.memo(function Field({ depth, field, onEdit, selectionNode }: FieldProps) {
+const Field = React.memo(function Field({
+  depth,
+  field,
+  onEdit,
+  parentDefinition,
+  selectionNode,
+}: FieldProps) {
+  const parentDefinitionRef = useRef({ definition: field, parentDefinition });
   const selectionNodeRef = useRef(selectionNode);
 
   useEffect(() => {
@@ -164,6 +173,7 @@ const Field = React.memo(function Field({ depth, field, onEdit, selectionNode }:
                       depth={depth + 1}
                       key={arg.name}
                       onEdit={onEditArgument}
+                      parentDefinition={parentDefinitionRef.current}
                     />
                   ))}
               </div>
@@ -186,6 +196,7 @@ const Field = React.memo(function Field({ depth, field, onEdit, selectionNode }:
               <Type
                 depth={depth + 1}
                 onEdit={onEditType}
+                parentDefinition={parentDefinitionRef.current}
                 selectionSetNode={selectionNode!.selectionSet!}
                 type={type}
               />
@@ -197,11 +208,13 @@ const Field = React.memo(function Field({ depth, field, onEdit, selectionNode }:
       )}
     </div>
   );
-}, sourcesAreEqual('selectionNode'));
+},
+sourcesAreEqual('selectionNode'));
 
 export interface ImplementationTypeProps {
   depth: number;
   onEdit: (prevSelection?: InlineFragmentNode, nextSelection?: InlineFragmentNode) => void;
+  parentDefinition: ParentDefinition;
   selectionNode?: InlineFragmentNode;
   type: GraphQLObjectType;
 }
@@ -209,10 +222,12 @@ export interface ImplementationTypeProps {
 const ImplementationType = React.memo(function Type({
   depth,
   onEdit,
+  parentDefinition,
   selectionNode,
   type,
 }: ImplementationTypeProps) {
   const unwrappedType = unwrapType(type);
+  const parentDefinitionRef = useRef({ definition: type, parentDefinition });
   const selectionNodeRef = useRef(selectionNode);
 
   useEffect(() => {
@@ -284,6 +299,7 @@ const ImplementationType = React.memo(function Type({
                     field={field}
                     key={field.name}
                     onEdit={onEditField}
+                    parentDefinition={parentDefinitionRef.current}
                     selectionNode={subSelectionNode}
                   />
                 );
@@ -299,12 +315,20 @@ sourcesAreEqual('selectionNode'));
 export interface TypeProps {
   depth: number;
   onEdit: (prevSelectionSet?: SelectionSetNode, nextSelectionSet?: SelectionSetNode) => void;
+  parentDefinition?: ParentDefinition;
   selectionSetNode: SelectionSetNode;
   type?: GraphQLOutputType;
 }
 
-const Type = React.memo(function Type({ depth, onEdit, selectionSetNode, type }: TypeProps) {
+const Type = React.memo(function Type({
+  depth,
+  onEdit,
+  parentDefinition,
+  selectionSetNode,
+  type,
+}: TypeProps) {
   const schema = useContext(SchemaContext);
+  const parentDefinitionRef = useRef({ definition: type, parentDefinition });
   const selectionSetNodeRef = useRef(selectionSetNode);
 
   useEffect(() => {
@@ -360,6 +384,7 @@ const Type = React.memo(function Type({ depth, onEdit, selectionSetNode, type }:
                   field={field}
                   key={field.name}
                   onEdit={onEditField}
+                  parentDefinition={parentDefinitionRef.current}
                   selectionNode={selectionNode}
                 />
               );
@@ -377,6 +402,7 @@ const Type = React.memo(function Type({ depth, onEdit, selectionSetNode, type }:
                 depth={depth + 1}
                 key={type.name}
                 onEdit={onEditType}
+                parentDefinition={parentDefinitionRef.current}
                 selectionNode={selectionNode}
                 type={type}
               />
@@ -410,6 +436,7 @@ const Type = React.memo(function Type({ depth, onEdit, selectionSetNode, type }:
                 field={field}
                 key={field.name}
                 onEdit={onEditField}
+                parentDefinition={parentDefinitionRef.current}
                 selectionNode={selectionNode}
               />
             );
@@ -419,6 +446,7 @@ const Type = React.memo(function Type({ depth, onEdit, selectionSetNode, type }:
   }
 
   return <div>Unhandled type {unwrappedType.name}</div>;
-}, sourcesAreEqual('selectionSetNode'));
+},
+sourcesAreEqual('selectionSetNode'));
 
 export { Field, Type };
