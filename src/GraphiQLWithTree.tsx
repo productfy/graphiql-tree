@@ -14,14 +14,20 @@ export type { FetcherParams } from 'graphiql/dist/components/GraphiQL';
 export interface GraphiQLWithTreeProps {
   customizeNode?: (params: any) => JSX.Element | void;
   fetcher: Fetcher;
+  query?: string;
   schema?: GraphQLSchema;
 }
 
 const DEFAULT_QUERY =
-  'mutation myGraphql {\n  signUp(company: { addresses: [{ address: {}, primary: true }], name: "" }) {\n    __typename\n  }\n}\n';
+  'query myGraphql {\n  signUp(company: { name: "" }) {\n    __typename\n  }\n}\n';
 
-const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({ customizeNode, fetcher, schema }) => {
-  const [query, setQuery] = useState<string>(DEFAULT_QUERY);
+const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
+  customizeNode,
+  fetcher,
+  query: defaultQuery,
+  schema,
+}) => {
+  const [query, setQuery] = useState<string>(defaultQuery || DEFAULT_QUERY);
   const onEditQuery = useCallback((query?: string) => setQuery(query || ''), [setQuery]);
 
   return (
