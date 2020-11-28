@@ -19,7 +19,7 @@ export interface GraphiQLWithTreeProps {
 }
 
 const DEFAULT_QUERY =
-  'query myGraphql {\n  signUp(company: { name: "" }) {\n    __typename\n  }\n}\n';
+  'query signUp {\n  signUp(company: { name: "" }) {\n    __typename\n  }\n}\n';
 
 const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
   customizeNode,
@@ -38,7 +38,12 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
         query={query}
         schema={schema}
       />
-      <GraphiQL fetcher={fetcher} query={query} onEditQuery={onEditQuery} schema={schema} />
+      <GraphiQL
+        fetcher={fetcher}
+        query={query}
+        onEditQuery={onEditQuery}
+        schema={schema}
+      />
     </div>
   );
 };
