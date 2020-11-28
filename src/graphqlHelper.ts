@@ -106,7 +106,11 @@ export function generateInlineFragmentFromType(type: GraphQLNamedType): InlineFr
   };
 }
 
-export function generateObjectFieldNodeFromInputField(field: GraphQLInputField): ObjectFieldNode {
+export function generateObjectFieldNodeFromInputField(
+  field: GraphQLInputField,
+  parentDefinition: ParentDefinition,
+  customizeDefaultValue: DefaultValueCustomizer = () => undefined,
+): ObjectFieldNode {
   const { name, type } = field;
   const unwrappedType = unwrapType(type);
 
@@ -123,7 +127,9 @@ export function generateObjectFieldNodeFromInputField(field: GraphQLInputField):
             kind: 'Name',
             value: f.name,
           },
-          value: getDefaultValueByType(unwrapType(f.type)),
+          value:
+            customizeDefaultValue(f, { definition: field, parentDefinition }) ||
+            getDefaultValueByType(unwrapType(f.type)),
         })),
     };
   }
@@ -191,7 +197,7 @@ export function generateDefaultQueryByQueryOrMutationName({
 export function generateOutputFieldSelectionFromType(
   field: GraphQLField<any, any>,
   parentDefinition: ParentDefinition,
-  customizeDefaultValue: DefaultValueCustomizer,
+  customizeDefaultValue: DefaultValueCustomizer = () => undefined,
 ): SelectionNode {
   const { args = [], name, type } = field;
   const unwrappedType = unwrapType(type);

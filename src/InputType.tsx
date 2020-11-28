@@ -50,6 +50,7 @@ const InputField = React.memo(function InputField({
   objectFieldNode,
   parentDefinition,
 }: InputFieldProps) {
+  const customizeDefaultValue = useContext(DefaultValueCustomizerContext);
   const objectFieldNodeRef = useRef(objectFieldNode);
   const parentDefinitionRef = useRef({ definition: inputField, parentDefinition });
   const { description, name, type } = inputField;
@@ -125,6 +126,8 @@ const InputField = React.memo(function InputField({
     if (!objectFieldNodeRef.current) {
       const nextObjectFieldNode: ObjectFieldNode = generateObjectFieldNodeFromInputField(
         inputField,
+        parentDefinitionRef.current,
+        customizeDefaultValue,
       );
       onEdit(objectFieldNodeRef.current, nextObjectFieldNode);
     } else {
