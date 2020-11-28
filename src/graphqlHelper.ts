@@ -13,6 +13,7 @@ import {
   GraphQLList,
   GraphQLNamedType,
   GraphQLNonNull,
+  GraphQLSchema,
   GraphQLType,
   InlineFragmentNode,
   ListValueNode,
@@ -132,6 +133,41 @@ export function generateObjectFieldNodeFromInputField(field: GraphQLInputField):
         }
       : value,
   };
+}
+
+export function generateDefaultQueryByQueryOrMutationName({
+  name,
+  schema,
+}: {
+  name: string;
+  schema: GraphQLSchema;
+}): string {
+  const queryType = schema.getQueryType();
+  const mutationType = schema.getMutationType();
+  const field: GraphQLField<any, any> | undefined =
+    queryType?.getFields()[name] || mutationType?.getFields()[name];
+  if (field) {
+    const doc: DocumentNode = {
+      kind: 'Document',
+      definitions: [
+        {
+          kind: 'OperationDefinition',
+          operation: 'mutation',
+          name: {
+            kind: 'Name',
+            value: name,
+          },
+          selectionSet: {
+            kind: 'SelectionSet',
+            selections: [generateOutputFieldSelectionFromType(field)],
+          } as SelectionSetNode,
+        } as OperationDefinitionNode,
+      ],
+    };
+    return transformDocumentNodeToQueryString(doc);
+  }
+
+  return '';
 }
 
 export function generateOutputFieldSelectionFromType(field: GraphQLField<any, any>): SelectionNode {

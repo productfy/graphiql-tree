@@ -8,6 +8,9 @@ import { transformDocumentNodeToQueryString } from './graphqlHelper';
 
 import styles from './GraphiQLTree.module.scss';
 
+import * as graphqlHelper from './graphqlHelper';
+export { graphqlHelper };
+
 interface GraphiQLTreeProps {
   customizeNode?: (params: any) => JSX.Element | void;
   onEdit: (queryString: string) => void;

@@ -91,7 +91,6 @@ const InputField = React.memo(function InputField({
         nextObjectFieldNode,
         index,
       );
-      console.log(index);
       onEdit(objectFieldNodeRef.current, nextParentObjectFieldNode);
     },
     [objectFieldNodeRef, onEdit],

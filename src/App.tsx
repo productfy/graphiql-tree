@@ -8,10 +8,11 @@ import {
   getIntrospectionQuery,
   isScalarType,
 } from 'graphql';
+import { FetcherParams } from 'graphiql/dist/components/GraphiQL';
 import pickBy from 'lodash/pickBy';
 import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 
-import GraphiQLWithTree, { FetcherParams } from './GraphiQLWithTree';
+import GraphiQLWithTree from './GraphiQLWithTree';
 import { unwrapType } from './graphqlHelper';
 
 import styles from './GraphiQLTree.module.scss';

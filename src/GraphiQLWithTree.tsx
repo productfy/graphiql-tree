@@ -2,14 +2,13 @@ import classnames from 'classnames';
 import GraphiQL from 'graphiql';
 import { Fetcher } from 'graphiql/dist/components/GraphiQL';
 import { GraphQLSchema } from 'graphql';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import GraphiQLTree from './GraphiQLTree';
+import { generateDefaultQueryByQueryOrMutationName } from './graphqlHelper';
 
 import styles from './GraphiQLTree.module.scss';
 import 'graphiql/graphiql.min.css';
-
-export type { FetcherParams } from 'graphiql/dist/components/GraphiQL';
 
 export interface GraphiQLWithTreeProps {
   customizeNode?: (params: any) => JSX.Element | void;
@@ -18,8 +17,7 @@ export interface GraphiQLWithTreeProps {
   schema?: GraphQLSchema;
 }
 
-const DEFAULT_QUERY =
-  'query signUp {\n  signUp(company: { name: "" }) {\n    __typename\n  }\n}\n';
+const defaultApi = 'signUp';
 
 const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
   customizeNode,
@@ -27,8 +25,20 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
   query: defaultQuery,
   schema,
 }) => {
-  const [query, setQuery] = useState<string>(defaultQuery || DEFAULT_QUERY);
+  const [query, setQuery] = useState<string>(
+    defaultQuery ||
+      (schema && generateDefaultQueryByQueryOrMutationName({ name: defaultApi, schema })) ||
+      '',
+  );
   const onEditQuery = useCallback((query?: string) => setQuery(query || ''), [setQuery]);
+
+  useEffect(() => {
+    setQuery(
+      defaultQuery ||
+        (schema && generateDefaultQueryByQueryOrMutationName({ name: defaultApi, schema })) ||
+        '',
+    );
+  }, [defaultQuery, schema]);
 
   return (
     <div className={classnames('graphiql-container', styles.graphiqlTree)}>
