@@ -18,7 +18,7 @@ export interface GraphiQLWithTreeProps {
 }
 
 const DEFAULT_QUERY =
-  'query myEnums {\n  achTransferRequests(achTransferRequestIds: ["1", "2"]) {\n    __typename\n  }\n}\n';
+  'mutation myGraphql {\n  signUp(company: { addresses: [{ address: {}, primary: true }], name: "" }) {\n    __typename\n  }\n}\n';
 
 const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({ customizeNode, fetcher, schema }) => {
   const [query, setQuery] = useState<string>(DEFAULT_QUERY);

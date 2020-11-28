@@ -126,7 +126,7 @@ const Field = React.memo(function Field({ depth, field, onEdit, selectionNode }:
         )}
 
         <span className="field-name">{name}</span>
-        <TypeName type={type} />
+        {depth !== 4 && <TypeName type={type} />}
         {/* {!selected && hasArgs && <span className="cm-punctuation">()</span>}
         {(!selected || !hasFields) && (
           <>
@@ -401,6 +401,9 @@ const Type = React.memo(function Type({ depth, onEdit, selectionSetNode, type }:
             const selectionNode = (selectionSetNode?.selections as FieldNode[])?.find(
               selection => selection.name?.value === field.name,
             );
+            // if (depth === 3 && !selectionNode) {
+            //   return null;
+            // }
             return (
               <Field
                 depth={depth + 1}

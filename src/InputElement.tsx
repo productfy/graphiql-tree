@@ -1,56 +1,41 @@
 import classnames from 'classnames';
 import {
-  ArgumentNode,
   BooleanValueNode,
   EnumValueNode,
   FloatValueNode,
-  GraphQLArgument,
-  GraphQLInputField,
+  GraphQLInputType,
   IntValueNode,
   NullValueNode,
-  ObjectFieldNode,
   StringValueNode,
   ValueNode,
   isEnumType,
-  isRequiredArgument,
-  isRequiredInputField,
 } from 'graphql';
 import React, { ChangeEvent, useContext, useRef } from 'react';
 
 import { CustomNodeContext } from './Context';
-import { unwrapType } from './graphqlHelper';
+import { sourcesAreEqual, unwrapType } from './graphqlHelper';
 
 import styles from './GraphiQLTree.module.scss';
 
 export interface InputElementProps {
-  argument?: GraphQLArgument;
-  argumentNode?: ArgumentNode;
-  inputField?: GraphQLInputField;
   depth: number;
-  objectFieldNode?: ObjectFieldNode;
+  isRequired?: boolean;
+  name: string;
   onEdit: (prevValueNode?: ValueNode, nextValueNode?: ValueNode) => void;
+  type: GraphQLInputType;
+  value?: ValueNode;
 }
 
 export default React.memo(function InputElement({
-  argument,
-  argumentNode,
   depth,
-  inputField,
-  objectFieldNode,
+  isRequired = false,
+  name,
   onEdit,
+  type,
+  value,
 }: InputElementProps) {
   const customizeNode = useContext(CustomNodeContext);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  if (!argument && !inputField) {
-    // Shouldn't get to this point, but just in case
-    return null;
-  }
-
-  const isRequired =
-    (argument && isRequiredArgument(argument)) || (inputField && isRequiredInputField(inputField));
-  const { name, type } = argument || inputField!;
-  const value = argumentNode?.value || objectFieldNode?.value;
   const unwrappedType = unwrapType(type);
 
   const onEditInput = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -66,6 +51,8 @@ export default React.memo(function InputElement({
       // Scalars
       switch (unwrappedType.name) {
         case 'BigDecimal':
+        case 'Float':
+        case 'Int':
           nextValueNode = {
             kind: 'FloatValue',
             value: nextValue,
@@ -100,7 +87,7 @@ export default React.memo(function InputElement({
         if (isEnumType(unwrappedType)) {
           const options = unwrappedType.getValues();
           return (
-            <div className={classnames('cm-string', styles.select)}>
+            <div className={classnames('cm-string-2', styles.select)}>
               <select onChange={onEditInput} value={(value as EnumValueNode).value || ''}>
                 <option value="" disabled={isRequired} hidden={isRequired}></option>
                 {options.map(({ name, value }) => (
@@ -122,7 +109,6 @@ export default React.memo(function InputElement({
                   <label>
                     <input
                       checked={booleanValue === true}
-                      name={name}
                       onChange={onEditInput}
                       type="radio"
                       value="true"
@@ -132,7 +118,6 @@ export default React.memo(function InputElement({
                   <label>
                     <input
                       checked={booleanValue === false}
-                      name={name}
                       onChange={onEditInput}
                       type="radio"
                       value="false"
@@ -146,12 +131,16 @@ export default React.memo(function InputElement({
             case 'ID':
             case 'Int':
             case 'String':
+              const isNumber = ['BigDecimal', 'Float', 'Int'].includes(unwrappedType.name);
               scalarValue =
                 (value as NullValueNode)?.kind === 'NullValue'
                   ? ''
                   : (value as FloatValueNode | IntValueNode | StringValueNode)?.value ?? '';
               return (
-                <div className="cm-string" onClick={() => inputRef.current?.focus()}>
+                <div
+                  className={isNumber ? 'cm-number' : 'cm-string'}
+                  onClick={() => inputRef.current?.focus()}
+                >
                   <input
                     type="text"
                     ref={inputRef}
@@ -164,14 +153,33 @@ export default React.memo(function InputElement({
                   />
                 </div>
               );
+            case 'LocalDate':
+              scalarValue =
+                (value as NullValueNode)?.kind === 'NullValue'
+                  ? ''
+                  : (value as StringValueNode)?.value ?? '';
+              return (
+                <div className="cm-string" onClick={() => inputRef.current?.focus()}>
+                  <input
+                    type="date"
+                    ref={inputRef}
+                    value={scalarValue}
+                    onChange={onEditInput}
+                    className={classnames(styles.inputText, {
+                      [styles.focusBorder]: String(value ?? '').length === 0,
+                    })}
+                    // style={{ width: `calc(1px + ${String(value ?? '').length}ch)` }}
+                  />
+                </div>
+              );
             default:
               const customScalarArgumentResult = customizeNode({
-                argument,
-                argumentNode,
                 depth,
-                inputField,
-                objectFieldNode,
+                isRequired,
+                name,
                 onEdit,
+                type,
+                value,
               });
               if (customScalarArgumentResult) {
                 return customScalarArgumentResult;
@@ -200,4 +208,5 @@ export default React.memo(function InputElement({
       })()}
     </div>
   );
-});
+},
+sourcesAreEqual('value'));

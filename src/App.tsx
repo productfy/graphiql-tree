@@ -1,17 +1,12 @@
 import classnames from 'classnames';
 import {
-  ArgumentNode,
-  GraphQLArgument,
+  GraphQLInputType,
   GraphQLSchema,
   StringValueNode,
   ValueNode,
   buildClientSchema,
   getIntrospectionQuery,
-  isRequiredArgument,
   isScalarType,
-  GraphQLInputField,
-  ObjectFieldNode,
-  isRequiredInputField,
 } from 'graphql';
 import pickBy from 'lodash/pickBy';
 import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
@@ -154,27 +149,23 @@ const App = () => {
 
   // Returning undefined will fallback to default node handlers
   const customizeNode = ({
-    argument,
-    argumentNode,
-    inputField,
-    objectFieldNode,
+    isRequired = false,
+    name,
     onEdit,
+    type,
+    value,
   }: {
-    argument?: GraphQLArgument; // Schema
-    argumentNode?: ArgumentNode; // Selection
     depth: number;
-    inputField?: GraphQLInputField;
-    objectFieldNode?: ObjectFieldNode;
+    isRequired?: boolean;
+    name: string;
     onEdit: (prevValueNode?: ValueNode, nextValueNode?: ValueNode) => void;
+    type: GraphQLInputType;
+    value?: ValueNode;
   }) => {
-    const { type } = argument || inputField!;
     const unwrappedType = unwrapType(type);
     const productfyEnum = enums.find(({ left }) => left === unwrappedType.name);
 
     if (isScalarType(unwrappedType) && productfyEnum) {
-      const isRequired =
-        (argument && isRequiredArgument(argument)) ||
-        (inputField && isRequiredInputField(inputField));
       const onEditInput = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const nextValueNode = {
           kind: 'StringValue',
@@ -182,12 +173,11 @@ const App = () => {
         } as StringValueNode;
         onEdit(value, nextValueNode);
       };
-      const options = productfyEnum.right;
-      const { value } = argumentNode || objectFieldNode!;
+      const options = productfyEnum.right.sort((a, b) => a.code.localeCompare(b.code));
 
       return (
         <div className={classnames('cm-string', styles.select)}>
-          <select onChange={onEditInput} value={(value as StringValueNode).value || ''}>
+          <select name={name} onChange={onEditInput} value={(value as StringValueNode).value || ''}>
             <option value="" disabled={isRequired} hidden={isRequired}></option>
             {options.map(({ code, description }) => (
               <option key={code} value={code}>

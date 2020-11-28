@@ -35,6 +35,12 @@
       margin-left: 8px;
     }
 
+    :local(.addRow) {
+      text-align: right;
+      cursor: pointer;
+      color: #556cd6;
+    }
+
     :local(.argument) {
       padding: 12px 12px 12px 24px;
       border-bottom: 1px solid #e3e8ee;
@@ -59,7 +65,22 @@
     :local(.argumentFields),
     :local(.typeFields) {
       border: 1px solid var(--gray100);
-      margin: 8px 8px 8px 1.6em;
+      margin: 8px 0 8px 1.6em;
+
+      :local(.removeRow) {
+        text-align: right;
+        border-bottom: 1px solid var(--gray100);
+
+        img {
+          cursor: pointer;
+          margin-top: 4px;
+          margin-right: 4px;
+        }
+
+        &:local(.disabled) {
+          display: none;
+        }
+      }
     }
 
     :local(.boolean) {
@@ -160,6 +181,22 @@
       }
     }
 
+    :local(.inputElementContainer) {
+      position: relative;
+
+      :local(.removeRow) {
+        cursor: pointer;
+        position: absolute;
+        top: 50%;
+        margin-top: -9px;
+        right: -1.3em;
+
+        &:local(.disabled) {
+          display: none;
+        }
+      }
+    }
+
     :local(.inputText) {
       display: inline-block;
       font-family: var(--monospace-font);
@@ -240,15 +277,15 @@
     }
 
     :local(.node) {
-      .cm-number {
-        :local(.inputText) {
-          &:empty {
-            border-bottom: 1px solid;
-            margin-bottom: -1px;
-            min-width: 1ch;
-          }
-        }
-      }
+      // .cm-number {
+      //   :local(.inputText) {
+      //     &:empty {
+      //       border-bottom: 1px solid;
+      //       margin-bottom: -1px;
+      //       min-width: 1ch;
+      //     }
+      //   }
+      // }
 
       // .cm-string {
       //   &::before,
@@ -312,7 +349,7 @@
         background-color: transparent;
         border: none;
         color: inherit;
-        padding: 4px 8px;
+        padding: 4px 28px 4px 8px;
         margin: 0;
         width: 100%;
         font-family: inherit;
@@ -321,6 +358,7 @@
         line-height: inherit;
         grid-area: select;
         height: 28px;
+        text-overflow: ellipsis;
       }
 
       &::after {

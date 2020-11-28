@@ -15,6 +15,7 @@ import {
   GraphQLNonNull,
   GraphQLType,
   InlineFragmentNode,
+  ListValueNode,
   ObjectFieldNode,
   ObjectValueNode,
   OperationDefinitionNode,
@@ -22,13 +23,15 @@ import {
   SelectionNode,
   SelectionSetNode,
   ValueNode,
+  isEnumType,
   isInputObjectType,
   isInterfaceType,
+  isListType,
   isObjectType,
   isRequiredArgument,
+  isRequiredInputField,
   isWrappingType,
   print,
-  isScalarType,
 } from 'graphql';
 import unionBy from 'lodash/unionBy';
 import parserGraphql from 'prettier/parser-graphql';
@@ -46,25 +49,23 @@ export function generateArgumentSelectionFromType(arg: GraphQLArgument): Argumen
   const { name, type } = arg;
   const unwrappedType = unwrapType(type);
 
-  let value: ValueNode = {
-    kind: 'StringValue',
-    value: '',
-  };
-
-  if (isScalarType(unwrappedType)) {
-    if (unwrappedType.name === 'Boolean') {
-      value = {
-        kind: 'BooleanValue',
-        value: true,
-      };
-    }
-  }
+  let value: ValueNode = getDefaultValueByType(unwrappedType);
 
   if (isInputObjectType(unwrappedType)) {
+    const fields = unwrappedType.getFields();
     value = {
       kind: 'ObjectValue',
-      fields: [],
-    };
+      fields: Object.values(fields)
+        .filter(field => isRequiredInputField(field))
+        .map(field => ({
+          kind: 'ObjectField',
+          name: {
+            kind: 'Name',
+            value: field.name,
+          },
+          value: getDefaultValueByType(unwrapType(field.type)),
+        })),
+    } as ObjectValueNode;
   }
 
   return {
@@ -73,7 +74,12 @@ export function generateArgumentSelectionFromType(arg: GraphQLArgument): Argumen
       kind: 'Name',
       value: name,
     },
-    value,
+    value: isListType(type)
+      ? {
+          kind: 'ListValue',
+          values: [value],
+        }
+      : value,
   };
 }
 
@@ -95,24 +101,21 @@ export function generateObjectFieldNodeFromInputField(field: GraphQLInputField):
   const { name, type } = field;
   const unwrappedType = unwrapType(type);
 
-  let value: ValueNode = {
-    kind: 'StringValue',
-    value: '',
-  };
-
-  if (isScalarType(unwrappedType)) {
-    if (unwrappedType.name === 'Boolean') {
-      value = {
-        kind: 'BooleanValue',
-        value: true,
-      };
-    }
-  }
+  let value: ValueNode = getDefaultValueByType(unwrappedType);
 
   if (isInputObjectType(unwrappedType)) {
     value = {
       kind: 'ObjectValue',
-      fields: [],
+      fields: Object.values(unwrappedType.getFields())
+        .filter(f => isRequiredInputField(f))
+        .map(f => ({
+          kind: 'ObjectField',
+          name: {
+            kind: 'Name',
+            value: f.name,
+          },
+          value: getDefaultValueByType(unwrapType(f.type)),
+        })),
     };
   }
 
@@ -122,7 +125,12 @@ export function generateObjectFieldNodeFromInputField(field: GraphQLInputField):
       kind: 'Name',
       value: name,
     },
-    value,
+    value: isListType(type)
+      ? {
+          kind: 'ListValue',
+          values: [value],
+        }
+      : value,
   };
 }
 
@@ -149,6 +157,54 @@ export function generateOutputFieldSelectionFromType(field: GraphQLField<any, an
       .map(arg => generateArgumentSelectionFromType(arg)),
     selectionSet,
   } as FieldNode;
+}
+
+export function getDefaultValueByType(type: GraphQLNamedType): ValueNode {
+  if (isInputObjectType(type)) {
+    return {
+      kind: 'ObjectValue',
+      fields: Object.values(type.getFields())
+        .filter(field => isRequiredInputField(field))
+        .map(
+          field =>
+            ({
+              kind: 'ObjectField',
+              name: {
+                kind: 'Name',
+                value: field.name,
+              },
+              value: getDefaultValueByType(unwrapType(field.type)),
+            } as ObjectFieldNode),
+        ),
+    };
+  }
+  if (isEnumType(type)) {
+    return {
+      kind: 'NullValue',
+    };
+  }
+  if (type.name === 'Boolean') {
+    return {
+      kind: 'BooleanValue',
+      value: true,
+    };
+  }
+  if (type.name === 'Float') {
+    return {
+      kind: 'FloatValue',
+      value: '0',
+    };
+  }
+  if (type.name === 'Int') {
+    return {
+      kind: 'IntValue',
+      value: '0',
+    };
+  }
+  return {
+    kind: 'StringValue',
+    value: '',
+  };
 }
 
 export function getTypeName(type?: GraphQLType): string {
@@ -267,7 +323,9 @@ export function mergeObjectFieldIntoObjectField(
   parentObjectFieldNode: ObjectFieldNode,
   prevObjectFieldNode?: ObjectFieldNode,
   nextObjectFieldNode?: ObjectFieldNode,
+  index?: number,
 ): ObjectFieldNode {
+  const isList = Number.isInteger(index);
   const sorter = (a: ObjectFieldNode, b: ObjectFieldNode) =>
     a.name.value.localeCompare(b.name.value);
 
@@ -290,6 +348,22 @@ export function mergeObjectFieldIntoObjectField(
   }
   // Add
   if (!prevObjectFieldNode && nextObjectFieldNode) {
+    if (isList) {
+      return {
+        ...parentObjectFieldNode,
+        value: {
+          ...parentObjectFieldNode.value,
+          values: ((parentObjectFieldNode.value as ListValueNode).values || []).map((v, i) =>
+            i === index
+              ? {
+                  kind: 'ObjectValue',
+                  fields: [...(v as ObjectValueNode).fields, nextObjectFieldNode].sort(sorter),
+                }
+              : v,
+          ),
+        } as ListValueNode,
+      };
+    }
     return {
       ...parentObjectFieldNode,
       value: {
@@ -302,6 +376,26 @@ export function mergeObjectFieldIntoObjectField(
     };
   }
   // Update
+  if (isList) {
+    return {
+      ...parentObjectFieldNode,
+      value: {
+        ...parentObjectFieldNode.value,
+        values: ((parentObjectFieldNode.value as ListValueNode).values || []).map((v, i) =>
+          i === index
+            ? {
+                kind: 'ObjectValue',
+                fields: unionBy<ObjectFieldNode>(
+                  [nextObjectFieldNode!],
+                  (v as ObjectValueNode).fields,
+                  'name.value',
+                ).sort(sorter),
+              }
+            : v,
+        ),
+      } as ListValueNode,
+    };
+  }
   return {
     ...parentObjectFieldNode,
     value: {
@@ -429,7 +523,8 @@ export function sourcesAreEqual<T extends { [P in K]?: ASTNode }, K extends keyo
     const prevString = prevNode?.loc?.source.body.slice(prevNode.loc?.start, prevNode.loc?.end);
     const nextNode: ASTNode | undefined = next[key];
     const nextString = nextNode?.loc?.source.body.slice(nextNode.loc?.start, nextNode.loc?.end);
-    return prevString?.length === nextString?.length && prevString === nextString;
+    const isEqual = prevString?.length === nextString?.length && prevString === nextString;
+    return isEqual;
   };
 }
 
