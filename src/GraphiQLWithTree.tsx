@@ -4,26 +4,30 @@ import { Fetcher } from 'graphiql/dist/components/GraphiQL';
 import { GraphQLSchema, OperationTypeNode } from 'graphql';
 import React, { useCallback, useEffect, useState } from 'react';
 
+import DefaultValueCustomizer from './DefaultValueCustomizer';
 import GraphiQLTree from './GraphiQLTree';
 import { generateDefaultQueryByQueryOrMutationName } from './graphqlHelper';
+import NodeCustomizer from './NodeCustomizer';
 
 import styles from './GraphiQLTree.module.scss';
 import 'graphiql/graphiql.min.css';
 
 export interface GraphiQLWithTreeProps {
-  customizeNode?: (params: any) => JSX.Element | void;
+  customizeDefaultValue?: DefaultValueCustomizer;
+  customizeNode?: NodeCustomizer;
   fetcher: Fetcher;
   query?: string;
   schema?: GraphQLSchema;
 }
 
 const defaultApi = {
-  name: 'signUp',
+  name: 'personEmailAddress',
   operationType: 'mutation' as OperationTypeNode,
 };
 
 const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
-  customizeNode,
+  customizeDefaultValue = () => undefined,
+  customizeNode = () => undefined,
   fetcher,
   query: defaultQuery,
   schema,
@@ -33,6 +37,7 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
       (schema &&
         generateDefaultQueryByQueryOrMutationName({
           ...defaultApi,
+          customizeDefaultValue,
           schema,
         })) ||
       '',
@@ -42,14 +47,20 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
   useEffect(() => {
     setQuery(
       defaultQuery ||
-        (schema && generateDefaultQueryByQueryOrMutationName({ ...defaultApi, schema })) ||
+        (schema &&
+          generateDefaultQueryByQueryOrMutationName({
+            ...defaultApi,
+            customizeDefaultValue,
+            schema,
+          })) ||
         '',
     );
-  }, [defaultQuery, schema]);
+  }, [customizeDefaultValue, defaultQuery, schema]);
 
   return (
     <div className={classnames('graphiql-container', styles.graphiqlTree)}>
       <GraphiQLTree
+        customizeDefaultValue={customizeDefaultValue}
         customizeNode={customizeNode}
         onEdit={onEditQuery}
         query={query}

@@ -25,7 +25,7 @@ import {
   unwrapType,
 } from './graphqlHelper';
 import ParentDefinition from './ParentDefinition';
-import { SchemaContext } from './Context';
+import { DefaultValueCustomizerContext, SchemaContext } from './Context';
 import TypeName from './TypeName';
 
 import styles from './GraphiQLTree.module.scss';
@@ -34,8 +34,8 @@ export interface FieldProps {
   depth: number;
   field: GraphQLField<any, any>;
   onEdit: (prevField?: FieldNode, nextField?: FieldNode) => void;
-  selectionNode?: FieldNode;
   parentDefinition: ParentDefinition;
+  selectionNode?: FieldNode;
 }
 
 const Field = React.memo(function Field({
@@ -45,6 +45,7 @@ const Field = React.memo(function Field({
   parentDefinition,
   selectionNode,
 }: FieldProps) {
+  const customizeDefaultValue = useContext(DefaultValueCustomizerContext);
   const parentDefinitionRef = useRef({ definition: field, parentDefinition });
   const selectionNodeRef = useRef(selectionNode);
 
@@ -81,13 +82,18 @@ const Field = React.memo(function Field({
     //   return;
     // }
     if (!selectionNodeRef.current) {
-      const nextSelectionNode = generateOutputFieldSelectionFromType(field);
+      const nextSelectionNode = generateOutputFieldSelectionFromType(
+        field,
+        parentDefinitionRef.current,
+        customizeDefaultValue,
+      );
       onEdit(selectionNodeRef.current, nextSelectionNode as FieldNode);
     } else {
       onEdit(selectionNodeRef.current, undefined);
     }
   }, [
     // depth,
+    customizeDefaultValue,
     field,
     onEdit,
     selectionNodeRef,
@@ -317,7 +323,7 @@ export interface TypeProps {
   onEdit: (prevSelectionSet?: SelectionSetNode, nextSelectionSet?: SelectionSetNode) => void;
   parentDefinition?: ParentDefinition;
   selectionSetNode: SelectionSetNode;
-  type?: GraphQLOutputType;
+  type: GraphQLOutputType;
 }
 
 const Type = React.memo(function Type({

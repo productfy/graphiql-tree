@@ -10,8 +10,9 @@ import { FetcherParams } from 'graphiql/dist/components/GraphiQL';
 import pickBy from 'lodash/pickBy';
 import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 
+import DefaultValueCustomizer from './DefaultValueCustomizer';
 import GraphiQLWithTree from './GraphiQLWithTree';
-import { NodeCustomizer } from './GraphiQLTree';
+import { NodeCustomizerParams } from './NodeCustomizer';
 import { unwrapType } from './graphqlHelper';
 
 import styles from './GraphiQLTree.module.scss';
@@ -147,8 +148,18 @@ const App = () => {
     return () => controller.abort();
   }, []);
 
+  const customizeDefaultValue: DefaultValueCustomizer = (_arg, _parentDefinition) => {
+    return undefined;
+  };
+
   // Returning undefined will fallback to default node handlers
-  const customizeNode = ({ isRequired = false, name, onEdit, type, value }: NodeCustomizer) => {
+  const customizeNode = ({
+    isRequired = false,
+    name,
+    onEdit,
+    type,
+    value,
+  }: NodeCustomizerParams) => {
     const unwrappedType = unwrapType(type);
     const productfyEnum = enums.find(({ left }) => left === unwrappedType.name);
 
@@ -179,6 +190,7 @@ const App = () => {
 
   return (
     <GraphiQLWithTree
+      customizeDefaultValue={customizeDefaultValue}
       customizeNode={customizeNode}
       fetcher={fetcher(abortController.current)}
       schema={schema}

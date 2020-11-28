@@ -67,10 +67,10 @@ export default React.memo(function Operation({
   const schema = useContext(SchemaContext);
   const type =
     operation === 'query'
-      ? schema?.getQueryType() || undefined
+      ? schema?.getQueryType()
       : operation === 'mutation'
-      ? schema?.getMutationType() || undefined
-      : schema?.getSubscriptionType() || undefined;
+      ? schema?.getMutationType()
+      : schema?.getSubscriptionType();
 
   return (
     <div className={classnames(styles.operation, `depth-${depth}`)}>
@@ -103,13 +103,15 @@ export default React.memo(function Operation({
         {/* <span className="cm-punctuation">{' {'}</span> */}
       </div>
 
-      <Type
-        depth={depth + 1}
-        key={operation}
-        onEdit={onEditType}
-        selectionSetNode={operationDefinitionNode.selectionSet}
-        type={type}
-      />
+      {type && (
+        <Type
+          depth={depth + 1}
+          key={operation}
+          onEdit={onEditType}
+          selectionSetNode={operationDefinitionNode.selectionSet}
+          type={type}
+        />
+      )}
 
       {/* <div className="cm-punctuation">{'}'}</div> */}
     </div>

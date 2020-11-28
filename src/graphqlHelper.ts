@@ -37,6 +37,9 @@ import {
 import unionBy from 'lodash/unionBy';
 import parserGraphql from 'prettier/parser-graphql';
 import prettier from 'prettier/standalone';
+import DefaultValueCustomizer from './DefaultValueCustomizer';
+
+import ParentDefinition from './ParentDefinition';
 
 const defaultTypeName: FieldNode = {
   kind: 'Field',
@@ -46,11 +49,16 @@ const defaultTypeName: FieldNode = {
   },
 };
 
-export function generateArgumentSelectionFromType(arg: GraphQLArgument): ArgumentNode {
+export function generateArgumentSelectionFromType(
+  arg: GraphQLArgument,
+  parentDefinition: ParentDefinition,
+  customizeDefaultValue: DefaultValueCustomizer = () => undefined,
+): ArgumentNode {
   const { name, type } = arg;
   const unwrappedType = unwrapType(type);
 
-  let value: ValueNode = getDefaultValueByType(unwrappedType);
+  let value: ValueNode =
+    customizeDefaultValue(arg, parentDefinition) || getDefaultValueByType(unwrappedType);
 
   if (isInputObjectType(unwrappedType)) {
     const fields = unwrappedType.getFields();
@@ -136,10 +144,12 @@ export function generateObjectFieldNodeFromInputField(field: GraphQLInputField):
 }
 
 export function generateDefaultQueryByQueryOrMutationName({
+  customizeDefaultValue = () => undefined,
   name,
   operationType = 'query',
   schema,
 }: {
+  customizeDefaultValue?: DefaultValueCustomizer;
   name: string;
   operationType?: OperationTypeNode;
   schema: GraphQLSchema;
@@ -161,7 +171,13 @@ export function generateDefaultQueryByQueryOrMutationName({
           },
           selectionSet: {
             kind: 'SelectionSet',
-            selections: [generateOutputFieldSelectionFromType(field)],
+            selections: [
+              generateOutputFieldSelectionFromType(
+                field,
+                { definition: field },
+                customizeDefaultValue,
+              ),
+            ],
           } as SelectionSetNode,
         } as OperationDefinitionNode,
       ],
@@ -172,7 +188,11 @@ export function generateDefaultQueryByQueryOrMutationName({
   return '';
 }
 
-export function generateOutputFieldSelectionFromType(field: GraphQLField<any, any>): SelectionNode {
+export function generateOutputFieldSelectionFromType(
+  field: GraphQLField<any, any>,
+  parentDefinition: ParentDefinition,
+  customizeDefaultValue: DefaultValueCustomizer,
+): SelectionNode {
   const { args = [], name, type } = field;
   const unwrappedType = unwrapType(type);
   let selectionSet: SelectionSetNode | undefined = undefined;
@@ -192,7 +212,13 @@ export function generateOutputFieldSelectionFromType(field: GraphQLField<any, an
     },
     arguments: args
       .filter(arg => isRequiredArgument(arg))
-      .map(arg => generateArgumentSelectionFromType(arg)),
+      .map(arg =>
+        generateArgumentSelectionFromType(
+          arg,
+          { definition: field, parentDefinition },
+          customizeDefaultValue,
+        ),
+      ),
     selectionSet,
   } as FieldNode;
 }
@@ -465,9 +491,6 @@ export function mergeSelectionIntoSelectionSet(
   prevSelectionNode?: SelectionNode,
   nextSelectionNode?: SelectionNode,
 ): SelectionSetNode {
-  if (!selectionSetNode) {
-    debugger;
-  }
   const sorter = (a: SelectionNode, b: SelectionNode) => {
     if (a.kind === 'Field' && b.kind === 'Field') {
       return a.name.value.localeCompare(b.name.value);

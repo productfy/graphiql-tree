@@ -16,8 +16,9 @@ import {
   isScalarType,
   GraphQLInputFieldMap,
 } from 'graphql';
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useContext, useEffect, useRef } from 'react';
 
+import { DefaultValueCustomizerContext } from './Context';
 import {
   generateArgumentSelectionFromType,
   generateObjectFieldNodeFromInputField,
@@ -250,6 +251,7 @@ const Argument = React.memo(function Argument({
   const isRequired = isRequiredArgument(argument);
   const argumentNodeRef = useRef(argumentNode);
   const parentDefinitionRef = useRef({ definition: argument, parentDefinition });
+  const customizeDefaultValue = useContext(DefaultValueCustomizerContext);
 
   useEffect(() => {
     argumentNodeRef.current = argumentNode;
@@ -329,12 +331,16 @@ const Argument = React.memo(function Argument({
       return;
     }
     if (!argumentNodeRef.current) {
-      const nextArgumentNode: ArgumentNode = generateArgumentSelectionFromType(argument);
+      const nextArgumentNode: ArgumentNode = generateArgumentSelectionFromType(
+        argument,
+        parentDefinitionRef.current,
+        customizeDefaultValue,
+      );
       onEdit(argumentNodeRef.current, nextArgumentNode);
     } else {
       onEdit(argumentNodeRef.current, undefined);
     }
-  }, [argument, argumentNodeRef, isRequired, onEdit]);
+  }, [argument, argumentNodeRef, customizeDefaultValue, isRequired, onEdit]);
 
   const unwrappedType = unwrapType(type);
   const hasFields = isInputObjectType(unwrappedType);

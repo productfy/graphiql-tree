@@ -1,29 +1,22 @@
 import classnames from 'classnames';
-import { DocumentNode, GraphQLInputType, GraphQLSchema, ValueNode, parse } from 'graphql';
+import { DocumentNode, GraphQLSchema, parse } from 'graphql';
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { CustomNodeContext, SchemaContext } from './Context';
+import { DefaultValueCustomizerContext, NodeCustomizerContext, SchemaContext } from './Context';
+import DefaultValueCustomizer from './DefaultValueCustomizer';
 import Document from './Document';
-import ParentDefinition from './ParentDefinition';
+import NodeCustomizer from './NodeCustomizer';
 import { transformDocumentNodeToQueryString } from './graphqlHelper';
 
 import styles from './GraphiQLTree.module.scss';
 
 import * as graphqlHelper from './graphqlHelper';
+
 export { graphqlHelper };
 
-export interface NodeCustomizer {
-  depth: number;
-  isRequired?: boolean;
-  name: string;
-  onEdit: (prevValueNode?: ValueNode, nextValueNode?: ValueNode) => void;
-  parentDefinition: ParentDefinition;
-  type: GraphQLInputType;
-  value?: ValueNode;
-}
-
 export interface GraphiQLTreeProps {
-  customizeNode?: (params: NodeCustomizer) => JSX.Element | void;
+  customizeNode?: NodeCustomizer;
+  customizeDefaultValue?: DefaultValueCustomizer;
   onEdit: (queryString: string) => void;
   query: string;
   schema?: GraphQLSchema;
@@ -44,6 +37,7 @@ function parseQuery(queryString: string): DocumentNode | undefined {
 
 export default React.memo(function GraphiQLTree({
   customizeNode = () => {},
+  customizeDefaultValue = () => undefined,
   onEdit,
   query,
   schema,
@@ -102,9 +96,11 @@ export default React.memo(function GraphiQLTree({
           )}
           {schema && (
             <SchemaContext.Provider value={schema}>
-              <CustomNodeContext.Provider value={customizeNode}>
-                <Document documentNode={documentNode} onEdit={onEditDocument} />
-              </CustomNodeContext.Provider>
+              <NodeCustomizerContext.Provider value={customizeNode}>
+                <DefaultValueCustomizerContext.Provider value={customizeDefaultValue}>
+                  <Document documentNode={documentNode} onEdit={onEditDocument} />
+                </DefaultValueCustomizerContext.Provider>
+              </NodeCustomizerContext.Provider>
             </SchemaContext.Provider>
           )}
         </div>

@@ -1,10 +1,16 @@
 import { GraphQLSchema } from 'graphql';
 import React from 'react';
 
-const CustomNodeContext = React.createContext<(params: any) => JSX.Element | void>(() => {});
-CustomNodeContext.displayName = 'CustomNodeContext';
+import DefaultValueCustomizer from './DefaultValueCustomizer';
+import NodeCustomizer from './NodeCustomizer';
+
+const DefaultValueCustomizerContext = React.createContext<DefaultValueCustomizer>(() => undefined);
+DefaultValueCustomizerContext.displayName = 'DefaultValueCustomizerContext';
+
+const NodeCustomizerContext = React.createContext<NodeCustomizer>(() => {});
+NodeCustomizerContext.displayName = 'NodeCustomizerContext';
 
 const SchemaContext = React.createContext<GraphQLSchema | undefined>(undefined);
 SchemaContext.displayName = 'SchemaContext';
 
-export { CustomNodeContext, SchemaContext };
+export { DefaultValueCustomizerContext, NodeCustomizerContext, SchemaContext };

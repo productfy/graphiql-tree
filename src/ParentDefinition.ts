@@ -11,7 +11,7 @@ export default interface ParentDefinition {
   definition:
     | GraphQLArgument
     | GraphQLInputField
-    | GraphQLField
-    | GraphQLObjectType
+    | GraphQLField<any, any>
+    | GraphQLObjectType<any, any>
     | GraphQLOutputType;
 }

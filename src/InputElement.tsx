@@ -12,7 +12,7 @@ import {
 } from 'graphql';
 import React, { ChangeEvent, useContext, useRef } from 'react';
 
-import { CustomNodeContext } from './Context';
+import { NodeCustomizerContext } from './Context';
 import ParentDefinition from './ParentDefinition';
 import { sourcesAreEqual, unwrapType } from './graphqlHelper';
 
@@ -38,7 +38,7 @@ export default React.memo(function InputElement({
   type,
   value,
 }: InputElementProps) {
-  const customizeNode = useContext(CustomNodeContext);
+  const NodeCustomizer = useContext(NodeCustomizerContext);
   const inputRef = useRef<HTMLInputElement>(null);
   const unwrappedType = unwrapType(type);
 
@@ -105,7 +105,7 @@ export default React.memo(function InputElement({
   return (
     <div className={classnames(styles.argInput, styles.indented)}>
       {(() => {
-        const customScalarArgumentResult = customizeNode({
+        const customScalarArgumentResult = NodeCustomizer({
           depth,
           isRequired,
           name,
