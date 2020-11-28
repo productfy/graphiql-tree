@@ -126,7 +126,7 @@ const InputField = React.memo(function InputField({
     if (!objectFieldNodeRef.current) {
       const nextObjectFieldNode: ObjectFieldNode = generateObjectFieldNodeFromInputField(
         inputField,
-        parentDefinitionRef.current,
+        parentDefinition,
         customizeDefaultValue,
       );
       onEdit(objectFieldNodeRef.current, nextObjectFieldNode);
@@ -336,7 +336,7 @@ const Argument = React.memo(function Argument({
     if (!argumentNodeRef.current) {
       const nextArgumentNode: ArgumentNode = generateArgumentSelectionFromType(
         argument,
-        parentDefinitionRef.current,
+        parentDefinition,
         customizeDefaultValue,
       );
       onEdit(argumentNodeRef.current, nextArgumentNode);
