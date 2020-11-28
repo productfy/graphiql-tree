@@ -179,6 +179,10 @@
       &:last-child {
         border-bottom: none;
       }
+
+      label {
+        white-space: nowrap;
+      }
     }
 
     :local(.inputElementContainer) {

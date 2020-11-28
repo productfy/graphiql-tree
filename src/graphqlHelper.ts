@@ -66,7 +66,11 @@ export function generateArgumentSelectionFromType(
     value = {
       kind: 'ObjectValue',
       fields: Object.values(fields)
-        .filter(field => isRequiredInputField(field))
+        .filter(
+          field =>
+            isRequiredInputField(field) ||
+            customizeDefaultValue(field, { definition: arg, parentDefinition }),
+        )
         .map(field => ({
           kind: 'ObjectField',
           name: {
@@ -129,7 +133,11 @@ export function generateObjectFieldNodeFromInputField(
     value = {
       kind: 'ObjectValue',
       fields: Object.values(unwrappedType.getFields())
-        .filter(f => isRequiredInputField(f))
+        .filter(
+          f =>
+            isRequiredInputField(f) ||
+            customizeDefaultValue(f, { definition: field, parentDefinition }),
+        )
         .map(f => ({
           kind: 'ObjectField',
           name: {
@@ -230,7 +238,11 @@ export function generateOutputFieldSelectionFromType(
       value: name,
     },
     arguments: args
-      .filter(arg => isRequiredArgument(arg))
+      .filter(
+        arg =>
+          isRequiredArgument(arg) ||
+          customizeDefaultValue(arg, { definition: field, parentDefinition }),
+      )
       .map(arg =>
         generateArgumentSelectionFromType(
           arg,
@@ -251,7 +263,11 @@ export function getDefaultValueByType(
     return {
       kind: 'ObjectValue',
       fields: Object.values(type.getFields())
-        .filter(field => isRequiredInputField(field))
+        .filter(
+          field =>
+            isRequiredInputField(field) ||
+            customizeDefaultValue(field, { definition: type, parentDefinition }),
+        )
         .map(
           field =>
             ({

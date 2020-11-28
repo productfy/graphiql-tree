@@ -21,7 +21,7 @@ export interface GraphiQLWithTreeProps {
 }
 
 const defaultApi = {
-  name: 'personEmailAddress',
+  name: 'signUp',
   operationType: 'mutation' as OperationTypeNode,
 };
 
