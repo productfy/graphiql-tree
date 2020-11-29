@@ -30,7 +30,7 @@ import {
 } from './graphqlHelper';
 import InputElement from './InputElement';
 import ParentDefinition from './ParentDefinition';
-import trashIcon from './icons/trash.svg';
+import TrashIcon from './icons/Trash';
 import TypeName from './TypeName';
 
 import styles from './GraphiQLTree.module.scss';
@@ -136,11 +136,16 @@ const InputField = React.memo(function InputField({
   };
 
   const isList = isListType(type);
+  const hasFields = isInputObjectType(unwrappedType);
   const isSelected = Boolean(objectFieldNode) || isRequired;
 
   return (
     <div className={classnames(styles.inputField, `depth-${depth}`)}>
       <label>
+        {hasFields && (
+          <span className={`CodeMirror-foldgutter-${isSelected ? 'open' : 'folded'}`} />
+        )}
+
         <span className={styles.checkbox}>
           <input
             checked={isSelected}
@@ -192,7 +197,7 @@ const InputField = React.memo(function InputField({
                         })}
                         onClick={onRemoveInputFieldRow(index)}
                       >
-                        <img src={trashIcon} alt="Remove row" />
+                        <TrashIcon className={styles.trash} title="Remove row" />
                       </div>
                       {sortedFields.map(field => (
                         <InputField
@@ -343,7 +348,7 @@ const Argument = React.memo(function Argument({
     } else {
       onEdit(argumentNodeRef.current, undefined);
     }
-  }, [argument, argumentNodeRef, customizeDefaultValue, isRequired, onEdit]);
+  }, [argument, argumentNodeRef, customizeDefaultValue, isRequired, onEdit, parentDefinition]);
 
   const unwrappedType = unwrapType(type);
   const hasFields = isInputObjectType(unwrappedType);
@@ -396,7 +401,7 @@ const Argument = React.memo(function Argument({
                   })}
                   onClick={onRemoveArgumentRow(i)}
                 >
-                  <img src={trashIcon} alt="Remove row" />
+                  <TrashIcon className={styles.trash} title="Remove row" />
                 </div>
               </div>
             ))}

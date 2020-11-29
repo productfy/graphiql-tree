@@ -71,16 +71,24 @@
         text-align: right;
         border-bottom: 1px solid var(--gray100);
 
-        img {
+        :local(.trash) {
           cursor: pointer;
           margin-top: 4px;
           margin-right: 4px;
+
+          path {
+            fill: red;
+          }
         }
 
         &:local(.disabled) {
           display: none;
         }
       }
+    }
+
+    :local(.argumentFields + .argumentFields) {
+      margin-top: 24px;
     }
 
     :local(.boolean) {
@@ -174,7 +182,7 @@
 
     :local(.inputField) {
       border-bottom: 1px solid var(--gray100);
-      padding: 12px;
+      padding: 12px 12px 12px 24px;
 
       &:last-child {
         border-bottom: none;

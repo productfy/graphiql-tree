@@ -74,7 +74,7 @@ export default React.memo(function Operation({
 
   return (
     <div className={classnames(styles.operation, `depth-${depth}`)}>
-      <div className={styles.operationTypeAndName}>
+      <div className={classnames(styles.operationTypeAndName, 'operationTypeAndName')}>
         <span className="cm-keyword" style={{ display: 'inline-block', position: 'relative' }}>
           <div className={styles.operationInput}>
             <select name="operation" onChange={onEditOperation} value={operation}>

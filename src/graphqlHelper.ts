@@ -445,6 +445,24 @@ export function mergeObjectFieldIntoObjectField(
 
   // Remove
   if (prevObjectFieldNode && !nextObjectFieldNode) {
+    if (isList) {
+      return {
+        ...parentObjectFieldNode,
+        value: {
+          ...parentObjectFieldNode.value,
+          values: ((parentObjectFieldNode.value as ListValueNode).values || []).map((v, i) =>
+            i === index
+              ? {
+                  ...v,
+                  fields: (v as ObjectValueNode).fields.filter(
+                    f => f.name.value !== prevObjectFieldNode.name.value,
+                  ),
+                }
+              : v,
+          ),
+        } as ListValueNode,
+      };
+    }
     return {
       ...parentObjectFieldNode,
       value: {
@@ -493,7 +511,7 @@ export function mergeObjectFieldIntoObjectField(
         values: ((parentObjectFieldNode.value as ListValueNode).values || []).map((v, i) =>
           i === index
             ? {
-                kind: 'ObjectValue',
+                ...v,
                 fields: unionBy<ObjectFieldNode>(
                   [nextObjectFieldNode!],
                   (v as ObjectValueNode).fields,
