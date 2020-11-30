@@ -61,14 +61,14 @@ const InputField = React.memo(function InputField({
     objectFieldNodeRef.current = objectFieldNode;
   }, [objectFieldNode]);
 
-  const onAddInputFieldRow = () => {
+  const onAddRow = () => {
     const nextObjectFieldNode: ObjectFieldNode = {
       ...objectFieldNodeRef.current!,
       value: {
         ...objectFieldNodeRef.current!.value,
         values: [
           ...((objectFieldNodeRef.current!.value as ListValueNode).values || []),
-          getDefaultValueByType(unwrappedType),
+          getDefaultValueByType(unwrappedType, parentDefinitionRef.current, customizeDefaultValue),
         ],
       } as ListValueNode,
     };
@@ -76,10 +76,17 @@ const InputField = React.memo(function InputField({
   };
 
   const onEditInputField = useCallback(
-    (_prevValueNode?: ValueNode, nextValueNode?: ValueNode) => {
+    (index?: number) => (_prevValueNode?: ValueNode, nextValueNode?: ValueNode) => {
       const nextObjectFieldNode: ObjectFieldNode = {
         ...objectFieldNodeRef.current!,
-        value: nextValueNode!,
+        value: Number.isInteger(index)
+          ? ({
+              kind: 'ListValue',
+              values: (objectFieldNodeRef.current!.value as ListValueNode).values.map((v, i) =>
+                i === index ? nextValueNode : v,
+              ),
+            } as ListValueNode)
+          : nextValueNode!,
       };
       onEdit(objectFieldNodeRef.current, nextObjectFieldNode);
     },
@@ -102,7 +109,7 @@ const InputField = React.memo(function InputField({
     [objectFieldNodeRef, onEdit],
   );
 
-  const onRemoveInputFieldRow = (index: number) => () => {
+  const onRemoveRow = (index: number) => () => {
     if (index === 0) {
       return;
     }
@@ -161,17 +168,48 @@ const InputField = React.memo(function InputField({
         <TypeName className={styles.selectable} isInputType type={type} />
       </label>
 
-      {isSelected && !isList && !isInputObjectType(unwrappedType) && (
-        <InputElement
-          depth={depth}
-          isRequired={isRequiredInputField(inputField)}
-          name={inputField.name}
-          onEdit={onEditInputField}
-          parentDefinition={parentDefinitionRef.current}
-          type={type}
-          value={objectFieldNode?.value}
-        />
-      )}
+      {isSelected &&
+        !isInputObjectType(unwrappedType) &&
+        (isList ? (
+          <>
+            {(objectFieldNode?.value as ListValueNode).values?.map(
+              (v: ValueNode, index: number) => (
+                <div className={styles.inputElementContainer} key={index}>
+                  <InputElement
+                    depth={depth}
+                    isRequired={isRequiredInputField(inputField)}
+                    name={inputField.name}
+                    onEdit={onEditInputField(index)}
+                    parentDefinition={parentDefinitionRef.current}
+                    type={type}
+                    value={v}
+                  />
+                  <div
+                    className={classnames(styles.removeRow, styles.removeScalar, {
+                      [styles.disabled]: index === 0,
+                    })}
+                    onClick={onRemoveRow(index)}
+                  >
+                    <TrashIcon className={styles.trash} title="Remove row" />
+                  </div>
+                </div>
+              ),
+            )}
+            <div className={styles.addRow} onClick={onAddRow}>
+              Add row
+            </div>
+          </>
+        ) : (
+          <InputElement
+            depth={depth}
+            isRequired={isRequiredInputField(inputField)}
+            name={inputField.name}
+            onEdit={onEditInputField()}
+            parentDefinition={parentDefinitionRef.current}
+            type={type}
+            value={objectFieldNode?.value}
+          />
+        ))}
 
       {description && (
         <div className={classnames(styles.description, styles.indented)}>{description}</div>
@@ -188,34 +226,32 @@ const InputField = React.memo(function InputField({
           return isList ? (
             <>
               {(objectFieldNode?.value as ListValueNode).values?.map(
-                (v: ValueNode, index: number) => {
-                  return (
-                    <div className={classnames(styles.argumentFields)} key={index}>
-                      <div
-                        className={classnames(styles.removeRow, {
-                          [styles.disabled]: index === 0,
-                        })}
-                        onClick={onRemoveInputFieldRow(index)}
-                      >
-                        <TrashIcon className={styles.trash} title="Remove row" />
-                      </div>
-                      {sortedFields.map(field => (
-                        <InputField
-                          depth={depth + 1}
-                          inputField={field}
-                          key={`[${index}].${field.name}`}
-                          onEdit={onEditInputObjectField(index)}
-                          objectFieldNode={(v as ObjectValueNode)?.fields?.find(
-                            ({ name }) => name.value === field.name,
-                          )}
-                          parentDefinition={parentDefinitionRef.current}
-                        />
-                      ))}
+                (v: ValueNode, index: number) => (
+                  <div className={classnames(styles.argumentFields, styles.listable)} key={index}>
+                    <div
+                      className={classnames(styles.removeRow, styles.removeInputObject, {
+                        [styles.disabled]: index === 0,
+                      })}
+                      onClick={onRemoveRow(index)}
+                    >
+                      <TrashIcon className={styles.trash} title="Remove row" />
                     </div>
-                  );
-                },
+                    {sortedFields.map(field => (
+                      <InputField
+                        depth={depth + 1}
+                        inputField={field}
+                        key={`[${index}].${field.name}`}
+                        onEdit={onEditInputObjectField(index)}
+                        objectFieldNode={(v as ObjectValueNode)?.fields?.find(
+                          ({ name }) => name.value === field.name,
+                        )}
+                        parentDefinition={parentDefinitionRef.current}
+                      />
+                    ))}
+                  </div>
+                ),
               )}
-              <div className={styles.addRow} onClick={onAddInputFieldRow}>
+              <div className={styles.addRow} onClick={onAddRow}>
                 Add row
               </div>
             </>
@@ -396,7 +432,7 @@ const Argument = React.memo(function Argument({
                   value={v}
                 />
                 <div
-                  className={classnames(styles.removeRow, {
+                  className={classnames(styles.removeRow, styles.removeScalar, {
                     [styles.disabled]: i === 0,
                   })}
                   onClick={onRemoveArgumentRow(i)}
@@ -432,7 +468,7 @@ const Argument = React.memo(function Argument({
           const objectFieldNodes: readonly ObjectFieldNode[] = (argumentNode?.value as ObjectValueNode)
             ?.fields;
           return (
-            <div className={classnames(styles.argumentFields)}>
+            <div className={styles.argumentFields}>
               {Object.values(fields)
                 .sort((a, b) => (a.name === 'id' ? -1 : a.name.localeCompare(b.name)))
                 .map(field => (

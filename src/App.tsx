@@ -177,11 +177,13 @@ const App = () => {
         <div className={classnames('cm-string', styles.select)}>
           <select name={name} onChange={onEditInput} value={(value as StringValueNode).value || ''}>
             <option value="" disabled={isRequired} hidden={isRequired}></option>
-            {options.map(({ code, description }) => (
-              <option key={code} value={code}>
-                {code} - {description}
-              </option>
-            ))}
+            {options
+              .sort((a, b) => (a.description || '').localeCompare(b.description || ''))
+              .map(({ code, description }) => (
+                <option key={code} value={code}>
+                  {code} - {description}
+                </option>
+              ))}
           </select>
         </div>
       );

@@ -39,6 +39,7 @@
       text-align: right;
       cursor: pointer;
       color: #556cd6;
+      margin-bottom: 8px;
     }
 
     :local(.argument) {
@@ -62,29 +63,23 @@
       margin-left: -24px;
     }
 
+    :local(.argumentFields) {
+      &:local(.listable) {
+        margin-top: 24px;
+        padding-right: 18px;
+        border-right: 1px solid var(--gray100);
+        position: relative;
+
+        > :local(.inputField) {
+          border-right: 1px solid var(--gray100);
+        }
+      }
+    }
+
     :local(.argumentFields),
     :local(.typeFields) {
       border: 1px solid var(--gray100);
       margin: 8px 0 8px 1.6em;
-
-      :local(.removeRow) {
-        text-align: right;
-        border-bottom: 1px solid var(--gray100);
-
-        :local(.trash) {
-          cursor: pointer;
-          margin-top: 4px;
-          margin-right: 4px;
-
-          path {
-            fill: red;
-          }
-        }
-
-        &:local(.disabled) {
-          display: none;
-        }
-      }
     }
 
     :local(.argumentFields + .argumentFields) {
@@ -195,18 +190,6 @@
 
     :local(.inputElementContainer) {
       position: relative;
-
-      :local(.removeRow) {
-        cursor: pointer;
-        position: absolute;
-        top: 50%;
-        margin-top: -9px;
-        right: -1.3em;
-
-        &:local(.disabled) {
-          display: none;
-        }
-      }
     }
 
     :local(.inputText) {
@@ -315,6 +298,39 @@
         margin-right: 6px;
         color: #999;
         margin-left: -20px;
+      }
+    }
+
+    :local(.removeRow) {
+      text-align: right;
+
+      &:local(.removeInputObject) {
+        position: absolute;
+        right: 0;
+      }
+
+      &:local(.removeScalar) {
+        cursor: pointer;
+        position: absolute;
+        top: 50%;
+        margin-top: -9px;
+        right: -1.55em;
+        height: 18px;
+        background-color: white;
+      }
+
+      &:local(.disabled) {
+        display: none;
+      }
+
+      :local(.trash) {
+        cursor: pointer;
+        margin-top: 4px;
+        margin-right: 4px;
+
+        path {
+          fill: red;
+        }
       }
     }
 
