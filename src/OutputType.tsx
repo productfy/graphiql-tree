@@ -169,7 +169,9 @@ const Field = React.memo(function Field({
               {depth === 4 && <h5 className={styles.parameters}>Parameters</h5>}
               <div className={classnames(styles.arguments, `depth-${depth}`)}>
                 {(args || [])
-                  .sort((a, b) => (a.name === 'id' ? -1 : a.name.localeCompare(b.name)))
+                  .sort((a, b) =>
+                    a.name === 'id' ? -1 : b.name === 'id' ? 1 : a.name.localeCompare(b.name),
+                  )
                   .map(arg => (
                     <Argument
                       argument={arg}

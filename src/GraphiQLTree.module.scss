@@ -37,9 +37,11 @@
 
     :local(.addRow) {
       text-align: right;
-      cursor: pointer;
-      color: #556cd6;
-      margin-bottom: 8px;
+
+      span {
+        cursor: pointer;
+        color: #556cd6;
+      }
     }
 
     :local(.argument) {

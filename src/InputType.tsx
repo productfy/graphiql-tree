@@ -195,8 +195,8 @@ const InputField = React.memo(function InputField({
                 </div>
               ),
             )}
-            <div className={styles.addRow} onClick={onAddRow}>
-              Add row
+            <div className={styles.addRow}>
+              <span onClick={onAddRow}>Add row</span>
             </div>
           </>
         ) : (
@@ -251,8 +251,8 @@ const InputField = React.memo(function InputField({
                   </div>
                 ),
               )}
-              <div className={styles.addRow} onClick={onAddRow}>
-                Add row
+              <div className={styles.addRow}>
+                <span onClick={onAddRow}>Add row</span>
               </div>
             </>
           ) : (
@@ -441,8 +441,8 @@ const Argument = React.memo(function Argument({
                 </div>
               </div>
             ))}
-            <div className={styles.addRow} onClick={onAddArgumentRow}>
-              Add row
+            <div className={styles.addRow}>
+              <span onClick={onAddArgumentRow}>Add row</span>
             </div>
           </>
         ) : (

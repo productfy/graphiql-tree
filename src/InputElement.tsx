@@ -18,7 +18,6 @@ import { sourcesAreEqual, unwrapType } from './graphqlHelper';
 
 import styles from './GraphiQLTree.module.scss';
 
-
 export interface InputElementProps {
   depth: number;
   isRequired?: boolean;
@@ -44,7 +43,7 @@ export default React.memo(function InputElement({
 
   const onEditInput = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const nextValue = e.target.value;
-    let nextValueNode;
+    let nextValueNode: ValueNode;
 
     const nullValueNode: NullValueNode = { kind: 'NullValue' };
 
@@ -75,6 +74,7 @@ export default React.memo(function InputElement({
             } as FloatValueNode;
           }
           break;
+        case 'Long':
         case 'Int':
           nextValueNode = {
             kind: 'IntValue',
@@ -90,6 +90,12 @@ export default React.memo(function InputElement({
           } else {
             nextValueNode = nullValueNode;
           }
+          break;
+        case 'OffsetDateTime':
+          nextValueNode = {
+            kind: 'StringValue',
+            value: `${nextValue}Z`,
+          } as StringValueNode;
           break;
         default:
           nextValueNode = {
@@ -163,6 +169,7 @@ export default React.memo(function InputElement({
             case 'BigDecimal':
             case 'Float':
             case 'Int':
+            case 'Long':
               scalarValue =
                 (value as NullValueNode)?.kind === 'NullValue'
                   ? ''
@@ -174,9 +181,7 @@ export default React.memo(function InputElement({
                     ref={inputRef}
                     value={scalarValue}
                     onChange={onEditInput}
-                    className={classnames(styles.inputText, {
-                      [styles.focusBorder]: String(value ?? '').length === 0,
-                    })}
+                    className={styles.inputText}
                     // style={{ width: `calc(1px + ${String(value ?? '').length}ch)` }}
                   />
                 </div>
@@ -193,9 +198,25 @@ export default React.memo(function InputElement({
                     ref={inputRef}
                     value={scalarValue}
                     onChange={onEditInput}
-                    className={classnames(styles.inputText, {
-                      [styles.focusBorder]: String(value ?? '').length === 0,
-                    })}
+                    className={styles.inputText}
+                    // style={{ width: `calc(1px + ${String(value ?? '').length}ch)` }}
+                  />
+                </div>
+              );
+            case 'OffsetDateTime':
+              scalarValue =
+                (value as NullValueNode)?.kind === 'NullValue'
+                  ? ''
+                  : (value as StringValueNode)?.value ?? '';
+              return (
+                <div className="cm-string" onClick={() => inputRef.current?.focus()}>
+                  <input
+                    type="datetime-local"
+                    ref={inputRef}
+                    value={scalarValue.slice(0, 16)}
+                    onChange={onEditInput}
+                    pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}"
+                    className={styles.inputText}
                     // style={{ width: `calc(1px + ${String(value ?? '').length}ch)` }}
                   />
                 </div>
@@ -212,9 +233,7 @@ export default React.memo(function InputElement({
                     ref={inputRef}
                     value={scalarValue}
                     onChange={onEditInput}
-                    className={classnames(styles.inputText, {
-                      [styles.focusBorder]: String(value ?? '').length === 0,
-                    })}
+                    className={styles.inputText}
                     // style={{ width: `calc(1px + ${String(value ?? '').length}ch)` }}
                   />
                 </div>

@@ -22,7 +22,7 @@ const TypeName = React.memo(function TypeName({
       <span className={classnames(className, styles.typeName)} onClick={onClick}>
         <TypeName {...{ className, onClick, type: type.ofType }} />
         {isInputType && <span className={classnames(styles.required, styles.tag)}>Required</span>}
-        {!isInputType && <span className={styles.tag}>Non-null</span>}
+        {!isInputType && <span className={classnames(styles.tag, 'cm-keyword')}>Non-null</span>}
         {/* {!isInputType && <span className="cm-punctuation">{'!'}</span>} */}
       </span>
     );

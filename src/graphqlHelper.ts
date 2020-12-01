@@ -243,6 +243,7 @@ export function generateOutputFieldSelectionFromType(
           isRequiredArgument(arg) ||
           customizeDefaultValue(arg, { definition: field, parentDefinition }),
       )
+      .sort((a, b) => (a.name === 'id' ? -1 : b.name === 'id' ? 1 : a.name.localeCompare(b.name)))
       .map(arg =>
         generateArgumentSelectionFromType(
           arg,
@@ -304,7 +305,7 @@ export function getDefaultValueByType(
       value: '0',
     };
   }
-  if (type.name === 'Int') {
+  if (type.name === 'Int' || type.name === 'Long') {
     return {
       kind: 'IntValue',
       value: '0',
@@ -600,9 +601,11 @@ export function mergeSelectionIntoSelectionSet(
   // Update
   return {
     ...selectionSetNode,
-    selections: unionBy([nextSelectionNode!], selectionSetNode.selections, 'name.value').sort(
-      sorter,
-    ),
+    selections: unionBy([nextSelectionNode!], selectionSetNode.selections, s =>
+      s.kind === 'InlineFragment'
+        ? (s as InlineFragmentNode).typeCondition?.name.value
+        : s.name.value,
+    ).sort(sorter),
   };
 }
 
