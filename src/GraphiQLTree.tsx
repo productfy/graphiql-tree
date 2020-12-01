@@ -42,7 +42,8 @@ export default React.memo(function GraphiQLTree({
   query,
   schema,
 }: GraphiQLTreeProps) {
-  const [open, setOpen] = useState<boolean>(true);
+  // const [open, setOpen] = useState<boolean>(true);
+  const open = true;
   const [documentNode, setDocumentNode] = useState<DocumentNode>(
     parseQuery(query) || DEFAULT_DOCUMENT,
   );
@@ -78,7 +79,7 @@ export default React.memo(function GraphiQLTree({
       <section aria-label="API Definition">
         <div className="history-title-bar">
           <div className="history-title">API Definition</div>
-          <div className="doc-explorer-rhs">
+          {/* <div className="doc-explorer-rhs">
             <button
               className="docExplorerHide"
               aria-label="Close History"
@@ -86,7 +87,7 @@ export default React.memo(function GraphiQLTree({
             >
               ✕
             </button>
-          </div>
+          </div> */}
         </div>
         <div className="history-contents">
           {!schema && (
