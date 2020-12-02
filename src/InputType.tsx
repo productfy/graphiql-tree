@@ -53,9 +53,10 @@ const InputField = React.memo(function InputField({
   const customizeDefaultValue = useContext(DefaultValueCustomizerContext);
   const objectFieldNodeRef = useRef(objectFieldNode);
   const parentDefinitionRef = useRef({ definition: inputField, parentDefinition });
-  const { description, name, type } = inputField;
+  const { name, type } = inputField;
   const isRequired = isRequiredInputField(inputField);
   const unwrappedType = unwrapType(type);
+  const description = inputField.description || unwrappedType.description;
 
   useEffect(() => {
     objectFieldNodeRef.current = objectFieldNode;

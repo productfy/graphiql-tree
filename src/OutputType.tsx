@@ -106,6 +106,7 @@ const Field = React.memo(function Field({
     isObjectType(unwrappedType) ||
     (isInterfaceType(unwrappedType) && Object.keys(unwrappedType.getFields()).length > 0);
   const isSelected = Boolean(selectionNode);
+  const description = field.description || unwrappedType.description;
 
   return (
     <div className={classnames(styles.node, styles.fieldNode, `depth-${depth}`)}>
@@ -152,13 +153,9 @@ const Field = React.memo(function Field({
         {selected && hasArgs && <span className="cm-punctuation">(</span>}
         {selected && hasFields && !hasArgs && <span className="cm-punctuation">{' {'}</span>} */}
       </div>
-      {field.description && (
-        <div
-          className={classnames(styles.description, {
-            [styles.indented]: depth !== 4,
-          })}
-        >
-          {field.description}
+      {description && (
+        <div className={classnames(styles.description, { [styles.indented]: depth !== 4 })}>
+          {description}
         </div>
       )}
 

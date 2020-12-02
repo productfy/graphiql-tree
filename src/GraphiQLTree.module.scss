@@ -26,7 +26,7 @@
       input[type='checkbox'] {
         cursor: pointer;
         margin: 0;
-        vertical-align: -1px;
+        vertical-align: -2px;
       }
     }
 
@@ -49,7 +49,6 @@
       border-bottom: 1px solid #e3e8ee;
 
       &.depth-5 {
-        margin-left: 24px;
         padding-left: 0;
         padding-right: 0;
       }
@@ -61,11 +60,10 @@
       }
     }
 
-    :local(.arguments).depth-4 {
-      margin-left: -24px;
-    }
-
     :local(.argumentFields) {
+      border: 1px solid var(--gray100);
+      margin: 8px 0 8px 1.6em;
+
       &:local(.listable) {
         margin-top: 24px;
         padding-right: 18px;
@@ -76,12 +74,6 @@
           border-right: 1px solid var(--gray100);
         }
       }
-    }
-
-    :local(.argumentFields),
-    :local(.typeFields) {
-      border: 1px solid var(--gray100);
-      margin: 8px 0 8px 1.6em;
     }
 
     :local(.argumentFields + .argumentFields) {
@@ -125,6 +117,14 @@
       margin-right: 0.5em;
     }
 
+    .depth-4 {
+      > :local(.nameLine) {
+        .field-name {
+          font-size: 18px;
+        }
+      }
+    }
+
     :local(.description) {
       line-height: 1.5;
     }
@@ -136,12 +136,10 @@
       &.depth-4 {
         padding-left: 0;
         padding-right: 0;
-        margin-left: 24px;
       }
 
       &.depth-5 {
         padding-left: 0;
-        margin-left: 24px;
       }
 
       &.depth-6 {
@@ -426,19 +424,16 @@
       margin-left: 8px;
     }
 
+    :local(.typeFields) {
+      border: 1px solid var(--gray100);
+      margin: 8px 8px 8px 1.6em;
+    }
+
     :local(.typeName) {
       color: #8792a2;
       font-size: 13px;
       font-weight: 500;
       -webkit-font-smoothing: antialiased;
-    }
-
-    .depth-4 {
-      > :local(.nameLine) {
-        .field-name {
-          font-size: 18px;
-        }
-      }
     }
   }
 }
