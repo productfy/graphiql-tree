@@ -1,7 +1,7 @@
-import classnames from 'classnames';
 import { GraphQLList, GraphQLNonNull, GraphQLType } from 'graphql';
-import React from 'react';
 
+import React from 'react';
+import classnames from 'classnames';
 import styles from './GraphiQLTree.module.scss';
 
 type TypeNameProps = {
@@ -30,9 +30,10 @@ const TypeName = React.memo(function TypeName({
   if (type instanceof GraphQLList) {
     return (
       <span className={classnames(className, styles.typeName)} onClick={onClick}>
-        <span className="cm-punctuation">{'['}</span>
+        {/* <span className="cm-punctuation">{'['}</span> */}
         <TypeName {...{ className, onClick, type: type.ofType }} />
-        <span className="cm-punctuation">{']'}</span>
+        {/* <span className="cm-punctuation">{']'}</span> */}
+        <span className={classnames(styles.tag, styles.list)}>Array</span>
       </span>
     );
   }

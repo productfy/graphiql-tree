@@ -1,8 +1,8 @@
-import classnames from 'classnames';
 import {
   ArgumentNode,
   GraphQLArgument,
   GraphQLInputField,
+  GraphQLInputFieldMap,
   GraphQLInputObjectType,
   ListValueNode,
   ObjectFieldNode,
@@ -10,29 +10,28 @@ import {
   ValueNode,
   isEnumType,
   isInputObjectType,
-  isListType,
   isRequiredArgument,
   isRequiredInputField,
   isScalarType,
-  GraphQLInputFieldMap,
 } from 'graphql';
 import React, { useCallback, useContext, useEffect, useRef } from 'react';
-
-import { DefaultValueCustomizerContext } from './Context';
 import {
   generateArgumentSelectionFromType,
   generateObjectFieldNodeFromInputField,
   getDefaultValueByType,
+  hasList,
   mergeObjectFieldIntoArgument,
   mergeObjectFieldIntoObjectField,
   sourcesAreEqual,
   unwrapType,
 } from './graphqlHelper';
+
+import { DefaultValueCustomizerContext } from './Context';
 import InputElement from './InputElement';
 import ParentDefinition from './ParentDefinition';
 import TrashIcon from './icons/Trash';
 import TypeName from './TypeName';
-
+import classnames from 'classnames';
 import styles from './GraphiQLTree.module.scss';
 
 export interface InputFieldProps {
@@ -143,7 +142,7 @@ const InputField = React.memo(function InputField({
     }
   };
 
-  const isList = isListType(type);
+  const isList = hasList(type);
   const hasFields = isInputObjectType(unwrappedType);
   const isSelected = Boolean(objectFieldNode) || isRequired;
 
@@ -164,7 +163,7 @@ const InputField = React.memo(function InputField({
           />
         </span>
 
-        <span className={classnames('arg-name', styles.selectable)}>{name}</span>
+        <span className={classnames('arg-name', 'cm-attribute', styles.selectable)}>{name}</span>
 
         <TypeName className={styles.selectable} isInputType type={type} />
       </label>
@@ -343,11 +342,15 @@ const Argument = React.memo(function Argument({
   };
 
   const onEditInputField = useCallback(
-    (prevObjectFieldNode?: ObjectFieldNode, nextObjectFieldNode?: ObjectFieldNode) => {
+    (index?: number) => (
+      prevObjectFieldNode?: ObjectFieldNode,
+      nextObjectFieldNode?: ObjectFieldNode,
+    ) => {
       const nextArgumentNode = mergeObjectFieldIntoArgument(
         argumentNodeRef.current!,
         prevObjectFieldNode,
         nextObjectFieldNode,
+        index,
       );
       onEdit(argumentNodeRef.current, nextArgumentNode);
     },
@@ -389,7 +392,7 @@ const Argument = React.memo(function Argument({
 
   const unwrappedType = unwrapType(type);
   const hasFields = isInputObjectType(unwrappedType);
-  const isList = isListType(type);
+  const isList = hasList(type);
   const isSelected = Boolean(argumentNode) || isRequired;
 
   return (
@@ -412,7 +415,7 @@ const Argument = React.memo(function Argument({
             value={isSelected.toString()}
           />
         </span>
-        <span className={classnames('arg-name', styles.selectable)}>{name}</span>
+        <span className={classnames('arg-name', 'cm-attribute', styles.selectable)}>{name}</span>
         <TypeName className={styles.selectable} isInputType type={type} />
       </label>
 
@@ -466,24 +469,55 @@ const Argument = React.memo(function Argument({
       {(() => {
         if (isInputObjectType(unwrappedType) && isSelected) {
           const fields: GraphQLInputFieldMap = (unwrappedType as GraphQLInputObjectType).getFields();
+          const sortedFields = Object.values(fields).sort((a, b) =>
+            a.name === 'id' ? -1 : a.name.localeCompare(b.name),
+          );
           const objectFieldNodes: readonly ObjectFieldNode[] = (argumentNode?.value as ObjectValueNode)
             ?.fields;
-          return (
+          return isList ? (
+            <>
+              {((argumentNode?.value as ListValueNode).values || []).map(
+                (v: ValueNode, i: number) => (
+                  <div className={classnames(styles.argumentFields, styles.listable)} key={i}>
+                    <div
+                      className={classnames(styles.removeRow, styles.removeInputObject, {
+                        [styles.disabled]: i === 0,
+                      })}
+                      onClick={onRemoveArgumentRow(i)}
+                    >
+                      <TrashIcon className={styles.trash} title="Remove row" />
+                    </div>
+                    {sortedFields.map(field => (
+                      <InputField
+                        depth={depth + 1}
+                        inputField={field}
+                        key={`[${i}].${field.name}`}
+                        onEdit={onEditInputField(i)}
+                        objectFieldNode={(v as ObjectValueNode)?.fields?.find(
+                          ({ name }) => name.value === field.name,
+                        )}
+                        parentDefinition={parentDefinitionRef.current}
+                      />
+                    ))}
+                  </div>
+                ),
+              )}
+              <div className={styles.addRow}>
+                <span onClick={onAddArgumentRow}>Add row</span>
+              </div>
+            </>
+          ) : (
             <div className={styles.argumentFields}>
-              {Object.values(fields)
-                .sort((a, b) => (a.name === 'id' ? -1 : a.name.localeCompare(b.name)))
-                .map(field => (
-                  <InputField
-                    depth={depth + 1}
-                    inputField={field}
-                    key={field.name}
-                    onEdit={onEditInputField}
-                    objectFieldNode={objectFieldNodes?.find(
-                      ({ name }) => name.value === field.name,
-                    )}
-                    parentDefinition={parentDefinitionRef.current}
-                  />
-                ))}
+              {sortedFields.map(field => (
+                <InputField
+                  depth={depth + 1}
+                  inputField={field}
+                  key={field.name}
+                  onEdit={onEditInputField()}
+                  objectFieldNode={objectFieldNodes?.find(({ name }) => name.value === field.name)}
+                  parentDefinition={parentDefinitionRef.current}
+                />
+              ))}
             </div>
           );
         }

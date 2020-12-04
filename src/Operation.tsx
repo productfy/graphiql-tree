@@ -1,15 +1,14 @@
-import classnames from 'classnames';
 import { OperationDefinitionNode, OperationTypeNode, SelectionSetNode } from 'graphql';
 import React, { ChangeEvent, useCallback, useContext, useEffect, useRef } from 'react';
-
 import {
   mergeSelectionSetIntoOperationDefinition,
-  updateOperationDefinition,
   sourcesAreEqual,
+  updateOperationDefinition,
 } from './graphqlHelper';
+
 import { SchemaContext } from './Context';
 import { Type } from './OutputType';
-
+import classnames from 'classnames';
 import styles from './GraphiQLTree.module.scss';
 
 interface OperationProps {

@@ -1,40 +1,54 @@
 {
   "name": "@productfy/graphiql-tree",
   "version": "0.1.22",
-  "author": "Bao Ngo <bingo@productfy.io>",
-  "license": "MIT",
+  "private": false,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/productfy/graphiql-tree.git"
   },
+  "license": "MIT",
+  "author": {
+    "name": "Bao Ngo",
+    "email": "bingo@productfy.io"
+  },
   "main": "dist/index.js",
   "module": "dist/index.es.js",
   "types": "dist/index.d.ts",
-  "private": false,
-  "release": {
-    "branches": [
-      "main"
-    ],
-    "plugins": [
-      "@semantic-release/npm",
-      "@semantic-release/git"
-    ]
-  },
   "files": [
     "dist"
   ],
+  "scripts": {
+    "build": "npm run build:clean && npm run build:rollup && cp dist/GraphiQLTree.d.ts dist/index.d.ts",
+    "build:clean": "rimraf ./dist",
+    "build:rollup": "rollup -c ./config/rollup.config.js",
+    "semantic-release": "semantic-release",
+    "start": "react-scripts start --no-cache"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
   "dependencies": {
     "@types/react": "^16.9.34",
     "@types/react-dom": "^16.9.6",
     "classnames": "^2.2.6",
+    "codemirror": "^5.58.3",
+    "copy-to-clipboard": "^3.3.1",
     "graphiql": "^1.0.5",
+    "graphiql-code-exporter": "^3.0.3",
+    "graphql-query-compress": "^1.2.4",
     "prettier": "^2.1.2"
-  },
-  "peerDependencies": {
-    "graphql": "^15.4.0",
-    "lodash": "^4.17.20",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1"
   },
   "devDependencies": {
     "@rollup/plugin-babel": "^5.2.1",
@@ -63,29 +77,25 @@
     "typescript": "^4.0.5",
     "worker-loader": "^2.0.0"
   },
-  "scripts": {
-    "start": "react-scripts start --no-cache",
-    "build": "npm run build:clean && npm run build:rollup",
-    "build:clean": "rm -rf ./dist",
-    "build:rollup": "rollup -c ./config/rollup.config.js",
-    "semantic-release": "semantic-release"
+  "peerDependencies": {
+    "graphql": "^15.4.0",
+    "lodash": "^4.17.20",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
   },
-  "eslintConfig": {
-    "extends": "react-app"
+  "engines": {
+    "node": ">=10"
   },
   "publishConfig": {
     "access": "public"
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
+  "release": {
+    "branches": [
+      "main"
     ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
+    "plugins": [
+      "@semantic-release/npm",
+      "@semantic-release/git"
     ]
   }
 }

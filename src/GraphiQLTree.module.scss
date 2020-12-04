@@ -1,33 +1,29 @@
-:root {
-  --monospace-font: Menlo, Consolas, monospace;
-  --gray100: #e3e8ee;
-}
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
 
 :global {
-  .graphiql-container:local(.graphiqlTree) .CodeMirror {
-    font-family: var(--monospace-font);
-  }
-  .graphiql-container:local(.graphiqlTree) .historyPaneWrap:local(.graphiqlTree) {
-    min-width: 50%;
+  :local(.graphiqlTree) {
+    --body-font: Roboto, sans-serif;
+    --monospace-font: 'IBM Plex Mono', monospace;
+    --heading-color: #212833;
+    --text-color: #425166;
+    --gray100: #eaeaea;
+    --productfy-blue: #1C6EDC;
 
-    .history-contents {
-      font-family: system, -apple-system, San Francisco, \.SFNSDisplay-Regular, Segoe UI, Segoe,
-        Segoe WP, Helvetica Neue, helvetica, Lucida Grande, arial, sans-serif;
-      font-size: 14px;
-      line-height: 22px;
-      padding: 2.5vw 5vw;
-      overflow-x: auto;
-      color: #4f566b;
+    padding: 2.5vw 5%;
+    font-family: var(--body-font);
+    font-size: 14px;
+    line-height: 22px;
+    color: var(--text-color);
 
-      input {
-        vertical-align: baseline;
-      }
+    input {
+      vertical-align: baseline;
+    }
 
-      input[type='checkbox'] {
-        cursor: pointer;
-        margin: 0;
-        vertical-align: -2px;
-      }
+    input[type='checkbox'] {
+      cursor: pointer;
+      margin: 0;
+      vertical-align: -2px;
     }
 
     .arg-name + :local(.typeName),
@@ -40,7 +36,7 @@
 
       span {
         cursor: pointer;
-        color: #556cd6;
+        color: var(--productfy-blue);
       }
     }
 
@@ -120,13 +116,21 @@
     .depth-4 {
       > :local(.nameLine) {
         .field-name {
+          color: var(--heading-color);
           font-size: 18px;
+          font-weight: 700;
+          -webkit-font-smoothing: antialiased;
         }
       }
     }
 
     :local(.description) {
       line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .field-name {
+      font-weight: 500;
     }
 
     :local(.fieldNode) {
@@ -207,6 +211,8 @@
       width: 100%;
       height: 28px;
       box-sizing: border-box;
+      border: none;
+      color: inherit;
 
       // &:focus,
       // &:local(.focusBorder) {
@@ -257,10 +263,10 @@
         padding: 0;
         margin: 0;
         border-radius: 0;
+        border-bottom: 1px solid transparent;
 
         &:focus {
-          border-bottom: 1px solid;
-          margin-bottom: -1px;
+          border-bottom-color: inherit;
           outline: none;
         }
       }
@@ -313,7 +319,7 @@
         cursor: pointer;
         position: absolute;
         top: 50%;
-        margin-top: -9px;
+        margin-top: -11px;
         right: -1.55em;
         height: 18px;
         background-color: white;
@@ -422,6 +428,10 @@
       font-weight: 600;
       text-transform: uppercase;
       margin-left: 8px;
+
+      &:local(.list) {
+        color: #666666;
+      }
     }
 
     :local(.typeFields) {

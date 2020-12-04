@@ -1,19 +1,16 @@
-import classnames from 'classnames';
 import {
   ArgumentNode,
   FieldNode,
   GraphQLField,
-  // GraphQLInterfaceType,
   GraphQLObjectType,
   GraphQLOutputType,
   InlineFragmentNode,
+  SelectionSetNode,
   isInterfaceType,
   isObjectType,
-  SelectionSetNode,
 } from 'graphql';
+import { DefaultValueCustomizerContext, SchemaContext } from './Context';
 import React, { useCallback, useContext, useEffect, useRef } from 'react';
-
-import { Argument } from './InputType';
 import {
   generateInlineFragmentFromType,
   generateOutputFieldSelectionFromType,
@@ -24,10 +21,11 @@ import {
   sourcesAreEqual,
   unwrapType,
 } from './graphqlHelper';
-import ParentDefinition from './ParentDefinition';
-import { DefaultValueCustomizerContext, SchemaContext } from './Context';
-import TypeName from './TypeName';
 
+import { Argument } from './InputType';
+import ParentDefinition from './ParentDefinition';
+import TypeName from './TypeName';
+import classnames from 'classnames';
 import styles from './GraphiQLTree.module.scss';
 
 export interface FieldProps {
@@ -141,7 +139,7 @@ const Field = React.memo(function Field({
           </span>
         )}
 
-        <span className="field-name">{name}</span>
+        <span className={classnames('field-name', 'cm-property')}>{name}</span>
         {depth !== 4 && <TypeName type={type} />}
         {/* {!selected && hasArgs && <span className="cm-punctuation">()</span>}
         {(!selected || !hasFields) && (
@@ -191,21 +189,20 @@ const Field = React.memo(function Field({
             </>
           )}
 
+          {depth === 4 && (
+            <h5 className={styles.returns}>
+              <span>Returns</span> <TypeName type={type} />
+            </h5>
+          )}
+
           {hasFields && (
-            <>
-              {depth === 4 && (
-                <h5 className={styles.returns}>
-                  <span>Returns</span> <TypeName type={type} />
-                </h5>
-              )}
-              <Type
-                depth={depth + 1}
-                onEdit={onEditType}
-                parentDefinition={parentDefinitionRef.current}
-                selectionSetNode={selectionNode!.selectionSet!}
-                type={type}
-              />
-            </>
+            <Type
+              depth={depth + 1}
+              onEdit={onEditType}
+              parentDefinition={parentDefinitionRef.current}
+              selectionSetNode={selectionNode!.selectionSet!}
+              type={type}
+            />
           )}
 
           {/* {hasFields && <div className="cm-punctuation">{'}'}</div>} */}
@@ -274,7 +271,7 @@ const ImplementationType = React.memo(function Type({
             value={isSelected.toString()}
           />
         </span>
-        {unwrappedType.name}
+        <span className="cm-atom">{unwrappedType.name}</span>
         {/* <ul className={styles.interfaceList}>
           {interfaces.map((i: GraphQLInterfaceType) => (
             <li>
