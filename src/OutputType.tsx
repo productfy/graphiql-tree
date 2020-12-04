@@ -189,21 +189,20 @@ const Field = React.memo(function Field({
             </>
           )}
 
+          {depth === 4 && (
+            <h5 className={styles.returns}>
+              <span>Returns</span> <TypeName type={type} />
+            </h5>
+          )}
+
           {hasFields && (
-            <>
-              {depth === 4 && (
-                <h5 className={styles.returns}>
-                  <span>Returns</span> <TypeName type={type} />
-                </h5>
-              )}
-              <Type
-                depth={depth + 1}
-                onEdit={onEditType}
-                parentDefinition={parentDefinitionRef.current}
-                selectionSetNode={selectionNode!.selectionSet!}
-                type={type}
-              />
-            </>
+            <Type
+              depth={depth + 1}
+              onEdit={onEditType}
+              parentDefinition={parentDefinitionRef.current}
+              selectionSetNode={selectionNode!.selectionSet!}
+              type={type}
+            />
           )}
 
           {/* {hasFields && <div className="cm-punctuation">{'}'}</div>} */}

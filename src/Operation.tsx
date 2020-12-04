@@ -86,16 +86,18 @@ export default React.memo(function Operation({
 
         <span className="cm-ws">&nbsp;</span>
 
-        <input
-          type="text"
-          name="name"
-          onChange={onEditOperation}
-          value={name}
-          className={classnames('cm-def', styles.inputText, styles.operationName, {
-            [styles.focusBorder]: name.length === 0,
-          })}
-          style={{ width: `calc(1px + ${name.length || 1}ch)` }}
-        />
+        <span className="cm-def">
+          <input
+            type="text"
+            name="name"
+            onChange={onEditOperation}
+            value={name}
+            className={classnames(styles.inputText, styles.operationName, {
+              [styles.focusBorder]: name.length === 0,
+            })}
+            style={{ width: `calc(1px + ${name.length || 1}ch)` }}
+          />
+        </span>
 
         {/* <span className="cm-punctuation">{' {'}</span> */}
       </div>

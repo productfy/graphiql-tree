@@ -3,7 +3,7 @@ import 'graphiql-code-exporter/CodeExporter.css';
 
 // @ts-expect-error
 import CodeExporter, { computeOperationDataList } from 'graphiql-code-exporter';
-import { DocumentNode, GraphQLSchema, OperationTypeNode } from 'graphql';
+import { GraphQLSchema, OperationTypeNode } from 'graphql';
 import React, { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 
 import ClipboardIcon from './icons/Clipboard';

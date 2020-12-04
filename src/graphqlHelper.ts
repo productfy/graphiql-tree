@@ -39,7 +39,6 @@ import DefaultValueCustomizer from './DefaultValueCustomizer';
 import ParentDefinition from './ParentDefinition';
 import parserGraphql from 'prettier/parser-graphql';
 import prettier from 'prettier/standalone';
-import trim from 'lodash/trim';
 import unionBy from 'lodash/unionBy';
 
 const defaultTypeName: FieldNode = {
@@ -754,22 +753,3 @@ export function updateOperationDefinition(
     operation,
   };
 }
-
-export const variablesAsObject = (str?: string) => {
-  if (!trim(str)) {
-    return {
-      valid: true,
-    };
-  }
-  try {
-    const variables = JSON.parse(str!);
-    return {
-      valid: true,
-      variables,
-    };
-  } catch (_error) {
-    return {
-      valid: false,
-    };
-  }
-};
