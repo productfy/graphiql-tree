@@ -2,8 +2,8 @@
  * Helpers to modify parsed GraphQL
  */
 import {
-  ArgumentNode,
   ASTNode,
+  ArgumentNode,
   DocumentNode,
   FieldNode,
   FragmentSpreadNode,
@@ -34,12 +34,13 @@ import {
   isWrappingType,
   print,
 } from 'graphql';
-import unionBy from 'lodash/unionBy';
+
+import DefaultValueCustomizer from './DefaultValueCustomizer';
+import ParentDefinition from './ParentDefinition';
 import parserGraphql from 'prettier/parser-graphql';
 import prettier from 'prettier/standalone';
-import DefaultValueCustomizer from './DefaultValueCustomizer';
-
-import ParentDefinition from './ParentDefinition';
+import trim from 'lodash/trim';
+import unionBy from 'lodash/unionBy';
 
 const defaultTypeName: FieldNode = {
   kind: 'Field',
@@ -94,7 +95,7 @@ export function generateArgumentSelectionFromType(
       kind: 'Name',
       value: name,
     },
-    value: isListType(type)
+    value: hasList(type)
       ? {
           kind: 'ListValue',
           values: [value],
@@ -161,7 +162,7 @@ export function generateObjectFieldNodeFromInputField(
       kind: 'Name',
       value: name,
     },
-    value: isListType(type)
+    value: hasList(type)
       ? {
           kind: 'ListValue',
           values: [value],
@@ -330,6 +331,17 @@ export function getTypeName(type?: GraphQLType): string {
   return type.name;
 }
 
+export function hasList(type: GraphQLType): boolean {
+  let unwrappedType = type;
+  while (isWrappingType(unwrappedType)) {
+    if (isListType(unwrappedType)) {
+      return true;
+    }
+    unwrappedType = (unwrappedType as GraphQLNonNull<any>).ofType;
+  }
+  return false;
+}
+
 export function mergeArgumentIntoField(
   fieldNode: FieldNode,
   prevArgumentNode?: ArgumentNode,
@@ -383,7 +395,9 @@ export function mergeObjectFieldIntoArgument(
   argumentNode: ArgumentNode,
   prevObjectFieldNode?: ObjectFieldNode,
   nextObjectFieldNode?: ObjectFieldNode,
+  index?: number,
 ): ArgumentNode {
+  const isList = Number.isInteger(index);
   const sorter = (a: ObjectFieldNode, b: ObjectFieldNode) =>
     a.name.value.localeCompare(b.name.value);
 
@@ -393,6 +407,24 @@ export function mergeObjectFieldIntoArgument(
   }
   // Remove
   if (prevObjectFieldNode && !nextObjectFieldNode) {
+    if (isList) {
+      return {
+        ...argumentNode,
+        value: {
+          ...argumentNode.value,
+          values: ((argumentNode.value as ListValueNode).values || []).map((v, i) =>
+            i === index
+              ? {
+                  ...v,
+                  fields: (v as ObjectValueNode).fields.filter(
+                    f => f.name.value !== prevObjectFieldNode.name.value,
+                  ),
+                }
+              : v,
+          ),
+        } as ListValueNode,
+      };
+    }
     return {
       ...argumentNode,
       value: {
@@ -405,6 +437,22 @@ export function mergeObjectFieldIntoArgument(
   }
   // Add
   if (!prevObjectFieldNode && nextObjectFieldNode) {
+    if (isList) {
+      return {
+        ...argumentNode,
+        value: {
+          ...argumentNode.value,
+          values: ((argumentNode.value as ListValueNode).values || []).map((v, i) =>
+            i === index
+              ? {
+                  kind: 'ObjectValue',
+                  fields: [...(v as ObjectValueNode).fields, nextObjectFieldNode].sort(sorter),
+                }
+              : v,
+          ),
+        } as ListValueNode,
+      };
+    }
     return {
       ...argumentNode,
       value: {
@@ -416,6 +464,26 @@ export function mergeObjectFieldIntoArgument(
     };
   }
   // Update
+  if (isList) {
+    return {
+      ...argumentNode,
+      value: {
+        ...argumentNode.value,
+        values: ((argumentNode.value as ListValueNode).values || []).map((v, i) =>
+          i === index
+            ? {
+                ...v,
+                fields: unionBy<ObjectFieldNode>(
+                  [nextObjectFieldNode!],
+                  (v as ObjectValueNode).fields,
+                  'name.value',
+                ).sort(sorter),
+              }
+            : v,
+        ),
+      } as ListValueNode,
+    };
+  }
   return {
     ...argumentNode,
     value: {
@@ -686,3 +754,22 @@ export function updateOperationDefinition(
     operation,
   };
 }
+
+export const variablesAsObject = (str?: string) => {
+  if (!trim(str)) {
+    return {
+      valid: true,
+    };
+  }
+  try {
+    const variables = JSON.parse(str!);
+    return {
+      valid: true,
+      variables,
+    };
+  } catch (_error) {
+    return {
+      valid: false,
+    };
+  }
+};

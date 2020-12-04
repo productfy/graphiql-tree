@@ -1,16 +1,15 @@
-import classnames from 'classnames';
+import * as graphqlHelper from './graphqlHelper';
+
+import { DefaultValueCustomizerContext, NodeCustomizerContext, SchemaContext } from './Context';
 import { DocumentNode, GraphQLSchema, parse } from 'graphql';
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { DefaultValueCustomizerContext, NodeCustomizerContext, SchemaContext } from './Context';
 import DefaultValueCustomizer from './DefaultValueCustomizer';
 import Document from './Document';
 import NodeCustomizer from './NodeCustomizer';
-import { transformDocumentNodeToQueryString } from './graphqlHelper';
-
+import classnames from 'classnames';
 import styles from './GraphiQLTree.module.scss';
-
-import * as graphqlHelper from './graphqlHelper';
+import { transformDocumentNodeToQueryString } from './graphqlHelper';
 
 export { graphqlHelper };
 
@@ -73,39 +72,23 @@ export default React.memo(function GraphiQLTree({
 
   return (
     <div
-      className={classnames('historyPaneWrap', styles.graphiqlTree)}
+      className={classnames('apiDefinition', styles.graphiqlTree)}
       style={{ ...(!open ? { display: 'none' } : {}) }}
     >
-      <section aria-label="API Definition">
-        <div className="history-title-bar">
-          <div className="history-title">API Definition</div>
-          {/* <div className="doc-explorer-rhs">
-            <button
-              className="docExplorerHide"
-              aria-label="Close History"
-              onClick={() => setOpen(false)}
-            >
-              ✕
-            </button>
-          </div> */}
+      {!schema && (
+        <div className="spinner-container">
+          <div className="spinner" />
         </div>
-        <div className="history-contents">
-          {!schema && (
-            <div className="spinner-container">
-              <div className="spinner" />
-            </div>
-          )}
-          {schema && (
-            <SchemaContext.Provider value={schema}>
-              <NodeCustomizerContext.Provider value={customizeNode}>
-                <DefaultValueCustomizerContext.Provider value={customizeDefaultValue}>
-                  <Document documentNode={documentNode} onEdit={onEditDocument} />
-                </DefaultValueCustomizerContext.Provider>
-              </NodeCustomizerContext.Provider>
-            </SchemaContext.Provider>
-          )}
-        </div>
-      </section>
+      )}
+      {schema && (
+        <SchemaContext.Provider value={schema}>
+          <NodeCustomizerContext.Provider value={customizeNode}>
+            <DefaultValueCustomizerContext.Provider value={customizeDefaultValue}>
+              <Document documentNode={documentNode} onEdit={onEditDocument} />
+            </DefaultValueCustomizerContext.Provider>
+          </NodeCustomizerContext.Provider>
+        </SchemaContext.Provider>
+      )}
     </div>
   );
 });

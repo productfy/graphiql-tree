@@ -1,4 +1,3 @@
-import classnames from 'classnames';
 import {
   GraphQLSchema,
   StringValueNode,
@@ -6,16 +5,16 @@ import {
   getIntrospectionQuery,
   isScalarType,
 } from 'graphql';
-import { FetcherParams } from 'graphiql/dist/components/GraphiQL';
-import pickBy from 'lodash/pickBy';
 import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 
 import DefaultValueCustomizer from './DefaultValueCustomizer';
+import { FetcherParams } from 'graphiql/dist/components/GraphiQL';
 import GraphiQLWithTree from './GraphiQLWithTree';
 import { NodeCustomizerParams } from './NodeCustomizer';
-import { unwrapType } from './graphqlHelper';
-
+import classnames from 'classnames';
+import pickBy from 'lodash/pickBy';
 import styles from './GraphiQLTree.module.scss';
+import { unwrapType } from './graphqlHelper';
 
 const url = 'https://stage-user-api.productfy.io/graphql/api/public';
 
@@ -196,6 +195,7 @@ const App = () => {
       customizeNode={customizeNode}
       fetcher={fetcher(abortController.current)}
       schema={schema}
+      serverUrl={url}
     />
   );
 };

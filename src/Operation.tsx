@@ -1,15 +1,14 @@
-import classnames from 'classnames';
 import { OperationDefinitionNode, OperationTypeNode, SelectionSetNode } from 'graphql';
 import React, { ChangeEvent, useCallback, useContext, useEffect, useRef } from 'react';
-
 import {
   mergeSelectionSetIntoOperationDefinition,
-  updateOperationDefinition,
   sourcesAreEqual,
+  updateOperationDefinition,
 } from './graphqlHelper';
+
 import { SchemaContext } from './Context';
 import { Type } from './OutputType';
-
+import classnames from 'classnames';
 import styles from './GraphiQLTree.module.scss';
 
 interface OperationProps {
@@ -87,18 +86,16 @@ export default React.memo(function Operation({
 
         <span className="cm-ws">&nbsp;</span>
 
-        <span className="cm-def">
-          <input
-            type="text"
-            name="name"
-            onChange={onEditOperation}
-            value={name}
-            className={classnames(styles.inputText, styles.operationName, {
-              [styles.focusBorder]: name.length === 0,
-            })}
-            style={{ width: `calc(1px + ${name.length || 1}ch)` }}
-          />
-        </span>
+        <input
+          type="text"
+          name="name"
+          onChange={onEditOperation}
+          value={name}
+          className={classnames('cm-def', styles.inputText, styles.operationName, {
+            [styles.focusBorder]: name.length === 0,
+          })}
+          style={{ width: `calc(1px + ${name.length || 1}ch)` }}
+        />
 
         {/* <span className="cm-punctuation">{' {'}</span> */}
       </div>

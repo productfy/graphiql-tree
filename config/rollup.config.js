@@ -4,8 +4,8 @@ import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 import postcss from 'rollup-plugin-postcss';
-import svg from 'rollup-plugin-svg';
 import resolve from '@rollup/plugin-node-resolve';
+import svg from 'rollup-plugin-svg';
 import typescript from 'rollup-plugin-typescript2';
 
 export default [
