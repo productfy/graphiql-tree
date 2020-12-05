@@ -1,6 +1,6 @@
 {
   "name": "@productfy/graphiql-tree",
-  "version": "0.2.3-dev.4",
+  "version": "0.2.3",
   "private": false,
   "repository": {
     "type": "git",
