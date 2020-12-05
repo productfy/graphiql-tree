@@ -1,6 +1,6 @@
 {
   "name": "@productfy/graphiql-tree",
-  "version": "0.2.2",
+  "version": "0.2.3-dev.0",
   "private": false,
   "repository": {
     "type": "git",
@@ -62,10 +62,10 @@
     "graphiql-code-exporter": "^3.0.3",
     "graphql": "^15.4.0",
     "lodash": "^4.17.20",
-    "node-sass": "^5.0.0",
+    "node-sass": "^4.14.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "react-scripts": "3.4.1",
+    "react-scripts": "^4.0.1",
     "rollup": "^2.33.3",
     "rollup-plugin-analyzer": "^3.3.0",
     "rollup-plugin-peer-deps-external": "^2.2.4",
