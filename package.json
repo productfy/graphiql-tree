@@ -40,13 +40,8 @@
     "extends": "react-app"
   },
   "dependencies": {
-    "@types/react": "^16.9.34",
-    "@types/react-dom": "^16.9.6",
     "classnames": "^2.2.6",
-    "codemirror": "^5.58.3",
     "copy-to-clipboard": "^3.3.1",
-    "graphiql": "^1.0.5",
-    "graphiql-code-exporter": "^3.0.3",
     "graphql-query-compress": "^1.2.4",
     "prettier": "^2.1.2"
   },
@@ -60,10 +55,14 @@
     "@types/classnames": "^2.2.10",
     "@types/lodash": "^4.14.165",
     "@types/prettier": "^2.1.5",
+    "@types/react": "^16.9.34",
+    "@types/react-dom": "^16.9.6",
     "eslint-config-react-app": "^5.2.1",
+    "graphiql": "^1.0.5",
+    "graphiql-code-exporter": "^3.0.3",
     "graphql": "^15.4.0",
     "lodash": "^4.17.20",
-    "node-sass": "^4.14.1",
+    "node-sass": "^5.0.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.1",
@@ -78,6 +77,8 @@
     "worker-loader": "^2.0.0"
   },
   "peerDependencies": {
+    "graphiql": "^1.1.0",
+    "graphiql-code-exporter": "^3.0.3",
     "graphql": "^15.4.0",
     "lodash": "^4.17.20",
     "react": "^16.13.1",

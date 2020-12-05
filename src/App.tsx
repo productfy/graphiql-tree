@@ -16,10 +16,6 @@ import pickBy from 'lodash/pickBy';
 import styles from './GraphiQLTree.module.scss';
 import { unwrapType } from './graphqlHelper';
 
-const url = 'https://stage-user-api.productfy.io/graphql/api/public';
-
-const GET_ENUMS = '{ enums { left right { code description name }}}';
-
 interface ProductfyEnum {
   left: string;
   right: {
@@ -29,8 +25,10 @@ interface ProductfyEnum {
   }[];
 }
 
+const serverUrl = 'https://stage-user-api.productfy.io/graphql/api/public';
+
 const fetcher = ({ signal }: AbortController) => async (graphQLParams: FetcherParams) => {
-  const response = await fetch(url, {
+  const response = await fetch(serverUrl, {
     method: 'POST',
     headers: {
       Accept: 'application/json',
@@ -43,6 +41,8 @@ const fetcher = ({ signal }: AbortController) => async (graphQLParams: FetcherPa
   });
   return response.json().catch(() => response.text());
 };
+
+const GET_ENUMS = '{ enums { left right { code description name }}}';
 
 const mutationWhitelist = [
   'activatePaymentCard',
@@ -195,7 +195,7 @@ const App = () => {
       customizeNode={customizeNode}
       fetcher={fetcher(abortController.current)}
       schema={schema}
-      serverUrl={url}
+      serverUrl={serverUrl}
     />
   );
 };
