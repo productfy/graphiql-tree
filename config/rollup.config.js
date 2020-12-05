@@ -41,20 +41,20 @@ export default [
     ],
     plugins,
   },
-  // {
-  //   input: ['src/GraphiQLWithTree.tsx'],
-  //   output: [
-  //     {
-  //       exports: 'named',
-  //       file: 'dist/GraphiQLWithTree.js',
-  //       format: 'cjs',
-  //     },
-  //     {
-  //       exports: 'named',
-  //       file: 'dist/GraphiQLWithTree.es.js',
-  //       format: 'esm',
-  //     },
-  //   ],
-  //   plugins,
-  // },
+  {
+    input: ['src/GraphiQLWithTree.tsx'],
+    output: [
+      {
+        exports: 'named',
+        file: 'dist/GraphiQLWithTree.js',
+        format: 'cjs',
+      },
+      {
+        exports: 'named',
+        file: 'dist/GraphiQLWithTree.es.js',
+        format: 'esm',
+      },
+    ],
+    plugins,
+  },
 ];

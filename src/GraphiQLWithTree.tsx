@@ -1,15 +1,16 @@
-import CodeExporter, { computeOperationDataList } from 'graphiql-code-exporter';
-import { GraphQLSchema, OperationTypeNode } from 'graphql';
-import React, { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
+import 'graphiql/graphiql.css';
+
+import { GraphQLSchema, OperationDefinitionNode, OperationTypeNode, parse } from 'graphql';
+import React, { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import ClipboardIcon from './icons/Clipboard';
-import CurlSnippet from './snippets/Curl';
+import CodeExport from './CodeExport';
 import DefaultValueCustomizer from './DefaultValueCustomizer';
 import { Fetcher } from 'graphiql/dist/components/GraphiQL';
 import GraphiQL from 'graphiql';
 import GraphiQLTree from './GraphiQLTree';
 import NodeCustomizer from './NodeCustomizer';
-import classnames from 'classnames';
+import Snippet from './snippets/Snippet';
 import copy from 'copy-to-clipboard';
 import { generateDefaultQueryByQueryOrMutationName } from './graphqlHelper';
 import styles from './GraphiQLWithTree.module.scss';
@@ -21,6 +22,11 @@ export interface GraphiQLWithTreeProps {
   query?: string;
   schema?: GraphQLSchema;
   serverUrl: string;
+  snippets?: Snippet[];
+}
+
+enum CodeMode {
+  GraphQL,
 }
 
 const defaultApi = {
@@ -29,61 +35,67 @@ const defaultApi = {
 };
 
 const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
-  customizeDefaultValue = () => undefined,
-  customizeNode = () => undefined,
+  customizeDefaultValue,
+  customizeNode,
   fetcher,
-  query: defaultQuery,
+  query: queryOverride,
   schema,
   serverUrl,
+  snippets,
 }) => {
   const graphiqlRef = useRef(null);
-  const [codeMode, setCodeMode] = useState<string>('GraphQL');
+
+  const [codeMode, setCodeMode] = useState<CodeMode | string>(CodeMode.GraphQL);
+  const [exportCode, setExportCode] = useState<string>('');
+  const [query, setQuery] = useState<string>('');
   const [showCopiedTooltip, setShowCopiedTooltip] = useState<boolean>(false);
-  const [query, setQuery] = useState<string>(
-    defaultQuery ||
+
+  const onEditQuery = useCallback((query?: string) => setQuery(query || ''), [setQuery]);
+  const parsedQuery = useMemo(() => {
+    try {
+      return parse(query);
+    } catch (e) {
+      return undefined;
+    }
+  }, [query]);
+
+  useEffect(() => {
+    const newQuery =
+      queryOverride ??
       (schema &&
         generateDefaultQueryByQueryOrMutationName({
           ...defaultApi,
           customizeDefaultValue,
           schema,
-        })) ||
-      '',
-  );
-  const hideCodeExporter = useCallback(() => setCodeMode('GraphQL'), []);
-  const onEditQuery = useCallback((query?: string) => setQuery(query || ''), [setQuery]);
-  const onCodeModeChange = (e: ChangeEvent<HTMLSelectElement>) => setCodeMode(e.target.value);
+        }));
+    setQuery(newQuery || '');
+  }, [customizeDefaultValue, queryOverride, schema]);
 
   useEffect(() => {
-    setQuery(
-      defaultQuery ||
-        (schema &&
-          generateDefaultQueryByQueryOrMutationName({
-            ...defaultApi,
-            customizeDefaultValue,
-            schema,
-          })) ||
-        '',
-    );
-  }, [customizeDefaultValue, defaultQuery, schema]);
+    const snippet = (snippets || []).find(({ name }) => codeMode === name);
+    if (snippet) {
+      setExportCode(
+        snippet.generate({
+          operationDefinition: parsedQuery?.definitions[0] as OperationDefinitionNode,
+          serverUrl,
+        }),
+      );
+    }
+  }, [codeMode, parsedQuery, serverUrl, snippets]);
+
+  useEffect(() => {
+    if ((graphiqlRef.current as any)?.getQueryEditor()?.options?.readOnly === false) {
+      (graphiqlRef.current as any).getQueryEditor().options.readOnly = true;
+    }
+  }, [graphiqlRef.current]);
 
   const copyByCodeMode = () => {
-    try {
-      let snippet = query;
-      if (codeMode !== 'GraphQL') {
-        const { operationDataList } = computeOperationDataList({ query, variables: {} });
-        switch (codeMode) {
-          case 'cURL':
-            snippet = CurlSnippet.generate({ operationDataList, serverUrl });
-            break;
-        }
-      }
-      copy(snippet);
-      setShowCopiedTooltip(true);
-      setTimeout(() => setShowCopiedTooltip(false), 1000);
-    } catch (e) {
-      console.warn('Could not parse invalid query');
-    }
+    copy(exportCode);
+    setShowCopiedTooltip(true);
+    setTimeout(() => setShowCopiedTooltip(false), 1000);
   };
+  const onCodeModeChange = (e: ChangeEvent<HTMLSelectElement>) => setCodeMode(e.target.value);
+  const snippet = (snippets || []).find(({ name }) => codeMode === name);
 
   return (
     <div className={styles.graphiqlWithTree}>
@@ -105,14 +117,20 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
               >
                 <span style={{ fontSize: 11 }}>&#x25B6;</span> Run query
               </button>
-              <div>
-                <div className={styles.select}>
-                  <select onChange={onCodeModeChange} value={codeMode}>
-                    <option value="GraphQL">GraphQL</option>
-                    <option value="cURL">cURL</option>
-                  </select>
+              {snippets && (
+                <div>
+                  <div className={styles.select}>
+                    <select onChange={onCodeModeChange} value={codeMode}>
+                      <option value="GraphQL">GraphQL</option>
+                      {snippets.map(({ name }) => (
+                        <option key={name} value={name}>
+                          {name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-              </div>
+              )}
               <button className={styles.copyButton}>
                 <div
                   style={{
@@ -147,20 +165,7 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
               ref={graphiqlRef}
               schema={schema}
             />
-            <div
-              className={classnames(styles.codeExporter, {
-                [styles.hidden]: codeMode === 'GraphQL',
-              })}
-            >
-              <CodeExporter
-                codeMirrorTheme="graphiql"
-                key={codeMode}
-                hideCodeExporter={hideCodeExporter}
-                snippets={[CurlSnippet]}
-                serverUrl={serverUrl}
-                query={query}
-              />
-            </div>
+            {snippet && <CodeExport code={exportCode} mode={snippet.mode} theme="graphiql" />}
           </div>
         </div>
       </div>

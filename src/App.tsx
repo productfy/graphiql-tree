@@ -7,6 +7,7 @@ import {
 } from 'graphql';
 import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 
+import Curl from './snippets/Curl';
 import DefaultValueCustomizer from './DefaultValueCustomizer';
 import { FetcherParams } from 'graphiql/dist/components/GraphiQL';
 import GraphiQLWithTree from './GraphiQLWithTree';
@@ -196,6 +197,7 @@ const App = () => {
       fetcher={fetcher(abortController.current)}
       schema={schema}
       serverUrl={serverUrl}
+      snippets={[Curl]}
     />
   );
 };

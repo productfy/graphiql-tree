@@ -1,24 +1,22 @@
 import 'codemirror/mode/shell/shell';
 
-import first from 'lodash/first';
+import Snippet from './Snippet';
 import graphqlQueryCompress from 'graphql-query-compress';
+import { print } from 'graphql';
 
 export default {
-  language: 'cURL',
-  codeMirrorMode: 'shell',
   name: 'cURL',
-  options: [],
-  generate: ({ context, operationDataList, serverUrl }: any) => {
-    const { variables = '' } = context || {};
-    const op = first(operationDataList);
-    const { name, query }: any = op;
+  mode: 'shell',
+  generate: ({ operationDefinition, serverUrl }) => {
+    const { name } = operationDefinition;
+    const query = print(operationDefinition);
+
     return `curl -X POST \\
   ${serverUrl} \\
   -H 'Content-Type: application/json' \\
   -d '${JSON.stringify({
-    operationName: name,
+    operationName: name?.value,
     query: graphqlQueryCompress(query),
-    ...(variables.length > 0 ? { variables } : {}),
   })}'`;
   },
-};
+} as Snippet;

@@ -2,9 +2,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
 
 :global {
-  @import '~graphiql/graphiql.css';
-  @import '~graphiql-code-exporter/CodeExporter.css';
-
   :local(.graphiqlWithTree) {
     display: flex;
     flex-direction: row;
@@ -31,67 +28,47 @@
           position: relative;
         }
 
-        :local(.codeExporter) {
+        :local(.codeExport) {
           position: absolute;
           top: 0;
           left: 0;
           right: 0;
           z-index: 20;
 
-          .docExplorerWrap {
-            width: 100% !important;
-            box-sizing: border-box;
-            min-height: 40vh;
-            max-height: 40vh;
+          box-sizing: border-box;
+          min-height: 40vh;
+          max-height: 40vh;
+          padding: 12px;
 
-            border-left: 1px solid #e3e8ee;
-            border-bottom: 1px solid #e3e8ee;
-            border-right: 1px solid #e3e8ee;
-            border-bottom-left-radius: 8px;
-            border-bottom-right-radius: 8px;
-            background-color: #ffffff;
-            overflow: auto;
+          border-left: 1px solid #e3e8ee;
+          border-bottom: 1px solid #e3e8ee;
+          border-right: 1px solid #e3e8ee;
+          border-bottom-left-radius: 8px;
+          border-bottom-right-radius: 8px;
+          background-color: #ffffff;
+          overflow: auto;
 
-            .doc-explorer-title-bar {
-              display: none;
+          .CodeMirror {
+            font-size: 13px;
+            font-family: var(--monospace-font);
+
+            &.cm-s-graphiql {
+              width: fit-content;
+              height: fit-content;
             }
 
-            .doc-explorer-contents {
-              border: none !important;
+            .CodeMirror-hscrollbar,
+            .CodeMirror-vscrollbar {
+              display: none !important;
             }
 
-            .graphiql-code-exporter {
-              > :first-child {
-                display: none;
-              }
-
-              > :nth-child(3) {
-                border: none !important;
-              }
-
-              .CodeMirror {
-                font-size: 13px;
-                font-family: var(--monospace-font);
-
-                &.cm-s-graphiql {
-                  width: fit-content;
-                  height: fit-content;
-                }
-
-                .CodeMirror-hscrollbar,
-                .CodeMirror-vscrollbar {
-                  display: none !important;
-                }
-
-                .CodeMirror-scroll {
-                  overflow: visible !important;
-                  width: fit-content;
-                }
-              }
+            .CodeMirror-lines {
+              padding: 0;
             }
 
-            .toolbar-button {
-              display: none;
+            .CodeMirror-scroll {
+              overflow: visible !important;
+              width: fit-content;
             }
           }
         }
