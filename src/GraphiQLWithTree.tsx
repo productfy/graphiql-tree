@@ -1,4 +1,4 @@
-import 'graphiql/graphiql.min.css';
+import 'graphiql/graphiql.css';
 import 'graphiql-code-exporter/CodeExporter.css';
 
 // @ts-expect-error

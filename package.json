@@ -11,14 +11,14 @@
     "name": "Bao Ngo",
     "email": "bingo@productfy.io"
   },
-  "main": "dist/index.js",
-  "module": "dist/index.es.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/build.js",
+  "module": "dist/build.es.js",
+  "types": "dist/build.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "npm run build:clean && npm run build:rollup && cp dist/GraphiQLTree.d.ts dist/index.d.ts",
+    "build": "npm run build:clean && npm run build:rollup",
     "build:clean": "rimraf ./dist",
     "build:rollup": "rollup -c ./config/rollup.config.js",
     "semantic-release": "semantic-release",

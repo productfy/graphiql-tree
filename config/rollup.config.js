@@ -27,33 +27,16 @@ const plugins = [
 export default [
   {
     external: ['graphql', 'lodash', 'react'],
-    input: ['src/GraphiQLTree.tsx'],
+    input: ['src/build.ts'],
     output: [
       {
         exports: 'named',
-        file: 'dist/index.js',
+        file: 'dist/build.js',
         format: 'cjs',
       },
       {
         exports: 'named',
-        file: 'dist/index.es.js',
-        format: 'esm',
-      },
-    ],
-    plugins,
-  },
-  {
-    external: ['graphql', 'lodash', 'react'],
-    input: ['src/GraphiQLWithTree.tsx'],
-    output: [
-      {
-        exports: 'named',
-        file: 'dist/GraphiQLWithTree.js',
-        format: 'cjs',
-      },
-      {
-        exports: 'named',
-        file: 'dist/GraphiQLWithTree.es.js',
+        file: 'dist/build.es.js',
         format: 'esm',
       },
     ],

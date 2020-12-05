@@ -1,5 +1,3 @@
-import * as graphqlHelper from './graphqlHelper';
-
 import { DefaultValueCustomizerContext, NodeCustomizerContext, SchemaContext } from './Context';
 import { DocumentNode, GraphQLSchema, parse } from 'graphql';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -10,8 +8,6 @@ import NodeCustomizer from './NodeCustomizer';
 import classnames from 'classnames';
 import styles from './GraphiQLTree.module.scss';
 import { transformDocumentNodeToQueryString } from './graphqlHelper';
-
-export { graphqlHelper };
 
 export interface GraphiQLTreeProps {
   customizeNode?: NodeCustomizer;
