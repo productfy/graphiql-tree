@@ -26,7 +26,7 @@ const plugins = [
 
 export default [
   {
-    input: ['src/build.ts'],
+    input: ['src/build.tsx'],
     output: [
       {
         exports: 'named',
