@@ -1,6 +1,6 @@
 {
   "name": "@productfy/graphiql-tree",
-  "version": "0.2.3-dev.3",
+  "version": "0.2.3-dev.4",
   "private": false,
   "repository": {
     "type": "git",
@@ -41,7 +41,6 @@
   },
   "dependencies": {
     "classnames": "^2.2.6",
-    "codemirror": "^5.58.3",
     "copy-to-clipboard": "^3.3.1",
     "graphql-query-compress": "^1.2.4",
     "prettier": "^2.1.2"
@@ -59,6 +58,7 @@
     "@types/prettier": "^2.1.5",
     "@types/react": "^16.9.34",
     "@types/react-dom": "^16.9.6",
+    "codemirror": "^5.58.3",
     "eslint-config-react-app": "^5.2.1",
     "graphiql": "^1.0.5",
     "graphql": "^15.4.0",
@@ -78,6 +78,7 @@
     "worker-loader": "^2.0.0"
   },
   "peerDependencies": {
+    "codemirror": "^5.58.3",
     "graphiql": "^1.1.0",
     "graphql": "^15.4.0",
     "lodash": "^4.17.20",
