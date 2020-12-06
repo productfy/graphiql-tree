@@ -1,6 +1,7 @@
 import CodeMirror, { Editor } from 'codemirror';
 
 import React from 'react';
+import classnames from 'classnames';
 import styles from './GraphiQLWithTree.module.scss';
 
 interface CodeExportProps {
@@ -36,6 +37,11 @@ export default class CodeExport extends React.PureComponent<CodeExportProps, {}>
   }
 
   render() {
-    return <div className={styles.codeExport} ref={ref => (this._node = ref || undefined)} />;
+    return (
+      <div
+        className={classnames(styles.codeExport, 'codeExport')}
+        ref={ref => (this._node = ref || undefined)}
+      />
+    );
   }
 }
