@@ -115,7 +115,7 @@ export default React.memo(function InputElement({
           isRequired,
           name,
           onEdit,
-          parentDefinition,
+          parentDefinition: parentDefinition.parentDefinition!,
           type,
           value,
         });
