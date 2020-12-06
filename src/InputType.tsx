@@ -308,7 +308,7 @@ const Argument = React.memo(function Argument({
         ...argumentNodeRef.current!.value,
         values: [
           ...((argumentNodeRef.current!.value as ListValueNode).values || []),
-          getDefaultValueByType(unwrappedType),
+          getDefaultValueByType(unwrappedType, parentDefinitionRef.current, customizeDefaultValue),
         ],
       } as ListValueNode,
     };

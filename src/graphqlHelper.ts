@@ -52,7 +52,7 @@ const defaultTypeName: FieldNode = {
 export function generateArgumentSelectionFromType(
   arg: GraphQLArgument,
   parentDefinition: ParentDefinition,
-  customizeDefaultValue: DefaultValueCustomizer = () => undefined,
+  customizeDefaultValue: DefaultValueCustomizer,
 ): ArgumentNode {
   const { name, type } = arg;
   const unwrappedType = unwrapType(type);
@@ -120,7 +120,7 @@ export function generateInlineFragmentFromType(type: GraphQLNamedType): InlineFr
 export function generateObjectFieldNodeFromInputField(
   field: GraphQLInputField,
   parentDefinition: ParentDefinition,
-  customizeDefaultValue: DefaultValueCustomizer = () => undefined,
+  customizeDefaultValue: DefaultValueCustomizer,
 ): ObjectFieldNode {
   const { name, type } = field;
   const unwrappedType = unwrapType(type);
@@ -218,7 +218,7 @@ export function generateDefaultQueryByQueryOrMutationName({
 export function generateOutputFieldSelectionFromType(
   field: GraphQLField<any, any>,
   parentDefinition: ParentDefinition,
-  customizeDefaultValue: DefaultValueCustomizer = () => undefined,
+  customizeDefaultValue: DefaultValueCustomizer,
 ): SelectionNode {
   const { args = [], name, type } = field;
   const unwrappedType = unwrapType(type);
@@ -257,8 +257,8 @@ export function generateOutputFieldSelectionFromType(
 
 export function getDefaultValueByType(
   type: GraphQLNamedType,
-  parentDefinition?: ParentDefinition,
-  customizeDefaultValue: DefaultValueCustomizer = () => undefined,
+  parentDefinition: ParentDefinition,
+  customizeDefaultValue: DefaultValueCustomizer,
 ): ValueNode {
   if (isInputObjectType(type)) {
     return {

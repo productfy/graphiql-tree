@@ -33,15 +33,17 @@ enum CodeMode {
   GraphQL,
 }
 
-const defaultApi = {
+const DEFAULT_API = {
   name: 'signUp',
   operationType: 'mutation' as OperationTypeNode,
 };
+const DEFAULT_DEFAULT_VALUE_CUSTOMIZER = () => undefined;
+const DEFAULT_NODE_CUSTOMIZER = () => undefined;
 
 const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
   context,
-  customizeDefaultValue,
-  customizeNode,
+  customizeDefaultValue = DEFAULT_DEFAULT_VALUE_CUSTOMIZER,
+  customizeNode  = DEFAULT_NODE_CUSTOMIZER,
   fetcher,
   query: queryOverride,
   schema,
@@ -69,7 +71,7 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
       queryOverride ??
       (schema &&
         generateDefaultQueryByQueryOrMutationName({
-          ...defaultApi,
+          ...DEFAULT_API,
           customizeDefaultValue,
           schema,
         }));

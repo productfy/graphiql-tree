@@ -1,4 +1,3 @@
-import classnames from 'classnames';
 import {
   BooleanValueNode,
   EnumValueNode,
@@ -11,11 +10,11 @@ import {
   isEnumType,
 } from 'graphql';
 import React, { ChangeEvent, useContext, useRef } from 'react';
+import { sourcesAreEqual, unwrapType } from './graphqlHelper';
 
 import { NodeCustomizerContext } from './Context';
 import ParentDefinition from './ParentDefinition';
-import { sourcesAreEqual, unwrapType } from './graphqlHelper';
-
+import classnames from 'classnames';
 import styles from './GraphiQLTree.module.scss';
 
 export interface InputElementProps {

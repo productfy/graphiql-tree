@@ -10,8 +10,8 @@ import styles from './GraphiQLTree.module.scss';
 import { transformDocumentNodeToQueryString } from './graphqlHelper';
 
 export interface GraphiQLTreeProps {
-  customizeNode?: NodeCustomizer;
-  customizeDefaultValue?: DefaultValueCustomizer;
+  customizeNode: NodeCustomizer;
+  customizeDefaultValue: DefaultValueCustomizer;
   onEdit: (queryString: string) => void;
   query: string;
   schema?: GraphQLSchema;
@@ -31,8 +31,8 @@ function parseQuery(queryString: string): DocumentNode | undefined {
 }
 
 export default React.memo(function GraphiQLTree({
-  customizeNode = () => {},
-  customizeDefaultValue = () => undefined,
+  customizeNode,
+  customizeDefaultValue,
   onEdit,
   query,
   schema,
