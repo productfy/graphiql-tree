@@ -11,11 +11,15 @@ import GraphiQL from 'graphiql';
 import GraphiQLTree from './GraphiQLTree';
 import NodeCustomizer from './NodeCustomizer';
 import Snippet from './snippets/Snippet';
+import classnames from 'classnames';
 import copy from 'copy-to-clipboard';
 import { generateDefaultQueryByQueryOrMutationName } from './graphqlHelper';
 import styles from './GraphiQLWithTree.module.scss';
 
 export interface GraphiQLWithTreeProps {
+  context?: {
+    [key: string]: any;
+  };
   customizeDefaultValue?: DefaultValueCustomizer;
   customizeNode?: NodeCustomizer;
   fetcher: Fetcher;
@@ -35,6 +39,7 @@ const defaultApi = {
 };
 
 const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
+  context,
   customizeDefaultValue,
   customizeNode,
   fetcher,
@@ -76,6 +81,7 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
     if (snippet) {
       setExportCode(
         snippet.generate({
+          context,
           operationDefinition: parsedQuery?.definitions[0] as OperationDefinitionNode,
           serverUrl,
         }),
@@ -98,7 +104,7 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
   const snippet = (snippets || []).find(({ name }) => codeMode === name);
 
   return (
-    <div className={styles.graphiqlWithTree}>
+    <div className={classnames(styles.graphiqlWithTree, 'graphiqlWithTree')}>
       <GraphiQLTree
         customizeDefaultValue={customizeDefaultValue}
         customizeNode={customizeNode}
@@ -106,11 +112,18 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
         query={query}
         schema={schema}
       />
-      <div className={styles.interactiveInterfaceContainer}>
-        <div className={styles.interactiveInterfaceContent}>
-          <div className={styles.topBar}>
+      <div
+        className={classnames(
+          styles.interactiveInterfaceContainer,
+          'interactiveInterfaceContainer',
+        )}
+      >
+        <div
+          className={classnames(styles.interactiveInterfaceContent, 'interactiveInterfaceContent')}
+        >
+          <div className={classnames(styles.topBar, 'topBar')}>
             <div>Request</div>
-            <div className={styles.toolbar}>
+            <div className={classnames(styles.toolbar, 'toolBar')}>
               <button
                 className={styles.executeButton}
                 onClick={() => (graphiqlRef?.current as any)?.handleRunQuery()}
@@ -157,7 +170,7 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
               </button>
             </div>
           </div>
-          <div className={styles.bottomContent}>
+          <div className={classnames(styles.bottomContent, 'bottomContent')}>
             <GraphiQL
               fetcher={fetcher}
               query={query}
