@@ -9,7 +9,7 @@ import {
   isInterfaceType,
   isObjectType,
 } from 'graphql';
-import { DefaultValueCustomizerContext, SchemaContext } from './Context';
+import { DefaultValueCustomizerContext, DescriptionContext, SchemaContext } from './Context';
 import React, { useCallback, useContext, useEffect, useRef } from 'react';
 import {
   generateInlineFragmentFromType,
@@ -44,6 +44,7 @@ const Field = React.memo(function Field({
   selectionNode,
 }: FieldProps) {
   const customizeDefaultValue = useContext(DefaultValueCustomizerContext);
+  const showDescription = useContext(DescriptionContext);
   const parentDefinitionRef = useRef({ definition: field, parentDefinition });
   const selectionNodeRef = useRef(selectionNode);
 
@@ -108,15 +109,29 @@ const Field = React.memo(function Field({
 
   return (
     <div className={classnames(styles.node, styles.fieldNode, `depth-${depth}`)}>
-      <div
-        className={classnames(styles.nameLine, {
-          [styles.selectable]: depth !== 4,
-        })}
-        onClick={onToggleField}
-      >
-        {hasFields && depth !== 4 && (
-          <>
-            <span className={`CodeMirror-foldgutter-${isSelected ? 'open' : 'folded'}`} />
+      <label className={classnames(styles.nameLine, styles.selectable)}>
+        <span className={styles.checkboxGroup}>
+          {hasFields && (
+            <>
+              {depth !== 4 && (
+                <span className={`CodeMirror-foldgutter-${isSelected ? 'open' : 'folded'}`} />
+              )}
+              <span
+                className={classnames(styles.checkbox, {
+                  [styles.hidden]: depth === 4,
+                })}
+              >
+                <input
+                  checked={isSelected}
+                  onChange={onToggleField}
+                  type="checkbox"
+                  value={isSelected.toString()}
+                />
+              </span>
+            </>
+          )}
+
+          {!hasFields && depth !== 4 && (
             <span className={styles.checkbox}>
               <input
                 checked={isSelected}
@@ -125,21 +140,10 @@ const Field = React.memo(function Field({
                 value={isSelected.toString()}
               />
             </span>
-          </>
-        )}
+          )}
 
-        {!hasFields && depth !== 4 && (
-          <span className={styles.checkbox}>
-            <input
-              checked={isSelected}
-              onChange={onToggleField}
-              type="checkbox"
-              value={isSelected.toString()}
-            />
-          </span>
-        )}
-
-        <span className={classnames('field-name', 'cm-property')}>{name}</span>
+          <span className={classnames('field-name', 'cm-property')}>{name}</span>
+        </span>
         {depth !== 4 && <TypeName type={type} />}
         {/* {!selected && hasArgs && <span className="cm-punctuation">()</span>}
         {(!selected || !hasFields) && (
@@ -150,8 +154,8 @@ const Field = React.memo(function Field({
         )}
         {selected && hasArgs && <span className="cm-punctuation">(</span>}
         {selected && hasFields && !hasArgs && <span className="cm-punctuation">{' {'}</span>} */}
-      </div>
-      {description && (
+      </label>
+      {showDescription && description && (
         <div className={classnames(styles.description, { [styles.indented]: depth !== 4 })}>
           {description}
         </div>

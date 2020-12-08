@@ -89,13 +89,13 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
         }),
       );
     }
-  }, [codeMode, parsedQuery, serverUrl, snippets]);
+  }, [codeMode, context, parsedQuery, serverUrl, snippets]);
 
   useEffect(() => {
     if ((graphiqlRef.current as any)?.getQueryEditor()?.options?.readOnly === false) {
       (graphiqlRef.current as any).getQueryEditor().options.readOnly = true;
     }
-  }, [graphiqlRef.current]);
+  });
 
   const copyByCodeMode = () => {
     copy(exportCode);
