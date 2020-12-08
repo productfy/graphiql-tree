@@ -1,4 +1,9 @@
-import { DefaultValueCustomizerContext, NodeCustomizerContext, SchemaContext } from './Context';
+import {
+  DefaultValueCustomizerContext,
+  DescriptionContext,
+  NodeCustomizerContext,
+  SchemaContext,
+} from './Context';
 import { DocumentNode, GraphQLSchema, parse } from 'graphql';
 import React, { useCallback, useEffect, useState } from 'react';
 
@@ -37,8 +42,7 @@ export default React.memo(function GraphiQLTree({
   query,
   schema,
 }: GraphiQLTreeProps) {
-  // const [open, setOpen] = useState<boolean>(true);
-  const open = true;
+  const [showDescription, setShowDescription] = useState<boolean>(true);
   const [documentNode, setDocumentNode] = useState<DocumentNode>(
     parseQuery(query) || DEFAULT_DOCUMENT,
   );
@@ -67,22 +71,26 @@ export default React.memo(function GraphiQLTree({
   }, [query]);
 
   return (
-    <div
-      className={classnames('apiDefinition', styles.graphiqlTree)}
-      style={{ ...(!open ? { display: 'none' } : {}) }}
-    >
-      {!schema && (
-        <div className="spinner-container">
-          <div className="spinner" />
-        </div>
-      )}
+    <div className={classnames('apiDefinition', styles.graphiqlTree)}>
+      <div className={classnames('toolbar', styles.toolbar)}>
+        <label className={styles.showDescription}>
+          <input
+            type="checkbox"
+            checked={showDescription}
+            onChange={() => setShowDescription(!showDescription)}
+          />
+          Description
+        </label>
+      </div>
       {schema && (
         <SchemaContext.Provider value={schema}>
-          <NodeCustomizerContext.Provider value={customizeNode}>
-            <DefaultValueCustomizerContext.Provider value={customizeDefaultValue}>
-              <Document documentNode={documentNode} onEdit={onEditDocument} />
-            </DefaultValueCustomizerContext.Provider>
-          </NodeCustomizerContext.Provider>
+          <DescriptionContext.Provider value={showDescription}>
+            <NodeCustomizerContext.Provider value={customizeNode}>
+              <DefaultValueCustomizerContext.Provider value={customizeDefaultValue}>
+                <Document documentNode={documentNode} onEdit={onEditDocument} />
+              </DefaultValueCustomizerContext.Provider>
+            </NodeCustomizerContext.Provider>
+          </DescriptionContext.Provider>
         </SchemaContext.Provider>
       )}
     </div>

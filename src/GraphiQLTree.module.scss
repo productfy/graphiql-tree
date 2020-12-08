@@ -8,7 +8,7 @@
     --heading-color: #212833;
     --text-color: #425166;
     --gray100: #eaeaea;
-    --productfy-blue: #1C6EDC;
+    --productfy-blue: #1c6edc;
 
     padding: 2.5vw 5%;
     font-family: var(--body-font);
@@ -24,11 +24,6 @@
       cursor: pointer;
       margin: 0;
       vertical-align: -2px;
-    }
-
-    .arg-name + :local(.typeName),
-    .field-name + :local(.typeName) {
-      margin-left: 8px;
     }
 
     :local(.addRow) {
@@ -54,11 +49,16 @@
         font-size: 13px;
         font-weight: 600;
       }
+
+      > label {
+        padding-left: 22px;
+        display: inline-block;
+      }
     }
 
     :local(.argumentFields) {
       border: 1px solid var(--gray100);
-      margin: 8px 0 8px 1.6em;
+      margin: 8px 0 8px 21px;
 
       &:local(.listable) {
         margin-top: 24px;
@@ -109,8 +109,15 @@
 
     :local(.checkbox) {
       display: inline-block;
-      width: 1em;
-      margin-right: 0.5em;
+      width: 14px;
+      margin-right: 7px;
+    }
+
+    :local(.checkboxGroup) {
+      display: inline-block;
+      white-space: nowrap;
+      margin-left: -22px;
+      margin-right: 7px;
     }
 
     .depth-4 {
@@ -162,6 +169,10 @@
       }
     }
 
+    :local(.hidden) {
+      display: none;
+    }
+
     :local(.implementationType) {
       padding: 12px 0 12px 24px;
       border-bottom: 1px solid #e3e8ee;
@@ -176,7 +187,7 @@
     }
 
     :local(.indented) {
-      padding-left: 1.6em;
+      padding-left: 21px;
     }
 
     :local(.inputField) {
@@ -187,8 +198,9 @@
         border-bottom: none;
       }
 
-      label {
-        white-space: nowrap;
+      > label {
+        padding-left: 22px;
+        display: inline-block;
       }
     }
 
@@ -274,7 +286,7 @@
 
     :local(.nameLine) {
       display: inline-block;
-      white-space: nowrap;
+      padding-left: 22px;
     }
 
     :local(.node) {
@@ -355,7 +367,7 @@
       padding-top: 12px;
 
       > span + :local(.typeName) {
-        margin-left: 8px;
+        margin-left: 7px;
       }
     }
 
@@ -434,9 +446,21 @@
       }
     }
 
+    :local(.toolbar) {
+      margin-top: 6px;
+      margin-bottom: 6px;
+      text-align: right;
+
+      :local(.showDescription) {
+        input[type='checkbox'] {
+          margin-right: 7px;
+        }
+      }
+    }
+
     :local(.typeFields) {
       border: 1px solid var(--gray100);
-      margin: 8px 8px 8px 1.6em;
+      margin: 8px 8px 8px 21px;
     }
 
     :local(.typeName) {

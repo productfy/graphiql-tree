@@ -10,6 +10,7 @@ import {
   GraphQLArgument,
   GraphQLField,
   GraphQLInputField,
+  GraphQLInputType,
   GraphQLList,
   GraphQLNamedType,
   GraphQLNonNull,
@@ -28,6 +29,7 @@ import {
   isInputObjectType,
   isInterfaceType,
   isListType,
+  isNonNullType,
   isObjectType,
   isRequiredArgument,
   isRequiredInputField,
@@ -59,7 +61,7 @@ export function generateArgumentSelectionFromType(
 
   let value: ValueNode =
     customizeDefaultValue(arg, parentDefinition) ||
-    getDefaultValueByType(unwrappedType, parentDefinition, customizeDefaultValue);
+    getDefaultValueByType(type, parentDefinition, customizeDefaultValue);
 
   if (isInputObjectType(unwrappedType)) {
     const fields = unwrappedType.getFields();
@@ -80,7 +82,7 @@ export function generateArgumentSelectionFromType(
           value:
             customizeDefaultValue(field, { definition: arg, parentDefinition }) ||
             getDefaultValueByType(
-              unwrapType(field.type),
+              field.type,
               { definition: arg, parentDefinition },
               customizeDefaultValue,
             ),
@@ -127,7 +129,7 @@ export function generateObjectFieldNodeFromInputField(
 
   let value: ValueNode =
     customizeDefaultValue(field, parentDefinition) ||
-    getDefaultValueByType(unwrappedType, parentDefinition, customizeDefaultValue);
+    getDefaultValueByType(type, parentDefinition, customizeDefaultValue);
 
   if (isInputObjectType(unwrappedType)) {
     value = {
@@ -147,7 +149,7 @@ export function generateObjectFieldNodeFromInputField(
           value:
             customizeDefaultValue(f, { definition: field, parentDefinition }) ||
             getDefaultValueByType(
-              unwrapType(f.type),
+              f.type,
               { definition: field, parentDefinition },
               customizeDefaultValue,
             ),
@@ -256,10 +258,19 @@ export function generateOutputFieldSelectionFromType(
 }
 
 export function getDefaultValueByType(
-  type: GraphQLNamedType,
+  type: GraphQLInputType,
   parentDefinition: ParentDefinition,
   customizeDefaultValue: DefaultValueCustomizer,
 ): ValueNode {
+  if (isNonNullType(type)) {
+    return getDefaultValueByType(type.ofType, parentDefinition, customizeDefaultValue);
+  }
+  if (isListType(type)) {
+    return {
+      kind: 'ListValue',
+      values: [getDefaultValueByType(type.ofType, parentDefinition, customizeDefaultValue)],
+    };
+  }
   if (isInputObjectType(type)) {
     return {
       kind: 'ObjectValue',
@@ -280,7 +291,7 @@ export function getDefaultValueByType(
               value:
                 customizeDefaultValue(field, { definition: type, parentDefinition }) ||
                 getDefaultValueByType(
-                  unwrapType(field.type),
+                  field.type,
                   { definition: type, parentDefinition },
                   customizeDefaultValue,
                 ),

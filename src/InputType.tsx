@@ -14,6 +14,7 @@ import {
   isRequiredInputField,
   isScalarType,
 } from 'graphql';
+import { DefaultValueCustomizerContext, DescriptionContext } from './Context';
 import React, { useCallback, useContext, useEffect, useRef } from 'react';
 import {
   generateArgumentSelectionFromType,
@@ -26,7 +27,6 @@ import {
   unwrapType,
 } from './graphqlHelper';
 
-import { DefaultValueCustomizerContext } from './Context';
 import InputElement from './InputElement';
 import ParentDefinition from './ParentDefinition';
 import TrashIcon from './icons/Trash';
@@ -50,6 +50,7 @@ const InputField = React.memo(function InputField({
   parentDefinition,
 }: InputFieldProps) {
   const customizeDefaultValue = useContext(DefaultValueCustomizerContext);
+  const showDescription = useContext(DescriptionContext);
   const objectFieldNodeRef = useRef(objectFieldNode);
   const parentDefinitionRef = useRef({ definition: inputField, parentDefinition });
   const { name, type } = inputField;
@@ -68,7 +69,11 @@ const InputField = React.memo(function InputField({
         ...objectFieldNodeRef.current!.value,
         values: [
           ...((objectFieldNodeRef.current!.value as ListValueNode).values || []),
-          getDefaultValueByType(unwrappedType, parentDefinitionRef.current, customizeDefaultValue),
+          ...(getDefaultValueByType(
+            type,
+            parentDefinitionRef.current,
+            customizeDefaultValue,
+          ) as ListValueNode).values,
         ],
       } as ListValueNode,
     };
@@ -149,22 +154,23 @@ const InputField = React.memo(function InputField({
   return (
     <div className={classnames(styles.inputField, `depth-${depth}`)}>
       <label>
-        {hasFields && (
-          <span className={`CodeMirror-foldgutter-${isSelected ? 'open' : 'folded'}`} />
-        )}
+        <span className={styles.checkboxGroup}>
+          {hasFields && (
+            <span className={`CodeMirror-foldgutter-${isSelected ? 'open' : 'folded'}`} />
+          )}
 
-        <span className={styles.checkbox}>
-          <input
-            checked={isSelected}
-            disabled={isRequired}
-            onChange={onToggleInputField}
-            type="checkbox"
-            value={isSelected.toString()}
-          />
+          <span className={styles.checkbox}>
+            <input
+              checked={isSelected}
+              disabled={isRequired}
+              onChange={onToggleInputField}
+              type="checkbox"
+              value={isSelected.toString()}
+            />
+          </span>
+
+          <span className={classnames('arg-name', 'cm-attribute', styles.selectable)}>{name}</span>
         </span>
-
-        <span className={classnames('arg-name', 'cm-attribute', styles.selectable)}>{name}</span>
-
         <TypeName className={styles.selectable} isInputType type={type} />
       </label>
 
@@ -211,7 +217,7 @@ const InputField = React.memo(function InputField({
           />
         ))}
 
-      {description && (
+      {showDescription && description && (
         <div className={classnames(styles.description, styles.indented)}>{description}</div>
       )}
 
@@ -296,6 +302,7 @@ const Argument = React.memo(function Argument({
   const argumentNodeRef = useRef(argumentNode);
   const parentDefinitionRef = useRef({ definition: argument, parentDefinition });
   const customizeDefaultValue = useContext(DefaultValueCustomizerContext);
+  const showDescription = useContext(DescriptionContext);
 
   useEffect(() => {
     argumentNodeRef.current = argumentNode;
@@ -308,7 +315,11 @@ const Argument = React.memo(function Argument({
         ...argumentNodeRef.current!.value,
         values: [
           ...((argumentNodeRef.current!.value as ListValueNode).values || []),
-          getDefaultValueByType(unwrappedType, parentDefinitionRef.current, customizeDefaultValue),
+          ...(getDefaultValueByType(
+            type,
+            parentDefinitionRef.current,
+            customizeDefaultValue,
+          ) as ListValueNode).values,
         ],
       } as ListValueNode,
     };
@@ -398,24 +409,26 @@ const Argument = React.memo(function Argument({
   return (
     <div className={classnames(styles.argument, styles.node, `depth-${depth}`)}>
       <label>
-        {hasFields && (
-          <span
-            className={classnames(
-              styles.selectable,
-              isSelected ? 'CodeMirror-foldgutter-open' : 'CodeMirror-foldgutter-folded',
-            )}
-          />
-        )}
-        <span className={styles.checkbox}>
-          <input
-            checked={isSelected}
-            disabled={isRequired}
-            onChange={onToggleArgument}
-            type="checkbox"
-            value={isSelected.toString()}
-          />
+        <span className={styles.checkboxGroup}>
+          {hasFields && (
+            <span
+              className={classnames(
+                styles.selectable,
+                isSelected ? 'CodeMirror-foldgutter-open' : 'CodeMirror-foldgutter-folded',
+              )}
+            />
+          )}
+          <span className={styles.checkbox}>
+            <input
+              checked={isSelected}
+              disabled={isRequired}
+              onChange={onToggleArgument}
+              type="checkbox"
+              value={isSelected.toString()}
+            />
+          </span>
+          <span className={classnames('arg-name', 'cm-attribute', styles.selectable)}>{name}</span>
         </span>
-        <span className={classnames('arg-name', 'cm-attribute', styles.selectable)}>{name}</span>
         <TypeName className={styles.selectable} isInputType type={type} />
       </label>
 
@@ -462,7 +475,7 @@ const Argument = React.memo(function Argument({
           />
         ))}
 
-      {description && (
+      {showDescription && description && (
         <div className={classnames(styles.description, styles.indented)}>{description}</div>
       )}
 
