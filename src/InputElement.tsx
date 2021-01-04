@@ -43,6 +43,7 @@ export default React.memo(function InputElement({
   const onEditInput = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const nextValue = e.target.value;
     let nextValueNode: ValueNode;
+    let num: number;
 
     const nullValueNode: NullValueNode = { kind: 'NullValue' };
 
@@ -60,7 +61,7 @@ export default React.memo(function InputElement({
             nextValueNode = nullValueNode;
             break;
           }
-          const num = parseFloat(nextValue);
+          num = parseFloat(nextValue);
           if (isNaN(num)) {
             nextValueNode = {
               kind: 'StringValue',
@@ -75,9 +76,13 @@ export default React.memo(function InputElement({
           break;
         case 'Long':
         case 'Int':
+          if (nextValue === '') {
+            nextValueNode = nullValueNode;
+            break;
+          }
           nextValueNode = {
             kind: 'IntValue',
-            value: nextValue,
+            value: parseInt(nextValue).toString(),
           } as IntValueNode;
           break;
         case 'Boolean':
@@ -180,6 +185,14 @@ export default React.memo(function InputElement({
                     ref={inputRef}
                     value={scalarValue}
                     onChange={onEditInput}
+                    onKeyDown={e => {
+                      if (
+                        ['Int', 'Long'].includes(unwrappedType.name) &&
+                        [',', '.'].includes(e.key)
+                      ) {
+                        e.preventDefault();
+                      }
+                    }}
                     className={styles.inputText}
                     // style={{ width: `calc(1px + ${String(value ?? '').length}ch)` }}
                   />

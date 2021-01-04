@@ -63,7 +63,7 @@
     "graphiql": "^1.2.1",
     "graphql": "^15.4.0",
     "lodash": "^4.17.20",
-    "node-sass": "^5.0.0",
+    "node-sass": "^4.14.1",
     "postcss": "^8.2.2",
     "prop-types": "^15.7.2",
     "react": "^17.0.1",

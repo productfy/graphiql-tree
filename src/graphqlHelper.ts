@@ -25,6 +25,7 @@ import {
   SelectionNode,
   SelectionSetNode,
   ValueNode,
+  astFromValue,
   isEnumType,
   isInputObjectType,
   isInterfaceType,
@@ -272,14 +273,12 @@ export function getDefaultValueByType(
     };
   }
   if (isInputObjectType(type)) {
+    const cdv = (field: GraphQLInputField) =>
+      customizeDefaultValue(field, { definition: type, parentDefinition });
     return {
       kind: 'ObjectValue',
       fields: Object.values(type.getFields())
-        .filter(
-          field =>
-            isRequiredInputField(field) ||
-            customizeDefaultValue(field, { definition: type, parentDefinition }),
-        )
+        .filter(field => isRequiredInputField(field) || cdv(field))
         .map(
           field =>
             ({
@@ -289,7 +288,7 @@ export function getDefaultValueByType(
                 value: field.name,
               },
               value:
-                customizeDefaultValue(field, { definition: type, parentDefinition }) ||
+                cdv(field) ??
                 getDefaultValueByType(
                   field.type,
                   { definition: type, parentDefinition },
@@ -299,33 +298,18 @@ export function getDefaultValueByType(
         ),
     };
   }
+  // TODO: customizeDefaultValue for GraphQLEnumType and GraphQLScalarType
   if (isEnumType(type)) {
-    return {
-      kind: 'NullValue',
-    };
+    return astFromValue(null, type)!;
   }
+  /* Everything hereafter are scalars */
   if (type.name === 'Boolean') {
-    return {
-      kind: 'BooleanValue',
-      value: true,
-    };
+    return astFromValue(true, type)!;
   }
-  if (type.name === 'BigDecimal' || type.name === 'Float') {
-    return {
-      kind: 'FloatValue',
-      value: '0',
-    };
+  if (['BigDecimal', 'Float', 'Int', 'Long'].includes(type.name)) {
+    return astFromValue(0, type)!;
   }
-  if (type.name === 'Int' || type.name === 'Long') {
-    return {
-      kind: 'IntValue',
-      value: '0',
-    };
-  }
-  return {
-    kind: 'StringValue',
-    value: '',
-  };
+  return astFromValue('', type)!;
 }
 
 export function getTypeName(type?: GraphQLType): string {
