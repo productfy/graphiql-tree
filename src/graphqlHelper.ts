@@ -36,6 +36,7 @@ import {
   isRequiredInputField,
   isWrappingType,
   print,
+  VariableDefinitionNode,
 } from 'graphql';
 
 import DefaultValueCustomizer from './DefaultValueCustomizer';
@@ -747,4 +748,27 @@ export function updateOperationDefinition(
     },
     operation,
   };
+}
+
+export function updateOperationVariable(
+  operationDefinition: OperationDefinitionNode,
+  prevVariableDefinition?: VariableDefinitionNode,
+  nextVariableDefinition?: VariableDefinitionNode,
+): OperationDefinitionNode {
+  if (nextVariableDefinition) {
+    return {
+      ...operationDefinition,
+      variableDefinitions: [
+        ...(operationDefinition.variableDefinitions || []),
+        nextVariableDefinition,
+      ],
+    };
+  } else {
+    return {
+      ...operationDefinition,
+      variableDefinitions: (operationDefinition.variableDefinitions || []).filter(
+        ({ variable }) => variable.name !== prevVariableDefinition?.variable.name,
+      ),
+    };
+  }
 }

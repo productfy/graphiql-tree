@@ -1,6 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
 
+$elementShadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px,
+  rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(60, 66, 87, 0.16) 0px 0px 0px 1px,
+  rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px,
+  rgba(0, 0, 0, 0) 0px 0px 0px 0px;
+
 :global {
   :local(.graphiqlTree) {
     --body-font: Roboto, sans-serif;
@@ -10,10 +15,10 @@
     --gray100: #eaeaea;
     --productfy-blue: #1c6edc;
 
-    padding: 2.5vw 5%;
+    padding: 2.5vh 5%;
     font-family: var(--body-font);
     font-size: 14px;
-    line-height: 22px;
+    line-height: 1.5;
     color: var(--text-color);
 
     input {
@@ -115,7 +120,7 @@
 
     :local(.checkboxGroup) {
       display: inline-block;
-      white-space: nowrap;
+      // white-space: nowrap;
       margin-left: -22px;
       margin-right: 7px;
     }
@@ -213,10 +218,7 @@
       font-family: var(--monospace-font);
       font-size: 13px;
       line-height: 1.5;
-      box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px,
-        rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(60, 66, 87, 0.16) 0px 0px 0px 1px,
-        rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px,
-        rgba(0, 0, 0, 0) 0px 0px 0px 0px;
+      box-shadow: $elementShadow;
       margin: 4px 0;
       padding: 4px 8px;
       border-radius: 4px;
@@ -287,6 +289,8 @@
     :local(.nameLine) {
       display: inline-block;
       padding-left: 22px;
+      line-height: normal;
+      word-break: break-all;
     }
 
     :local(.node) {
@@ -316,6 +320,21 @@
         margin-right: 6px;
         color: #999;
         margin-left: -20px;
+      }
+    }
+
+    :local(.parameterize) {
+      height: 28px;
+      width: 28px;
+      border: none;
+      margin-right: 8px;
+      border-radius: 4px;
+      box-shadow: $elementShadow;
+      cursor: pointer;
+
+      &:local(.active) {
+        background-color: #397D13;
+        color: white;
       }
     }
 
@@ -468,6 +487,24 @@
       font-size: 13px;
       font-weight: 500;
       -webkit-font-smoothing: antialiased;
+    }
+
+    :local(.withParameterize) {
+      display: flex;
+      align-items: center;
+
+      > :nth-child(2) {
+        flex-grow: 1;
+      }
+    }
+  }
+
+  :local(.tooltip) {
+    font-family: Roboto, sans-serif;
+
+    .rc-tooltip-inner {
+      min-height: unset;
+      text-align: center;
     }
   }
 }

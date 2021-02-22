@@ -7,17 +7,27 @@ import {
   NullValueNode,
   StringValueNode,
   ValueNode,
+  VariableDefinitionNode,
+  VariableNode,
   isEnumType,
+  parseType,
 } from 'graphql';
+import {
+  NodeCustomizerContext,
+  OperationDefinitionContext,
+  VariableHandlerContext,
+} from './Context';
 import React, { ChangeEvent, useContext, useRef } from 'react';
 import { sourcesAreEqual, unwrapType } from './graphqlHelper';
 
-import { NodeCustomizerContext } from './Context';
 import ParentDefinition from './ParentDefinition';
+import Tooltip from 'rc-tooltip';
 import classnames from 'classnames';
 import styles from './GraphiQLTree.module.scss';
 
 export interface InputElementProps {
+  className?: string;
+  defaultValue: ValueNode;
   depth: number;
   isRequired?: boolean;
   name: string;
@@ -28,7 +38,9 @@ export interface InputElementProps {
 }
 
 export default React.memo(function InputElement({
+  defaultValue,
   depth,
+  className,
   isRequired = false,
   name,
   onEdit,
@@ -36,9 +48,12 @@ export default React.memo(function InputElement({
   type,
   value,
 }: InputElementProps) {
+  const operationDefinition = useContext(OperationDefinitionContext);
   const NodeCustomizer = useContext(NodeCustomizerContext);
+  const variableHandler = useContext(VariableHandlerContext);
   const inputRef = useRef<HTMLInputElement>(null);
   const unwrappedType = unwrapType(type);
+  const isVariable = value?.kind === 'Variable';
 
   const onEditInput = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const nextValue = e.target.value;
@@ -112,8 +127,39 @@ export default React.memo(function InputElement({
     onEdit(value, nextValueNode);
   };
 
+  const onToggleParameter = () => {
+    if (isVariable) {
+      const prevVariableDefinition = operationDefinition?.variableDefinitions?.find(
+        ({ variable }) => variable.name.value === name,
+      );
+
+      // This is a hack until we find a more elegant way of propagating changes for both
+      // leaf (at any depth) and root. Right now we let the variableDefinition changes
+      // finish and then make the changes to the argumentNode.
+      variableHandler(prevVariableDefinition, undefined);
+      setTimeout(() => onEdit(value, defaultValue), 50);
+    } else {
+      const variableNode: VariableNode = {
+        kind: 'Variable',
+        name: {
+          kind: 'Name',
+          value: name,
+        },
+      };
+      const nextVariableDefinition: VariableDefinitionNode = {
+        kind: 'VariableDefinition',
+        variable: variableNode,
+        type: parseType(type.toString()),
+        directives: [],
+      };
+
+      variableHandler(undefined, nextVariableDefinition);
+      setTimeout(() => onEdit(value, variableNode), 50);
+    }
+  };
+
   return (
-    <div className={classnames(styles.argInput, styles.indented)}>
+    <div className={classnames(styles.argInput, className)}>
       {(() => {
         const customScalarArgumentResult = NodeCustomizer({
           depth,
@@ -234,20 +280,44 @@ export default React.memo(function InputElement({
                 </div>
               );
             default:
-              scalarValue =
-                (value as NullValueNode)?.kind === 'NullValue'
-                  ? ''
-                  : (value as StringValueNode)?.value ?? '';
+              scalarValue = isVariable
+                ? `$${(value as VariableNode).name.value}`
+                : (value as NullValueNode)?.kind === 'NullValue'
+                ? ''
+                : (value as StringValueNode)?.value ?? '';
               return (
-                <div className="cm-string" onClick={() => inputRef.current?.focus()}>
-                  <input
-                    type="text"
-                    ref={inputRef}
-                    value={scalarValue}
-                    onChange={onEditInput}
-                    className={styles.inputText}
-                    // style={{ width: `calc(1px + ${String(value ?? '').length}ch)` }}
-                  />
+                <div className={styles.withParameterize}>
+                  <Tooltip overlay="Parameterize" overlayClassName={styles.tooltip} placement="top">
+                    <button
+                      className={classnames(styles.parameterize, {
+                        [styles.active]: isVariable,
+                      })}
+                      onClick={onToggleParameter}
+                    >
+                      $
+                    </button>
+                  </Tooltip>
+                  {isVariable ? (
+                    <div className="cm-variable">
+                      <input
+                        type="text"
+                        value={scalarValue}
+                        className={styles.inputText}
+                        disabled
+                      />
+                    </div>
+                  ) : (
+                    <div className="cm-string" onClick={() => inputRef.current?.focus()}>
+                      <input
+                        type="text"
+                        ref={inputRef}
+                        value={scalarValue}
+                        onChange={onEditInput}
+                        className={styles.inputText}
+                        // style={{ width: `calc(1px + ${String(value ?? '').length}ch)` }}
+                      />
+                    </div>
+                  )}
                 </div>
               );
           }

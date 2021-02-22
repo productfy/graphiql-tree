@@ -1,4 +1,5 @@
 import 'graphiql/graphiql.css';
+import 'rc-tooltip/assets/bootstrap.css';
 
 import { GraphQLSchema, OperationDefinitionNode, OperationTypeNode, parse } from 'graphql';
 import React, { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -11,6 +12,7 @@ import GraphiQL from 'graphiql';
 import GraphiQLTree from './GraphiQLTree';
 import NodeCustomizer from './NodeCustomizer';
 import Snippet from './snippets/Snippet';
+import Tooltip from 'rc-tooltip';
 import classnames from 'classnames';
 import copy from 'copy-to-clipboard';
 import { generateDefaultQueryByQueryOrMutationName } from './graphqlHelper';
@@ -30,7 +32,8 @@ export interface GraphiQLWithTreeProps {
 }
 
 enum CodeMode {
-  GraphQL,
+  GraphQL = 'GraphQL',
+  GraphQLVariables = 'GraphQLVariables',
 }
 
 const DEFAULT_API = {
@@ -43,7 +46,7 @@ const DEFAULT_NODE_CUSTOMIZER = () => undefined;
 const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
   context,
   customizeDefaultValue = DEFAULT_DEFAULT_VALUE_CUSTOMIZER,
-  customizeNode  = DEFAULT_NODE_CUSTOMIZER,
+  customizeNode = DEFAULT_NODE_CUSTOMIZER,
   fetcher,
   query: queryOverride,
   schema,
@@ -56,8 +59,10 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
   const [exportCode, setExportCode] = useState<string>('');
   const [query, setQuery] = useState<string>('');
   const [showCopiedTooltip, setShowCopiedTooltip] = useState<boolean>(false);
+  const [variables, setVariables] = useState<string>('{}');
 
   const onEditQuery = useCallback((query?: string) => setQuery(query || ''), [setQuery]);
+  const onEditVariables = useCallback((v?: string) => setVariables(v || ''), [setVariables]);
   const parsedQuery = useMemo(() => {
     try {
       return parse(query);
@@ -79,17 +84,39 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
   }, [customizeDefaultValue, queryOverride, schema]);
 
   useEffect(() => {
-    const snippet = (snippets || []).find(({ name }) => codeMode === name);
-    if (snippet) {
-      setExportCode(
-        snippet.generate({
-          context,
-          operationDefinition: parsedQuery?.definitions[0] as OperationDefinitionNode,
-          serverUrl,
-        }),
-      );
+    let nextExportCode = '';
+    let safeVariables = 'MUST BE VALID JSON';
+    try {
+      safeVariables = JSON.parse(variables);
+    } catch (e) {
+      // Variables is probably not valid JSON
     }
-  }, [codeMode, context, parsedQuery, serverUrl, snippets]);
+    switch (codeMode) {
+      case CodeMode.GraphQL:
+        nextExportCode = query;
+        break;
+      case CodeMode.GraphQLVariables:
+        // If we safely parsed it, format it. Otherwise copy as is.
+        nextExportCode =
+          safeVariables === 'MUST BE VALID JSON'
+            ? variables
+            : JSON.stringify(safeVariables, null, 2);
+        break;
+      default:
+        const snippet = (snippets || []).find(({ name }) => codeMode === name);
+        if (snippet) {
+          nextExportCode = snippet.generate({
+            context: {
+              ...context,
+              variables: safeVariables,
+            },
+            operationDefinition: parsedQuery?.definitions[0] as OperationDefinitionNode,
+            serverUrl,
+          });
+        }
+    }
+    setExportCode(nextExportCode);
+  }, [codeMode, context, parsedQuery, query, serverUrl, snippets, variables]);
 
   useEffect(() => {
     if ((graphiqlRef.current as any)?.getQueryEditor()?.options?.readOnly === false) {
@@ -104,6 +131,11 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
   };
   const onCodeModeChange = (e: ChangeEvent<HTMLSelectElement>) => setCodeMode(e.target.value);
   const snippet = (snippets || []).find(({ name }) => codeMode === name);
+  const hasSnippets = Array.isArray(snippets) && snippets.length > 0;
+  const notGraphqlMode = ![
+    CodeMode.GraphQL as string,
+    CodeMode.GraphQLVariables as string,
+  ].includes(codeMode);
 
   return (
     <div className={classnames(styles.graphiqlWithTree, 'graphiqlWithTree')}>
@@ -124,61 +156,89 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
           className={classnames(styles.interactiveInterfaceContent, 'interactiveInterfaceContent')}
         >
           <div className={classnames(styles.topBar, 'topBar')}>
-            <div>Request</div>
-            <div className={classnames(styles.toolbar, 'toolBar')}>
-              <button
-                className={styles.executeButton}
-                onClick={() => (graphiqlRef?.current as any)?.handleRunQuery()}
-              >
-                <span style={{ fontSize: 11 }}>&#x25B6;</span> Run query
-              </button>
-              {snippets && (
-                <div>
+            <div className={styles.mainBar}>
+              <div>Request</div>
+              <div className={classnames(styles.toolbar, 'toolBar')}>
+                <button
+                  className={styles.executeButton}
+                  onClick={() => (graphiqlRef?.current as any)?.handleRunQuery()}
+                >
+                  <span style={{ fontSize: 11 }}>&#x25B6;</span> Run query
+                </button>
+
+                <Tooltip
+                  overlay={showCopiedTooltip ? 'Copied!' : 'Click to copy'}
+                  overlayClassName={styles.tooltip}
+                  placement="left"
+                >
+                  <button className={styles.copyButton}>
+                    <ClipboardIcon onClick={copyByCodeMode} />
+                  </button>
+                </Tooltip>
+              </div>
+            </div>
+            <div className={styles.subBar}>
+              <ul className={styles.subBarTabs}>
+                <li
+                  className={classnames({
+                    [styles.active]: codeMode === CodeMode.GraphQL,
+                  })}
+                  onClick={() => setCodeMode(CodeMode.GraphQL)}
+                >
+                  Query
+                </li>
+                <li
+                  className={classnames({
+                    [styles.active]: codeMode === CodeMode.GraphQLVariables,
+                  })}
+                  onClick={() => setCodeMode(CodeMode.GraphQLVariables)}
+                >
+                  Variables
+                </li>
+                {hasSnippets && (
+                  <li
+                    className={classnames({
+                      [styles.active]: notGraphqlMode,
+                    })}
+                    onClick={() => setCodeMode(snippets![0].name)}
+                  >
+                    Export
+                  </li>
+                )}
+              </ul>
+            </div>
+
+            {hasSnippets && notGraphqlMode && (
+              <div className={styles.subBarExports}>
+                <label>
+                  Code type
                   <div className={styles.select}>
                     <select onChange={onCodeModeChange} value={codeMode}>
-                      <option value="GraphQL">GraphQL</option>
-                      {snippets.map(({ name }) => (
+                      {snippets!.map(({ name }) => (
                         <option key={name} value={name}>
                           {name}
                         </option>
                       ))}
                     </select>
                   </div>
-                </div>
-              )}
-              <button className={styles.copyButton}>
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: '-25px',
-                    left: '-22px',
-                    fontSize: 'small',
-                    padding: '6px 8px',
-                    color: '#fff',
-                    textAlign: 'left',
-                    textDecoration: 'none',
-                    wordWrap: 'break-word',
-                    backgroundColor: 'rgba(0,0,0,0.75)',
-                    borderRadius: '4px',
-                    lineHeight: 'normal',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                    display: showCopiedTooltip ? 'block' : 'none',
-                    pointerEvents: 'none',
-                  }}
-                >
-                  Copied!
-                </div>
-                <ClipboardIcon onClick={copyByCodeMode} title="Click to copy" />
-              </button>
-            </div>
+                </label>
+              </div>
+            )}
           </div>
-          <div className={classnames(styles.bottomContent, 'bottomContent')}>
+          <div
+            className={classnames(styles.bottomContent, 'bottomContent', {
+              [styles.variablesVisible]: codeMode === CodeMode.GraphQLVariables,
+              [styles.exportCodeVisible]: notGraphqlMode,
+            })}
+          >
             <GraphiQL
               fetcher={fetcher}
               query={query}
               onEditQuery={onEditQuery}
+              onEditVariables={onEditVariables}
               ref={graphiqlRef}
               schema={schema}
+              variables={variables}
             />
             {snippet && <CodeExport code={exportCode} mode={snippet.mode} theme="graphiql" />}
           </div>

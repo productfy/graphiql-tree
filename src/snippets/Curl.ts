@@ -7,7 +7,8 @@ import { print } from 'graphql';
 export default {
   name: 'cURL',
   mode: 'shell',
-  generate: ({ operationDefinition, serverUrl }) => {
+  generate: ({ context, operationDefinition, serverUrl }) => {
+    const { variables } = context;
     const { name } = operationDefinition;
     const query = print(operationDefinition);
 
@@ -17,6 +18,7 @@ export default {
   -d '${JSON.stringify({
     operationName: name?.value,
     query: graphqlQueryCompress(query),
+    variables,
   })}'`;
   },
 } as Snippet;

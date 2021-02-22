@@ -17,12 +17,12 @@
     }
 
     :local(.interactiveInterfaceContainer) {
-      padding-top: 2.5vw;
+      padding-top: 2.5vh;
       padding-right: 5%;
 
       :local(.interactiveInterfaceContent) {
         position: sticky;
-        top: 2.5vw;
+        top: 2.5vh;
 
         :local(.bottomContent) {
           position: relative;
@@ -36,8 +36,8 @@
           z-index: 20;
 
           box-sizing: border-box;
-          min-height: 40vh;
-          max-height: 40vh;
+          min-height: calc(46.25vh - 94px);
+          max-height: calc(46.25vh - 94px);
           padding: 12px;
 
           border-left: 1px solid #e3e8ee;
@@ -114,6 +114,15 @@
           }
         }
 
+        :local(.exportCodeVisible) {
+          .graphiql-container {
+            .queryWrap {
+              min-height: calc(46.25vh - 95px);
+              max-height: calc(46.25vh - 95px);
+            }
+          }
+        }
+
         :local(.hidden) {
           display: none;
         }
@@ -134,14 +143,22 @@
             padding: 12px 0;
           }
 
+          .CodeMirror-sizer {
+            margin-left: 42px !important;
+          }
+
+          .docExplorerWrap {
+            display: none !important;
+          }
+
           .editorBar {
             flex-direction: column;
           }
 
           .resultWrap {
-            min-height: 40vh;
-            max-height: 40vh;
-            margin-top: 24px;
+            min-height: 46.25vh;
+            max-height: 46.25vh;
+            margin-top: 2.5vh;
             border-left: none;
 
             &::before {
@@ -167,14 +184,15 @@
               border-right: 1px solid #e3e8ee;
               border-bottom-left-radius: 8px;
               border-bottom-right-radius: 8px;
-              background-color: #f7fafc;
+              background-color: white;
+              overflow: hidden;
 
               .CodeMirror {
                 background-color: transparent;
               }
 
               .CodeMirror-gutters {
-                background-color: transparent;
+                background-color: white;
                 border: none;
                 cursor: default;
               }
@@ -182,17 +200,18 @@
           }
 
           .queryWrap {
-            min-height: 40vh;
-            max-height: 40vh;
+            min-height: calc(46.25vh - 61px);
+            max-height: calc(46.25vh - 61px);
+
+            border-left: 1px solid #e3e8ee;
+            border-bottom: 1px solid #e3e8ee;
+            border-right: 1px solid #e3e8ee;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            background-color: #ffffff;
+            overflow: hidden;
 
             .query-editor {
-              border-left: 1px solid #e3e8ee;
-              border-bottom: 1px solid #e3e8ee;
-              border-right: 1px solid #e3e8ee;
-              border-bottom-left-radius: 8px;
-              border-bottom-right-radius: 8px;
-              background-color: #ffffff;
-
               .CodeMirror {
                 background-color: transparent;
               }
@@ -210,6 +229,15 @@
 
           .variable-editor {
             display: none;
+
+            .CodeMirror-gutters {
+              background-color: transparent;
+              border: none;
+            }
+
+            .variable-editor-title {
+              display: none;
+            }
           }
         }
 
@@ -219,56 +247,6 @@
           }
           > * + * {
             margin-left: 2em;
-          }
-
-          :local(.select) {
-            display: grid;
-            grid-template-areas: 'select';
-            align-items: center;
-            width: 100%;
-            box-sizing: border-box;
-            line-height: 34px;
-
-            select {
-              // A reset of styles, including removing the default dropdown arrow
-              appearance: none;
-              // Additional resets for further consistency
-              background-color: transparent;
-              border: none;
-              color: inherit;
-              padding: 0 20px 0 8px;
-              margin: 0;
-              width: 100%;
-              font-family: inherit;
-              font-size: inherit;
-              cursor: inherit;
-              line-height: inherit;
-              grid-area: select;
-              text-overflow: ellipsis;
-              outline: none;
-              text-align-last: right;
-            }
-
-            &::after {
-              content: '';
-              width: 0.7em;
-              height: 0.5em;
-              background-color: var(--toolbar-color);
-              clip-path: polygon(100% 0%, 0 0%, 50% 100%);
-              grid-area: select;
-              justify-self: end;
-              margin-right: 0.6em;
-            }
-
-            &:hover {
-              select {
-                color: var(--productfy-blue);
-              }
-
-              &::after {
-                background-color: var(--productfy-blue);
-              }
-            }
           }
         }
 
@@ -281,16 +259,136 @@
           font-size: 13px;
           line-height: 35px;
           letter-spacing: 0.01em;
-          text-transform: uppercase;
           -webkit-font-smoothing: antialiased;
 
           border-top-right-radius: 8px;
           border-top-left-radius: 8px;
 
-          display: flex;
-          justify-content: space-between;
+          :local(.mainBar) {
+            display: flex;
+            justify-content: space-between;
+            text-transform: uppercase;
+          }
+
+          :local(.subBar) {
+            display: flex;
+            margin-left: -12px;
+            margin-right: -12px;
+            line-height: 2;
+            background-color: #e3e8ee;
+            border-left: 1px solid #e3e8ee;
+            border-right: 1px solid #e3e8ee;
+          }
+
+          :local(.subBarExports) {
+            line-height: 2;
+            background-color: white;
+            margin: 0 -12px;
+            border-left: 1px solid #e3e8ee;
+            border-right: 1px solid #e3e8ee;
+            padding: 4px 12px;
+
+            label {
+              display: flex;
+            }
+
+            :local(.select) {
+              display: grid;
+              grid-template-areas: 'select';
+              align-items: center;
+              // width: 100%;
+              width: fit-content;
+              box-sizing: border-box;
+              margin-left: 12px;
+
+              select {
+                // A reset of styles, including removing the default dropdown arrow
+                appearance: none;
+                // Additional resets for further consistency
+                background-color: transparent;
+                border: none;
+                color: inherit;
+                padding: 0 20px 0 8px;
+                margin: 0;
+                width: 100%;
+                font-family: inherit;
+                font-size: inherit;
+                cursor: inherit;
+                line-height: inherit;
+                grid-area: select;
+                text-overflow: ellipsis;
+                outline: none;
+                // text-align-last: right;
+              }
+
+              &::after {
+                content: '';
+                width: 0.7em;
+                height: 0.5em;
+                background-color: var(--toolbar-color);
+                clip-path: polygon(100% 0%, 0 0%, 50% 100%);
+                grid-area: select;
+                justify-self: end;
+                margin-right: 0.6em;
+              }
+
+              &:hover {
+                select {
+                  color: var(--productfy-blue);
+                }
+
+                &::after {
+                  background-color: var(--productfy-blue);
+                }
+              }
+            }
+          }
+
+          :local(.subBarTabs) {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+
+            > li {
+              display: inline-block;
+              padding-left: 12px;
+              padding-right: 12px;
+              color: #7d869a;
+              cursor: pointer;
+
+              &:hover {
+                background-color: #eff2f5;
+              }
+
+              &:local(.active) {
+                color: var(--toolbar-color);
+                background-color: white;
+              }
+            }
+          }
+        }
+
+        :local(.variablesVisible) {
+          .query-editor {
+            display: none;
+          }
+
+          .variable-editor {
+            display: block;
+            flex: 1 1;
+            height: unset;
+          }
         }
       }
+    }
+  }
+
+  :local(.tooltip) {
+    font-family: Roboto, sans-serif;
+
+    .rc-tooltip-inner {
+      min-height: unset;
+      text-align: center;
     }
   }
 }
