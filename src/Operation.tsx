@@ -1,12 +1,18 @@
-import { OperationDefinitionNode, OperationTypeNode, SelectionSetNode } from 'graphql';
+import {
+  OperationDefinitionNode,
+  OperationTypeNode,
+  SelectionSetNode,
+  VariableDefinitionNode,
+} from 'graphql';
 import React, { ChangeEvent, useCallback, useContext, useEffect, useRef } from 'react';
 import {
   mergeSelectionSetIntoOperationDefinition,
   sourcesAreEqual,
   updateOperationDefinition,
+  updateOperationVariable,
 } from './graphqlHelper';
 
-import { SchemaContext } from './Context';
+import { OperationDefinitionContext, SchemaContext, VariableHandlerContext } from './Context';
 import { Type } from './OutputType';
 import classnames from 'classnames';
 import styles from './GraphiQLTree.module.scss';
@@ -61,6 +67,21 @@ export default React.memo(function Operation({
     [onEdit, operationDefinitionNodeRef],
   );
 
+  const onEditVariable = useCallback(
+    (
+      prevVariableDefinitionNode?: VariableDefinitionNode,
+      nextVariableDefinitionNode?: VariableDefinitionNode,
+    ) => {
+      const nextOperationDefinitionNode = updateOperationVariable(
+        operationDefinitionNodeRef.current,
+        prevVariableDefinitionNode,
+        nextVariableDefinitionNode,
+      );
+      onEdit(operationDefinitionNodeRef.current, nextOperationDefinitionNode);
+    },
+    [onEdit, operationDefinitionNodeRef],
+  );
+
   const name = operationDefinitionNode.name?.value || '';
   const operation = operationDefinitionNode.operation;
   const schema = useContext(SchemaContext);
@@ -103,13 +124,17 @@ export default React.memo(function Operation({
       </div>
 
       {type && (
-        <Type
-          depth={depth + 1}
-          key={operation}
-          onEdit={onEditType}
-          selectionSetNode={operationDefinitionNode.selectionSet}
-          type={type}
-        />
+        <OperationDefinitionContext.Provider value={operationDefinitionNode}>
+          <VariableHandlerContext.Provider value={onEditVariable}>
+            <Type
+              depth={depth + 1}
+              key={operation}
+              onEdit={onEditType}
+              selectionSetNode={operationDefinitionNode.selectionSet}
+              type={type}
+            />
+          </VariableHandlerContext.Provider>
+        </OperationDefinitionContext.Provider>
       )}
 
       {/* <div className="cm-punctuation">{'}'}</div> */}

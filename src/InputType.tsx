@@ -14,7 +14,12 @@ import {
   isRequiredInputField,
   isScalarType,
 } from 'graphql';
-import { DefaultValueCustomizerContext, DescriptionContext } from './Context';
+import {
+  DefaultValueCustomizerContext,
+  DescriptionContext,
+  OperationDefinitionContext,
+  VariableHandlerContext,
+} from './Context';
 import React, { useCallback, useContext, useEffect, useRef } from 'react';
 import {
   generateArgumentSelectionFromType,
@@ -51,6 +56,8 @@ const InputField = React.memo(function InputField({
 }: InputFieldProps) {
   const customizeDefaultValue = useContext(DefaultValueCustomizerContext);
   const showDescription = useContext(DescriptionContext);
+  const operationDefinition = useContext(OperationDefinitionContext);
+  const variableHandler = useContext(VariableHandlerContext);
   const objectFieldNodeRef = useRef(objectFieldNode);
   const parentDefinitionRef = useRef({ definition: inputField, parentDefinition });
   const { name, type } = inputField;
@@ -61,6 +68,12 @@ const InputField = React.memo(function InputField({
   useEffect(() => {
     objectFieldNodeRef.current = objectFieldNode;
   }, [objectFieldNode]);
+
+  const defaultObjectField: ObjectFieldNode = generateObjectFieldNodeFromInputField(
+    inputField,
+    parentDefinition,
+    customizeDefaultValue,
+  );
 
   const onAddRow = () => {
     const nextObjectFieldNode: ObjectFieldNode = {
@@ -136,14 +149,17 @@ const InputField = React.memo(function InputField({
       return;
     }
     if (!objectFieldNodeRef.current) {
-      const nextObjectFieldNode: ObjectFieldNode = generateObjectFieldNodeFromInputField(
-        inputField,
-        parentDefinition,
-        customizeDefaultValue,
-      );
-      onEdit(objectFieldNodeRef.current, nextObjectFieldNode);
+      onEdit(objectFieldNodeRef.current, defaultObjectField);
     } else {
-      onEdit(objectFieldNodeRef.current, undefined);
+      const prevVariableDefinition = operationDefinition?.variableDefinitions?.find(
+        ({ variable }) => variable.name.value === name,
+      );
+
+      // This is a hack until we find a more elegant way of propagating changes for both
+      // leaf (at any depth) and root. Right now we let the variableDefinition changes
+      // finish and then make the changes to the argumentNode.
+      variableHandler(prevVariableDefinition, undefined);
+      setTimeout(() => onEdit(objectFieldNodeRef.current, undefined), 50);
     }
   };
 
@@ -180,8 +196,12 @@ const InputField = React.memo(function InputField({
           <>
             {(objectFieldNode?.value as ListValueNode).values?.map(
               (v: ValueNode, index: number) => (
-                <div className={styles.inputElementContainer} key={index}>
+                <div
+                  className={classnames(styles.inputElementContainer, styles.indented)}
+                  key={index}
+                >
                   <InputElement
+                    defaultValue={defaultObjectField.value}
                     depth={depth}
                     isRequired={isRequiredInputField(inputField)}
                     name={inputField.name}
@@ -206,15 +226,18 @@ const InputField = React.memo(function InputField({
             </div>
           </>
         ) : (
-          <InputElement
-            depth={depth}
-            isRequired={isRequiredInputField(inputField)}
-            name={inputField.name}
-            onEdit={onEditInputField()}
-            parentDefinition={parentDefinitionRef.current}
-            type={type}
-            value={objectFieldNode?.value}
-          />
+          <div className={styles.indented}>
+            <InputElement
+              defaultValue={defaultObjectField.value}
+              depth={depth}
+              isRequired={isRequiredInputField(inputField)}
+              name={inputField.name}
+              onEdit={onEditInputField()}
+              parentDefinition={parentDefinitionRef.current}
+              type={type}
+              value={objectFieldNode?.value}
+            />
+          </div>
         ))}
 
       {showDescription && description && (
@@ -303,10 +326,18 @@ const Argument = React.memo(function Argument({
   const parentDefinitionRef = useRef({ definition: argument, parentDefinition });
   const customizeDefaultValue = useContext(DefaultValueCustomizerContext);
   const showDescription = useContext(DescriptionContext);
+  const operationDefinition = useContext(OperationDefinitionContext);
+  const variableHandler = useContext(VariableHandlerContext);
 
   useEffect(() => {
     argumentNodeRef.current = argumentNode;
   }, [argumentNode]);
+
+  const defaultArgument: ArgumentNode = generateArgumentSelectionFromType(
+    argument,
+    parentDefinition,
+    customizeDefaultValue,
+  );
 
   const onAddArgumentRow = () => {
     const nextArgumentNode: ArgumentNode = {
@@ -390,16 +421,27 @@ const Argument = React.memo(function Argument({
       return;
     }
     if (!argumentNodeRef.current) {
-      const nextArgumentNode: ArgumentNode = generateArgumentSelectionFromType(
-        argument,
-        parentDefinition,
-        customizeDefaultValue,
-      );
-      onEdit(argumentNodeRef.current, nextArgumentNode);
+      onEdit(argumentNodeRef.current, defaultArgument);
     } else {
-      onEdit(argumentNodeRef.current, undefined);
+      const prevVariableDefinition = operationDefinition?.variableDefinitions?.find(
+        ({ variable }) => variable.name.value === name,
+      );
+
+      // This is a hack until we find a more elegant way of propagating changes for both
+      // leaf (at any depth) and root. Right now we let the variableDefinition changes
+      // finish and then make the changes to the argumentNode.
+      variableHandler(prevVariableDefinition, undefined);
+      setTimeout(() => onEdit(argumentNodeRef.current, undefined), 50);
     }
-  }, [argument, argumentNodeRef, customizeDefaultValue, isRequired, onEdit, parentDefinition]);
+  }, [
+    argumentNodeRef,
+    defaultArgument,
+    isRequired,
+    name,
+    onEdit,
+    operationDefinition,
+    variableHandler,
+  ]);
 
   const unwrappedType = unwrapType(type);
   const hasFields = isInputObjectType(unwrappedType);
@@ -437,8 +479,9 @@ const Argument = React.memo(function Argument({
         (isList ? (
           <>
             {((argumentNode?.value as ListValueNode).values || []).map((v, i) => (
-              <div className={styles.inputElementContainer} key={i}>
+              <div className={classnames(styles.inputElementContainer, styles.indented)} key={i}>
                 <InputElement
+                  defaultValue={defaultArgument.value}
                   depth={depth}
                   key={`[${i}].${name}`}
                   name={name}
@@ -463,16 +506,19 @@ const Argument = React.memo(function Argument({
             </div>
           </>
         ) : (
-          <InputElement
-            depth={depth}
-            key={name}
-            name={name}
-            isRequired={isRequiredArgument(argument)}
-            onEdit={onEditArgument()}
-            parentDefinition={parentDefinitionRef.current}
-            type={unwrappedType}
-            value={argumentNode?.value}
-          />
+          <div className={classnames(styles.indented)}>
+            <InputElement
+              defaultValue={defaultArgument.value}
+              depth={depth}
+              key={name}
+              name={name}
+              isRequired={isRequiredArgument(argument)}
+              onEdit={onEditArgument()}
+              parentDefinition={parentDefinitionRef.current}
+              type={unwrappedType}
+              value={argumentNode?.value}
+            />
+          </div>
         ))}
 
       {showDescription && description && (

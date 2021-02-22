@@ -8,6 +8,7 @@ import {
 import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 
 import Curl from './snippets/Curl';
+import HttpJson from './snippets/HttpJson';
 import DefaultValueCustomizer from './DefaultValueCustomizer';
 import { FetcherParams } from 'graphiql/dist/components/GraphiQL';
 import GraphiQLWithTree from './GraphiQLWithTree';
@@ -46,49 +47,49 @@ const fetcher = ({ signal }: AbortController) => async (graphQLParams: FetcherPa
 const GET_ENUMS = '{ enums { left right { code description name }}}';
 
 const mutationWhitelist = [
-  'activatePaymentCard',
-  'applyFinancialAccountGroupFinancialTransactions',
-  'applySingleBalanceFinancialTransaction',
-  'cancelAchTransferRequest',
-  'closeFinancialAccount',
-  'createAchTransferRequest',
-  'createManuallyEnteredExternalFinancialAccountWithOwnerIds',
-  'createPhysicalCommercialCreditCardProduct',
-  'createPhysicalCommercialDebitCardProduct',
-  'createPhysicalCommercialPrepaidCardProduct',
-  'createVirtualCommercialCreditCardProduct',
-  'createVirtualCommercialDebitCardProduct',
-  'createVirtualCommercialPrepaidCardProduct',
-  'createVirtualGenericFinancialAccount',
-  'deactivatePaymentCard',
-  'downloadPersonProfessionalData',
-  'financialAccountKvpData',
-  'initiateMicroDeposits',
-  'invalidateLoginSession',
-  'issueCommercialCreditCard',
-  'issueCommercialDebitCard',
-  'issueCommercialPrepaidCard',
-  'kbaAnswers',
-  'loginKvpData',
-  'logIn',
-  'organizationAddress',
-  'organizationKvpData',
-  'personAddress',
-  'personEmailAddress',
-  'personKvpData',
-  'personPhoneNumber',
-  'removeFinancialAccount',
-  'requestEquifaxConsumerCreditData',
-  'resetPassword',
-  'reverseFinancialTransaction',
-  'saveCompany',
-  'saveOrganizationPersonAssociation',
-  'settlePendingFinancialTransaction',
+  // 'activatePaymentCard',
+  // 'applyFinancialAccountGroupFinancialTransactions',
+  // 'applySingleBalanceFinancialTransaction',
+  // 'cancelAchTransferRequest',
+  // 'closeFinancialAccount',
+  // 'createAchTransferRequest',
+  // 'createManuallyEnteredExternalFinancialAccountWithOwnerIds',
+  // 'createPhysicalCommercialCreditCardProduct',
+  // 'createPhysicalCommercialDebitCardProduct',
+  // 'createPhysicalCommercialPrepaidCardProduct',
+  // 'createVirtualCommercialCreditCardProduct',
+  // 'createVirtualCommercialDebitCardProduct',
+  // 'createVirtualCommercialPrepaidCardProduct',
+  // 'createVirtualGenericFinancialAccount',
+  // 'deactivatePaymentCard',
+  // 'downloadPersonProfessionalData',
+  // 'financialAccountKvpData',
+  // 'initiateMicroDeposits',
+  // 'invalidateLoginSession',
+  // 'issueCommercialCreditCard',
+  // 'issueCommercialDebitCard',
+  // 'issueCommercialPrepaidCard',
+  // 'kbaAnswers',
+  // 'loginKvpData',
+  // 'logIn',
+  // 'organizationAddress',
+  // 'organizationKvpData',
+  // 'personAddress',
+  // 'personEmailAddress',
+  // 'personKvpData',
+  // 'personPhoneNumber',
+  // 'removeFinancialAccount',
+  // 'requestEquifaxConsumerCreditData',
+  // 'resetPassword',
+  // 'reverseFinancialTransaction',
+  // 'saveCompany',
+  // 'saveOrganizationPersonAssociation',
+  // 'settlePendingFinancialTransaction',
   'signUp',
-  'updateLoginAccountStatus',
-  'updatePerson',
-  'updateCardSpendingLimits',
-  'verifyMicroDeposits',
+  // 'updateLoginAccountStatus',
+  // 'updatePerson',
+  // 'updateCardSpendingLimits',
+  // 'verifyMicroDeposits',
 ];
 
 const queryWhitelist = [
@@ -197,7 +198,7 @@ const App = () => {
       fetcher={fetcher(abortController.current)}
       schema={schema}
       serverUrl={serverUrl}
-      snippets={[Curl]}
+      snippets={[Curl, HttpJson]}
     />
   );
 };
