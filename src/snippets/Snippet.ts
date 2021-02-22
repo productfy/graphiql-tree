@@ -4,7 +4,6 @@ export interface GenerateParams {
   context?: any;
   operationDefinition: OperationDefinitionNode;
   serverUrl: string;
-  variables?: string;
 }
 
 export default interface Snippet {
