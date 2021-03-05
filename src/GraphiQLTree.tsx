@@ -4,20 +4,26 @@ import {
   NodeCustomizerContext,
   SchemaContext,
 } from './Context';
-import { DocumentNode, GraphQLSchema, parse } from 'graphql';
+import type { DocumentNode, GraphQLSchema } from 'graphql';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import DefaultValueCustomizer from './DefaultValueCustomizer';
 import Document from './Document';
 import NodeCustomizer from './NodeCustomizer';
 import classnames from 'classnames';
+import { parse } from 'graphql';
 import styles from './GraphiQLTree.module.scss';
 import { transformDocumentNodeToQueryString } from './graphqlHelper';
 
 export interface GraphiQLTreeProps {
   customizeNode: NodeCustomizer;
   customizeDefaultValue: DefaultValueCustomizer;
-  onEdit: (queryString: string) => void;
+  onEdit: (
+    prevQueryString: string,
+    nextQueryString: string,
+    prevDocumentNode: DocumentNode,
+    nextDocumentNode: DocumentNode,
+  ) => void;
   query: string;
   schema?: GraphQLSchema;
 }
@@ -48,10 +54,12 @@ export default React.memo(function GraphiQLTree({
   );
 
   const onEditDocument = useCallback(
-    (_prevDocumentNode: DocumentNode, nextDocumentNode: DocumentNode) => {
+    (prevDocumentNode: DocumentNode, nextDocumentNode: DocumentNode) => {
       try {
         const nextQuery = transformDocumentNodeToQueryString(nextDocumentNode);
-        onEdit(nextQuery);
+        if (query !== nextQuery) {
+          onEdit(query, nextQuery, prevDocumentNode, nextDocumentNode);
+        }
       } catch (error) {
         /**
          * It's possible that we have an invalid DocumentNode, e.g. change operationName to "123",
@@ -60,7 +68,7 @@ export default React.memo(function GraphiQLTree({
         console.error(error);
       }
     },
-    [onEdit],
+    [onEdit, query],
   );
 
   useEffect(() => {
