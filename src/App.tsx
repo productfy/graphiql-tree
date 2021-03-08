@@ -27,7 +27,7 @@ interface ProductfyEnum {
   }[];
 }
 
-const serverUrl = 'https://stage-user-api.productfy.io/graphql/api/public';
+const serverUrl = 'https://user-api.productfy.io/graphql/api/public';
 
 const fetcher = ({ signal }: AbortController) => async (graphQLParams: FetcherParams) => {
   const response = await fetch(serverUrl, {
@@ -191,7 +191,7 @@ const App = () => {
     }
   };
 
-  return (
+  return schema ? (
     <GraphiQLWithTree
       customizeDefaultValue={customizeDefaultValue}
       customizeNode={customizeNode}
@@ -200,7 +200,7 @@ const App = () => {
       serverUrl={serverUrl}
       snippets={[Curl, HttpJson]}
     />
-  );
+  ) : null;
 };
 
 export default App;

@@ -24,7 +24,20 @@ export interface GraphiQLTreeProps {
 
 const DEFAULT_DOCUMENT: DocumentNode = {
   kind: 'Document',
-  definitions: [],
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: {
+        kind: 'Name',
+        value: 'myQuery',
+      },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [],
+      },
+    },
+  ],
 };
 
 function parseQuery(queryString: string): DocumentNode | undefined {

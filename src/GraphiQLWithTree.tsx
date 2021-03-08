@@ -1,7 +1,7 @@
 import 'graphiql/graphiql.css';
 import 'rc-tooltip/assets/bootstrap.css';
 
-import { GraphQLSchema, OperationDefinitionNode, OperationTypeNode, parse } from 'graphql';
+import { GraphQLSchema, OperationDefinitionNode, parse } from 'graphql';
 import React, { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import ClipboardIcon from './icons/Clipboard';
@@ -15,7 +15,6 @@ import Snippet from './snippets/Snippet';
 import Tooltip from 'rc-tooltip';
 import classnames from 'classnames';
 import copy from 'copy-to-clipboard';
-import { generateDefaultQueryByQueryOrMutationName } from './graphqlHelper';
 import styles from './GraphiQLWithTree.module.scss';
 
 export interface GraphiQLWithTreeProps {
@@ -36,10 +35,6 @@ enum CodeMode {
   GraphQLVariables = 'GraphQLVariables',
 }
 
-const DEFAULT_API = {
-  name: 'signUp',
-  operationType: 'mutation' as OperationTypeNode,
-};
 const DEFAULT_DEFAULT_VALUE_CUSTOMIZER = () => undefined;
 const DEFAULT_NODE_CUSTOMIZER = () => undefined;
 
@@ -72,15 +67,7 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
   }, [query]);
 
   useEffect(() => {
-    const newQuery =
-      queryOverride ??
-      (schema &&
-        generateDefaultQueryByQueryOrMutationName({
-          ...DEFAULT_API,
-          customizeDefaultValue,
-          schema,
-        }));
-    setQuery(newQuery || '');
+    setQuery(queryOverride || 'query myQuery {}');
   }, [customizeDefaultValue, queryOverride, schema]);
 
   useEffect(() => {
