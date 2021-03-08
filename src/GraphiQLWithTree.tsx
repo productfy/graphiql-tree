@@ -7,7 +7,7 @@ import React, { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState }
 import ClipboardIcon from './icons/Clipboard';
 import CodeExport from './CodeExport';
 import DefaultValueCustomizer from './DefaultValueCustomizer';
-import { Fetcher } from 'graphiql/dist/components/GraphiQL';
+import type { Fetcher } from '@graphiql/toolkit';
 import GraphiQL from 'graphiql';
 import GraphiQLTree from './GraphiQLTree';
 import NodeCustomizer from './NodeCustomizer';
