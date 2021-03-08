@@ -8,10 +8,10 @@ import {
 import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 
 import Curl from './snippets/Curl';
-import HttpJson from './snippets/HttpJson';
 import DefaultValueCustomizer from './DefaultValueCustomizer';
-import { FetcherParams } from 'graphiql/dist/components/GraphiQL';
+import type { FetcherParams } from '@graphiql/toolkit';
 import GraphiQLWithTree from './GraphiQLWithTree';
+import HttpJson from './snippets/HttpJson';
 import { NodeCustomizerParams } from './NodeCustomizer';
 import classnames from 'classnames';
 import pickBy from 'lodash/pickBy';
@@ -27,7 +27,7 @@ interface ProductfyEnum {
   }[];
 }
 
-const serverUrl = 'https://stage-user-api.productfy.io/graphql/api/public';
+const serverUrl = 'https://user-api.productfy.io/graphql/api/public';
 
 const fetcher = ({ signal }: AbortController) => async (graphQLParams: FetcherParams) => {
   const response = await fetch(serverUrl, {
@@ -191,7 +191,7 @@ const App = () => {
     }
   };
 
-  return (
+  return schema ? (
     <GraphiQLWithTree
       customizeDefaultValue={customizeDefaultValue}
       customizeNode={customizeNode}
@@ -200,7 +200,7 @@ const App = () => {
       serverUrl={serverUrl}
       snippets={[Curl, HttpJson]}
     />
-  );
+  ) : null;
 };
 
 export default App;

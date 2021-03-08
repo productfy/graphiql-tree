@@ -1,6 +1,6 @@
 {
   "name": "@productfy/graphiql-tree",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": false,
   "repository": {
     "type": "git",
@@ -49,6 +49,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",
+    "@graphiql/toolkit": "^0.1.1",
     "@rollup/plugin-babel": "^5.2.2",
     "@rollup/plugin-commonjs": "^17.0.0",
     "@rollup/plugin-json": "^4.1.0",
@@ -62,7 +63,7 @@
     "@types/react-dom": "^17.0.0",
     "codemirror": "^5.58.3",
     "eslint-config-react-app": "^6.0.0",
-    "graphiql": "^1.2.1",
+    "graphiql": "^1.4.0",
     "graphql": "^15.4.0",
     "lodash": "^4.17.20",
     "node-sass": "^4.14.1",
@@ -83,14 +84,14 @@
   },
   "peerDependencies": {
     "codemirror": "^5.58.3",
-    "graphiql": "^1.2.1",
+    "graphiql": "^1.4.0",
     "graphql": "^15.4.0",
     "lodash": "^4.17.20",
     "react": "^17.0.1",
     "react-dom": "^17.0.1"
   },
   "engines": {
-    "node": ">=10"
+    "node": ">=12"
   },
   "publishConfig": {
     "access": "public"

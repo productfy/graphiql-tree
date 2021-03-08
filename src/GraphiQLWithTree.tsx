@@ -1,18 +1,13 @@
 import 'graphiql/graphiql.css';
 import 'rc-tooltip/assets/bootstrap.css';
 
-import type {
-  DocumentNode,
-  GraphQLSchema,
-  OperationDefinitionNode,
-  OperationTypeNode,
-} from 'graphql';
+import { DocumentNode, GraphQLSchema, OperationDefinitionNode, parse } from 'graphql';
 import React, { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import ClipboardIcon from './icons/Clipboard';
 import CodeExport from './CodeExport';
 import DefaultValueCustomizer from './DefaultValueCustomizer';
-import { Fetcher } from 'graphiql/dist/components/GraphiQL';
+import type { Fetcher } from '@graphiql/toolkit';
 import GraphiQL from 'graphiql';
 import GraphiQLTree from './GraphiQLTree';
 import NodeCustomizer from './NodeCustomizer';
@@ -20,11 +15,7 @@ import Snippet from './snippets/Snippet';
 import Tooltip from 'rc-tooltip';
 import classnames from 'classnames';
 import copy from 'copy-to-clipboard';
-import {
-  generateDefaultQueryByQueryOrMutationName,
-  mergeDocumentNodeIntoVariables,
-} from './graphqlHelper';
-import { parse } from 'graphql';
+import { mergeDocumentNodeIntoVariables } from './graphqlHelper';
 import styles from './GraphiQLWithTree.module.scss';
 
 export interface GraphiQLWithTreeProps {
@@ -45,10 +36,6 @@ enum CodeMode {
   GraphQLVariables = 'GraphQLVariables',
 }
 
-const DEFAULT_API = {
-  name: 'signUp',
-  operationType: 'mutation' as OperationTypeNode,
-};
 const DEFAULT_DEFAULT_VALUE_CUSTOMIZER = () => undefined;
 const DEFAULT_NODE_CUSTOMIZER = () => undefined;
 
@@ -96,15 +83,7 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
   }, [query]);
 
   useEffect(() => {
-    const newQuery =
-      queryOverride ??
-      (schema &&
-        generateDefaultQueryByQueryOrMutationName({
-          ...DEFAULT_API,
-          customizeDefaultValue,
-          schema,
-        }));
-    setQuery(newQuery || '');
+    setQuery(queryOverride || 'query myQuery {}');
   }, [customizeDefaultValue, queryOverride, schema]);
 
   useEffect(() => {
