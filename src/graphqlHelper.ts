@@ -371,6 +371,44 @@ export function mergeArgumentIntoField(
   };
 }
 
+export function mergeDocumentNodeIntoVariables(
+  variables: string,
+  nextDocumentNode: DocumentNode,
+): string {
+  const [operationDefinition] = nextDocumentNode.definitions;
+  const { variableDefinitions } = operationDefinition as OperationDefinitionNode;
+  console.log(variables, variableDefinitions);
+  let parsedVariables = {} as Record<string, any>;
+  try {
+    parsedVariables = JSON.parse(variables);
+  } catch (e) {
+    // If not valid JSON, then we'll just create a new one from scratch
+  }
+  const keys = (variableDefinitions || []).map(({ variable }) => variable.name.value);
+  // Add if not present in variables
+  keys.forEach(key => {
+    if (!(key in parsedVariables)) {
+      parsedVariables[key] = '';
+    }
+  });
+  // Remove from variables if not present in definition
+  for (let key in parsedVariables) {
+    if (!keys.includes(key)) {
+      delete parsedVariables[key];
+    }
+  }
+
+  // Sort the keys in alphabetical order
+  parsedVariables = Object.keys(parsedVariables)
+    .sort()
+    .reduce((obj, key) => {
+      obj[key] = parsedVariables[key];
+      return obj;
+    }, {} as Record<string, any>);
+
+  return JSON.stringify(parsedVariables, null, 2);
+}
+
 export function mergeFieldIntoInlineFragment(
   inlineFragmentNode: InlineFragmentNode,
   prevFieldNode?: FieldNode,
@@ -761,7 +799,7 @@ export function updateOperationVariable(
       variableDefinitions: [
         ...(operationDefinition.variableDefinitions || []),
         nextVariableDefinition,
-      ],
+      ].sort((a, b) => a.variable.name.value.localeCompare(b.variable.name.value)),
     };
   } else {
     return {

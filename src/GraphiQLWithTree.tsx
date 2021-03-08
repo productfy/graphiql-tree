@@ -1,7 +1,7 @@
 import 'graphiql/graphiql.css';
 import 'rc-tooltip/assets/bootstrap.css';
 
-import { GraphQLSchema, OperationDefinitionNode, parse } from 'graphql';
+import { DocumentNode, GraphQLSchema, OperationDefinitionNode, parse } from 'graphql';
 import React, { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import ClipboardIcon from './icons/Clipboard';
@@ -15,6 +15,7 @@ import Snippet from './snippets/Snippet';
 import Tooltip from 'rc-tooltip';
 import classnames from 'classnames';
 import copy from 'copy-to-clipboard';
+import { mergeDocumentNodeIntoVariables } from './graphqlHelper';
 import styles from './GraphiQLWithTree.module.scss';
 
 export interface GraphiQLWithTreeProps {
@@ -56,7 +57,22 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
   const [showCopiedTooltip, setShowCopiedTooltip] = useState<boolean>(false);
   const [variables, setVariables] = useState<string>('{}');
 
-  const onEditQuery = useCallback((query?: string) => setQuery(query || ''), [setQuery]);
+  const onEditQueryGraphiql = useCallback(
+    (nextQueryString?: string) => setQuery(nextQueryString || ''),
+    [setQuery],
+  );
+  const onEditQueryTree = useCallback(
+    (
+      _prevQueryString: string,
+      nextQueryString: string,
+      _prevDocumentNode: DocumentNode,
+      nextDocumentNode: DocumentNode,
+    ) => {
+      setQuery(nextQueryString || '');
+      setVariables(mergeDocumentNodeIntoVariables(variables, nextDocumentNode));
+    },
+    [setQuery, setVariables, variables],
+  );
   const onEditVariables = useCallback((v?: string) => setVariables(v || ''), [setVariables]);
   const parsedQuery = useMemo(() => {
     try {
@@ -129,7 +145,7 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
       <GraphiQLTree
         customizeDefaultValue={customizeDefaultValue}
         customizeNode={customizeNode}
-        onEdit={onEditQuery}
+        onEdit={onEditQueryTree}
         query={query}
         schema={schema}
       />
@@ -221,7 +237,7 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
             <GraphiQL
               fetcher={fetcher}
               query={query}
-              onEditQuery={onEditQuery}
+              onEditQuery={onEditQueryGraphiql}
               onEditVariables={onEditVariables}
               ref={graphiqlRef}
               schema={schema}

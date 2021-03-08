@@ -9,6 +9,7 @@
     --body-font: Roboto, sans-serif;
     --monospace-font: 'IBM Plex Mono', monospace;
     --productfy-blue: #1c6edc;
+    --text-color: #425166;
     --toolbar-color: #505561;
 
     > * {
@@ -17,34 +18,32 @@
     }
 
     :local(.interactiveInterfaceContainer) {
-      padding-top: 2.5vh;
-      padding-right: 5%;
 
       :local(.interactiveInterfaceContent) {
         position: sticky;
-        top: 2.5vh;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        max-height: 100vh;
+        // top: 2.5vh;
+        top: 0;
 
         :local(.bottomContent) {
           position: relative;
+          flex: 1 1;
         }
 
         :local(.codeExport) {
           position: absolute;
-          top: 0;
+          top: 34px;
           left: 0;
           right: 0;
           z-index: 20;
 
           box-sizing: border-box;
-          min-height: calc(46.25vh - 94px);
-          max-height: calc(46.25vh - 94px);
           padding: 12px;
 
           border-left: 1px solid #e3e8ee;
-          border-bottom: 1px solid #e3e8ee;
-          border-right: 1px solid #e3e8ee;
-          border-bottom-left-radius: 8px;
-          border-bottom-right-radius: 8px;
           background-color: #ffffff;
           overflow: auto;
 
@@ -103,23 +102,16 @@
           padding: 0;
           border: 0;
           background: none;
-          font-size: inherit;
-          line-height: 34px;
+          font-size: 13px;
+          line-height: 22px;
           color: #505561;
           cursor: pointer;
           outline: none;
+          border-right: 1px solid #e3e8ee;
+          padding-right: 1em;
 
           &:hover {
             color: var(--productfy-blue);
-          }
-        }
-
-        :local(.exportCodeVisible) {
-          .graphiql-container {
-            .queryWrap {
-              min-height: calc(46.25vh - 95px);
-              max-height: calc(46.25vh - 95px);
-            }
           }
         }
 
@@ -155,35 +147,30 @@
             flex-direction: column;
           }
 
+          .editorWrap {
+            height: 100%;
+          }
+
           .resultWrap {
-            min-height: 46.25vh;
-            max-height: 46.25vh;
-            margin-top: 2.5vh;
             border-left: none;
 
             &::before {
               content: 'Result';
-              background-color: #e3e8ee;
+              background-color: #f4f5f9;
               padding: 0px 12px;
-              color: #697386;
+              color: var(--text-color);
               font-family: var(--body-font);
               font-weight: 500;
-              font-size: 13px;
-              line-height: 35px;
+              font-size: 15px;
+              line-height: 40px;
               letter-spacing: 0.01em;
-              text-transform: uppercase;
               -webkit-font-smoothing: antialiased;
 
-              border-top-right-radius: 8px;
-              border-top-left-radius: 8px;
+              border-left: 1px solid #e3e8ee;
             }
 
             .result-window {
               border-left: 1px solid #e3e8ee;
-              border-bottom: 1px solid #e3e8ee;
-              border-right: 1px solid #e3e8ee;
-              border-bottom-left-radius: 8px;
-              border-bottom-right-radius: 8px;
               background-color: white;
               overflow: hidden;
 
@@ -200,14 +187,7 @@
           }
 
           .queryWrap {
-            min-height: calc(46.25vh - 61px);
-            max-height: calc(46.25vh - 61px);
-
             border-left: 1px solid #e3e8ee;
-            border-bottom: 1px solid #e3e8ee;
-            border-right: 1px solid #e3e8ee;
-            border-bottom-left-radius: 8px;
-            border-bottom-right-radius: 8px;
             background-color: #ffffff;
             overflow: hidden;
 
@@ -246,28 +226,27 @@
             display: inline-block;
           }
           > * + * {
-            margin-left: 2em;
+            margin-left: 1em;
           }
         }
 
         :local(.topBar) {
-          background-color: #c6d0e8;
+          background-color: #f4f5f9;
           padding: 0px 12px;
-          color: var(--toolbar-color);
+          color: var(--text-color);
           font-family: var(--body-font);
           font-weight: 500;
           font-size: 13px;
-          line-height: 35px;
+          line-height: 40px;
           letter-spacing: 0.01em;
           -webkit-font-smoothing: antialiased;
 
-          border-top-right-radius: 8px;
-          border-top-left-radius: 8px;
+          border-left: 1px solid #e3e8ee;
 
           :local(.mainBar) {
             display: flex;
             justify-content: space-between;
-            text-transform: uppercase;
+            font-size: 15px;
           }
 
           :local(.subBar) {
@@ -275,18 +254,16 @@
             margin-left: -12px;
             margin-right: -12px;
             line-height: 2;
-            background-color: #e3e8ee;
-            border-left: 1px solid #e3e8ee;
-            border-right: 1px solid #e3e8ee;
+            background-color: #ebedf4;
           }
 
           :local(.subBarExports) {
             line-height: 2;
             background-color: white;
-            margin: 0 -12px;
-            border-left: 1px solid #e3e8ee;
-            border-right: 1px solid #e3e8ee;
+            margin: 0 -12px -34px;
             padding: 4px 12px;
+            position: relative;
+            z-index: 30;
 
             label {
               display: flex;
@@ -296,7 +273,6 @@
               display: grid;
               grid-template-areas: 'select';
               align-items: center;
-              // width: 100%;
               width: fit-content;
               box-sizing: border-box;
               margin-left: 12px;
@@ -318,7 +294,6 @@
                 grid-area: select;
                 text-overflow: ellipsis;
                 outline: none;
-                // text-align-last: right;
               }
 
               &::after {
@@ -357,7 +332,7 @@
               cursor: pointer;
 
               &:hover {
-                background-color: #eff2f5;
+                background-color: #f4f5f9;
               }
 
               &:local(.active) {

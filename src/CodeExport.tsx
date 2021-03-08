@@ -1,16 +1,19 @@
 import CodeMirror, { Editor } from 'codemirror';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 
-import React from 'react';
+import type { RefObject } from 'react';
 import classnames from 'classnames';
 import styles from './GraphiQLWithTree.module.scss';
+import useResizeObserver from '@react-hook/resize-observer';
 
 interface CodeExportProps {
   code: string;
+  height: number;
   mode: string;
   theme?: string;
 }
 
-export default class CodeExport extends React.PureComponent<CodeExportProps, {}> {
+class CodeExportContent extends React.PureComponent<CodeExportProps, {}> {
   _node?: HTMLDivElement;
   editor?: Editor;
 
@@ -37,11 +40,35 @@ export default class CodeExport extends React.PureComponent<CodeExportProps, {}>
   }
 
   render() {
+    const { height } = this.props;
     return (
       <div
         className={classnames(styles.codeExport, 'codeExport')}
         ref={ref => (this._node = ref || undefined)}
+        style={{ height: Math.max(height - 34, 0) }}
       />
     );
   }
 }
+
+const useSize = (target: RefObject<HTMLElement>) => {
+  const [size, setSize] = useState<DOMRect>();
+
+  useLayoutEffect(() => {
+    setSize(target.current?.getBoundingClientRect());
+  }, [target]);
+
+  // Where the magic happens
+  useResizeObserver(target, (entry: any) => setSize(entry.contentRect));
+  return size;
+};
+
+const CodeExport = (props: Omit<CodeExportProps, 'height'>) => {
+  const target = useRef<HTMLElement>(
+    document.getElementsByClassName('query-editor')[0] as HTMLElement,
+  );
+  const size: any = useSize(target);
+  return <CodeExportContent {...props} height={size?.height || 0} />;
+};
+
+export default CodeExport;
