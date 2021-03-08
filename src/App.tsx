@@ -8,10 +8,10 @@ import {
 import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 
 import Curl from './snippets/Curl';
-import HttpJson from './snippets/HttpJson';
 import DefaultValueCustomizer from './DefaultValueCustomizer';
-import { FetcherParams } from 'graphiql/dist/components/GraphiQL';
+import type { FetcherParams } from '@graphiql/toolkit';
 import GraphiQLWithTree from './GraphiQLWithTree';
+import HttpJson from './snippets/HttpJson';
 import { NodeCustomizerParams } from './NodeCustomizer';
 import classnames from 'classnames';
 import pickBy from 'lodash/pickBy';
