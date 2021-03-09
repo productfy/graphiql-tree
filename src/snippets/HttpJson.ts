@@ -8,12 +8,13 @@ export default {
   name: 'HTTP',
   mode: 'http',
   generate: ({ context, operationDefinition, serverUrl }) => {
-    const { variables } = context || {};
-    const name = operationDefinition.name?.value;
-    const query = print(operationDefinition);
-    const url = new URL(serverUrl);
+    try {
+      const { variables } = context || {};
+      const name = operationDefinition.name?.value;
+      const query = print(operationDefinition);
+      const url = new URL(serverUrl);
 
-    return `POST ${url.pathname} HTTP/1.1
+      return `POST ${url.pathname} HTTP/1.1
 Host: ${url.hostname}
 Content-Type: application/json
 
@@ -26,5 +27,8 @@ ${JSON.stringify(
   null,
   2,
 )}`;
+    } catch (e) {
+      return '';
+    }
   },
 } as Snippet;

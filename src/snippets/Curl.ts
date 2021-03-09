@@ -8,11 +8,12 @@ export default {
   name: 'cURL',
   mode: 'shell',
   generate: ({ context, operationDefinition, serverUrl }) => {
-    const { variables } = context;
-    const { name } = operationDefinition;
-    const query = print(operationDefinition);
+    try {
+      const { variables } = context;
+      const { name } = operationDefinition;
+      const query = print(operationDefinition);
 
-    return `curl -X POST \\
+      return `curl -X POST \\
   ${serverUrl} \\
   -H 'Content-Type: application/json' \\
   -d '${JSON.stringify({
@@ -20,5 +21,9 @@ export default {
     query: graphqlQueryCompress(query),
     variables,
   })}'`;
+    } catch (e) {
+      return '';
+    }
+
   },
 } as Snippet;

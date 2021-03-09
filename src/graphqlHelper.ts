@@ -377,7 +377,6 @@ export function mergeDocumentNodeIntoVariables(
 ): string {
   const [operationDefinition] = nextDocumentNode.definitions;
   const { variableDefinitions } = operationDefinition as OperationDefinitionNode;
-  console.log(variables, variableDefinitions);
   let parsedVariables = {} as Record<string, any>;
   try {
     parsedVariables = JSON.parse(variables);

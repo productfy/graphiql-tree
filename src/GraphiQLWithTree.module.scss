@@ -135,10 +135,6 @@
             padding: 12px 0;
           }
 
-          .CodeMirror-sizer {
-            margin-left: 42px !important;
-          }
-
           .docExplorerWrap {
             display: none !important;
           }
@@ -200,6 +196,10 @@
                 background-color: transparent;
                 border: none;
               }
+            }
+
+            .CodeMirror-sizer {
+              margin-left: 42px !important;
             }
           }
 
