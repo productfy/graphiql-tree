@@ -10,6 +10,10 @@ a file explorer interface.
 
 ## Online example
 
+You can test drive this app with the GitHub API GraphQL schema at https://static.productfy.io/graphql/
+
+Enter a [GitHub Personal Access Token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) if you wish to execute queries against the GitHub API.
+
 ## Usage example
 
 Go to the [example repo](https://github.com/productfy/graphiql-tree-example) to see how you can
