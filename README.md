@@ -5,6 +5,9 @@
 A plugin for the GraphiQL IDE that allows you to explore a GraphQL schema in a manner similar to
 a file explorer interface.
 
+![graphiql-tree-optimized](https://user-images.githubusercontent.com/4228012/110411430-66beb000-803f-11eb-9125-99bc43b92adb.gif)
+
+
 ## Online example
 
 ## Usage example
