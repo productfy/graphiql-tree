@@ -1,16 +1,19 @@
 import 'graphiql/graphiql.css';
 import 'rc-tooltip/assets/bootstrap.css';
 
+import { ChangeEvent, FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type {
+  DefaultValueCustomizer,
+  DescriptionCustomizer,
+  NodeCustomizer,
+} from './CustomizerTypes';
 import { DocumentNode, GraphQLSchema, OperationDefinitionNode, parse } from 'graphql';
-import React, { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import ClipboardIcon from './icons/Clipboard';
 import CodeExport from './CodeExport';
-import DefaultValueCustomizer from './DefaultValueCustomizer';
 import type { Fetcher } from '@graphiql/toolkit';
 import GraphiQL from 'graphiql';
 import GraphiQLTree from './GraphiQLTree';
-import NodeCustomizer from './NodeCustomizer';
 import Snippet from './snippets/Snippet';
 import Tooltip from 'rc-tooltip';
 import classnames from 'classnames';
@@ -23,6 +26,7 @@ export interface GraphiQLWithTreeProps {
     [key: string]: any;
   };
   customizeDefaultValue?: DefaultValueCustomizer;
+  customizeDescription?: DescriptionCustomizer;
   customizeNode?: NodeCustomizer;
   fetcher: Fetcher;
   query?: string;
@@ -38,14 +42,16 @@ enum CodeMode {
 }
 
 const DEFAULT_DEFAULT_VALUE_CUSTOMIZER = () => undefined;
+const DEFAULT_DESCRIPTION_CUSTOMIZER = () => undefined;
 const DEFAULT_NODE_CUSTOMIZER = () => undefined;
 const DEFAULT_QUERY = `query myQuery {
   __typename
 }`;
 
-const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
+const GraphiQLWithTree: FC<GraphiQLWithTreeProps> = ({
   context,
   customizeDefaultValue = DEFAULT_DEFAULT_VALUE_CUSTOMIZER,
+  customizeDescription = DEFAULT_DESCRIPTION_CUSTOMIZER,
   customizeNode = DEFAULT_NODE_CUSTOMIZER,
   fetcher,
   query: queryOverride,
@@ -89,7 +95,7 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
 
   useEffect(() => {
     setQuery(queryOverride || DEFAULT_QUERY);
-  }, [customizeDefaultValue, queryOverride, schema]);
+  }, [customizeDefaultValue, customizeDescription, queryOverride, schema]);
 
   useEffect(() => {
     let nextExportCode = '';
@@ -149,6 +155,7 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
     <div className={classnames(styles.graphiqlWithTree, 'graphiqlWithTree')}>
       <GraphiQLTree
         customizeDefaultValue={customizeDefaultValue}
+        customizeDescription={customizeDescription}
         customizeNode={customizeNode}
         onEdit={onEditQueryTree}
         query={query}

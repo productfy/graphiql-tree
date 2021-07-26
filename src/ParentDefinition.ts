@@ -7,8 +7,8 @@ import {
   GraphQLOutputType,
 } from 'graphql';
 
-export default interface ParentDefinition {
-  parentDefinition?: ParentDefinition;
+export default interface Parent {
+  parent?: Parent;
   definition:
     | GraphQLArgument
     | GraphQLInputField

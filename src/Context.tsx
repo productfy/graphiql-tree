@@ -1,28 +1,37 @@
-import DefaultValueCustomizer from './DefaultValueCustomizer';
-import type { GraphQLSchema, OperationDefinitionNode, VariableDefinitionNode } from 'graphql';
-import NodeCustomizer from './NodeCustomizer';
-import React from 'react';
+import type {
+  DefaultValueCustomizer,
+  DescriptionCustomizer,
+  NodeCustomizer,
+} from './CustomizerTypes';
+import type {
+  GraphQLSchema,
+  OperationDefinitionNode,
+  VariableDefinitionNode,
+} from 'graphql';
 
-export const DefaultValueCustomizerContext = React.createContext<DefaultValueCustomizer>(
-  () => undefined,
-);
+import { createContext } from 'react';
+
+export const DefaultValueCustomizerContext = createContext<DefaultValueCustomizer>(() => undefined);
 DefaultValueCustomizerContext.displayName = 'DefaultValueCustomizerContext';
 
-export const DescriptionContext = React.createContext<boolean>(true);
+export const DescriptionContext = createContext<boolean>(true);
 DescriptionContext.displayName = 'DescriptionContext';
 
-export const NodeCustomizerContext = React.createContext<NodeCustomizer>(() => undefined);
+export const DescriptionCustomizerContext = createContext<DescriptionCustomizer>(() => undefined);
+DescriptionContext.displayName = 'DescriptionCustomizerContext';
+
+export const NodeCustomizerContext = createContext<NodeCustomizer>(() => undefined);
 NodeCustomizerContext.displayName = 'NodeCustomizerContext';
 
-export const OperationDefinitionContext = React.createContext<OperationDefinitionNode | undefined>(
+export const OperationDefinitionContext = createContext<OperationDefinitionNode | undefined>(
   undefined,
 );
 OperationDefinitionContext.displayName = 'OperationDefinitionContext';
 
-export const SchemaContext = React.createContext<GraphQLSchema | undefined>(undefined);
+export const SchemaContext = createContext<GraphQLSchema | undefined>(undefined);
 SchemaContext.displayName = 'SchemaContext';
 
-export const VariableHandlerContext = React.createContext<
+export const VariableHandlerContext = createContext<
   (prevNode?: VariableDefinitionNode, nextNode?: VariableDefinitionNode) => void
 >(() => undefined);
 VariableHandlerContext.displayName = 'VariableHandlerContext';

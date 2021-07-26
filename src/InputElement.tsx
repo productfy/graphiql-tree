@@ -20,7 +20,7 @@ import {
 import React, { ChangeEvent, useContext, useRef } from 'react';
 import { sourcesAreEqual, unwrapType } from './graphqlHelper';
 
-import ParentDefinition from './ParentDefinition';
+import Parent from './ParentDefinition';
 import Tooltip from 'rc-tooltip';
 import classnames from 'classnames';
 import styles from './GraphiQLTree.module.scss';
@@ -32,7 +32,7 @@ export interface InputElementProps {
   isRequired?: boolean;
   name: string;
   onEdit: (prevValueNode?: ValueNode, nextValueNode?: ValueNode) => void;
-  parentDefinition: ParentDefinition;
+  parent: Parent;
   type: GraphQLInputType;
   value?: ValueNode;
 }
@@ -44,7 +44,7 @@ export default React.memo(function InputElement({
   isRequired = false,
   name,
   onEdit,
-  parentDefinition,
+  parent,
   type,
   value,
 }: InputElementProps) {
@@ -166,7 +166,7 @@ export default React.memo(function InputElement({
           isRequired,
           name,
           onEdit,
-          parentDefinition: parentDefinition.parentDefinition!,
+          parent,
           type,
           value,
         });
