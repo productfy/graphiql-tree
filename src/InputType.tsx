@@ -33,7 +33,7 @@ import {
 } from './graphqlHelper';
 
 import InputElement from './InputElement';
-import ParentDefinition from './ParentDefinition';
+import Parent from './ParentDefinition';
 import TrashIcon from './icons/Trash';
 import TypeName from './TypeName';
 import classnames from 'classnames';
@@ -44,7 +44,7 @@ export interface InputFieldProps {
   inputField: GraphQLInputField;
   onEdit: (prevObjectFieldNode?: ObjectFieldNode, nextObjectFieldNode?: ObjectFieldNode) => void;
   objectFieldNode?: ObjectFieldNode;
-  parentDefinition: ParentDefinition;
+  parent: Parent;
 }
 
 const InputField = React.memo(function InputField({
@@ -52,14 +52,14 @@ const InputField = React.memo(function InputField({
   inputField,
   onEdit,
   objectFieldNode,
-  parentDefinition,
+  parent,
 }: InputFieldProps) {
   const customizeDefaultValue = useContext(DefaultValueCustomizerContext);
   const showDescription = useContext(DescriptionContext);
   const operationDefinition = useContext(OperationDefinitionContext);
   const variableHandler = useContext(VariableHandlerContext);
   const objectFieldNodeRef = useRef(objectFieldNode);
-  const parentDefinitionRef = useRef({ definition: inputField, parentDefinition });
+  const parentRef = useRef({ definition: inputField, parent });
   const { name, type } = inputField;
   const isRequired = isRequiredInputField(inputField);
   const unwrappedType = unwrapType(type);
@@ -71,7 +71,7 @@ const InputField = React.memo(function InputField({
 
   const defaultObjectField: ObjectFieldNode = generateObjectFieldNodeFromInputField(
     inputField,
-    parentDefinition,
+    parent,
     customizeDefaultValue,
   );
 
@@ -84,7 +84,7 @@ const InputField = React.memo(function InputField({
           ...((objectFieldNodeRef.current!.value as ListValueNode).values || []),
           ...(getDefaultValueByType(
             type,
-            parentDefinitionRef.current,
+            parentRef.current,
             customizeDefaultValue,
           ) as ListValueNode).values,
         ],
@@ -206,7 +206,7 @@ const InputField = React.memo(function InputField({
                     isRequired={isRequiredInputField(inputField)}
                     name={inputField.name}
                     onEdit={onEditInputField(index)}
-                    parentDefinition={parentDefinitionRef.current}
+                    parent={parentRef.current}
                     type={type}
                     value={v}
                   />
@@ -233,7 +233,7 @@ const InputField = React.memo(function InputField({
               isRequired={isRequiredInputField(inputField)}
               name={inputField.name}
               onEdit={onEditInputField()}
-              parentDefinition={parentDefinitionRef.current}
+              parent={parentRef.current}
               type={type}
               value={objectFieldNode?.value}
             />
@@ -274,7 +274,7 @@ const InputField = React.memo(function InputField({
                         objectFieldNode={(v as ObjectValueNode)?.fields?.find(
                           ({ name }) => name.value === field.name,
                         )}
-                        parentDefinition={parentDefinitionRef.current}
+                        parent={parentRef.current}
                       />
                     ))}
                   </div>
@@ -293,7 +293,7 @@ const InputField = React.memo(function InputField({
                   key={field.name}
                   onEdit={onEditInputObjectField()}
                   objectFieldNode={objectFieldNodes?.find(({ name }) => name.value === field.name)}
-                  parentDefinition={parentDefinitionRef.current}
+                  parent={parentRef.current}
                 />
               ))}
             </div>
@@ -310,7 +310,7 @@ export interface ArgumentProps {
   argumentNode?: ArgumentNode; // Selection
   depth: number;
   onEdit: (prevArgumentNode?: ArgumentNode, nextArgumentNode?: ArgumentNode) => void;
-  parentDefinition: ParentDefinition;
+  parent: Parent;
 }
 
 const Argument = React.memo(function Argument({
@@ -318,12 +318,12 @@ const Argument = React.memo(function Argument({
   argumentNode,
   depth,
   onEdit,
-  parentDefinition,
+  parent,
 }: ArgumentProps) {
   const { description, name, type } = argument;
   const isRequired = isRequiredArgument(argument);
   const argumentNodeRef = useRef(argumentNode);
-  const parentDefinitionRef = useRef({ definition: argument, parentDefinition });
+  const parentRef = useRef({ definition: argument, parent });
   const customizeDefaultValue = useContext(DefaultValueCustomizerContext);
   const showDescription = useContext(DescriptionContext);
   const operationDefinition = useContext(OperationDefinitionContext);
@@ -335,7 +335,7 @@ const Argument = React.memo(function Argument({
 
   const defaultArgument: ArgumentNode = generateArgumentSelectionFromType(
     argument,
-    parentDefinition,
+    parent,
     customizeDefaultValue,
   );
 
@@ -348,7 +348,7 @@ const Argument = React.memo(function Argument({
           ...((argumentNodeRef.current!.value as ListValueNode).values || []),
           ...(getDefaultValueByType(
             type,
-            parentDefinitionRef.current,
+            parentRef.current,
             customizeDefaultValue,
           ) as ListValueNode).values,
         ],
@@ -487,7 +487,7 @@ const Argument = React.memo(function Argument({
                   name={name}
                   isRequired={isRequiredArgument(argument)}
                   onEdit={onEditArgument(i)}
-                  parentDefinition={parentDefinitionRef.current}
+                  parent={parentRef.current}
                   type={unwrappedType}
                   value={v}
                 />
@@ -514,7 +514,7 @@ const Argument = React.memo(function Argument({
               name={name}
               isRequired={isRequiredArgument(argument)}
               onEdit={onEditArgument()}
-              parentDefinition={parentDefinitionRef.current}
+              parent={parentRef.current}
               type={unwrappedType}
               value={argumentNode?.value}
             />
@@ -555,7 +555,7 @@ const Argument = React.memo(function Argument({
                         objectFieldNode={(v as ObjectValueNode)?.fields?.find(
                           ({ name }) => name.value === field.name,
                         )}
-                        parentDefinition={parentDefinitionRef.current}
+                        parent={parentRef.current}
                       />
                     ))}
                   </div>
@@ -574,7 +574,7 @@ const Argument = React.memo(function Argument({
                   key={field.name}
                   onEdit={onEditInputField()}
                   objectFieldNode={objectFieldNodes?.find(({ name }) => name.value === field.name)}
-                  parentDefinition={parentDefinitionRef.current}
+                  parent={parentRef.current}
                 />
               ))}
             </div>

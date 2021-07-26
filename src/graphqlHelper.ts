@@ -25,6 +25,7 @@ import {
   SelectionNode,
   SelectionSetNode,
   ValueNode,
+  VariableDefinitionNode,
   astFromValue,
   isEnumType,
   isInputObjectType,
@@ -36,11 +37,10 @@ import {
   isRequiredInputField,
   isWrappingType,
   print,
-  VariableDefinitionNode,
 } from 'graphql';
 
-import DefaultValueCustomizer from './DefaultValueCustomizer';
-import ParentDefinition from './ParentDefinition';
+import type { DefaultValueCustomizer } from './CustomizerTypes';
+import type Parent from './ParentDefinition';
 import parserGraphql from 'prettier/parser-graphql';
 import prettier from 'prettier/standalone';
 import unionBy from 'lodash/unionBy';
@@ -55,15 +55,15 @@ const defaultTypeName: FieldNode = {
 
 export function generateArgumentSelectionFromType(
   arg: GraphQLArgument,
-  parentDefinition: ParentDefinition,
+  parent: Parent,
   customizeDefaultValue: DefaultValueCustomizer,
 ): ArgumentNode {
   const { name, type } = arg;
   const unwrappedType = unwrapType(type);
 
   let value: ValueNode =
-    customizeDefaultValue(arg, parentDefinition) ||
-    getDefaultValueByType(type, parentDefinition, customizeDefaultValue);
+    customizeDefaultValue(arg, parent) ||
+    getDefaultValueByType(type, parent, customizeDefaultValue);
 
   if (isInputObjectType(unwrappedType)) {
     const fields = unwrappedType.getFields();
@@ -73,7 +73,7 @@ export function generateArgumentSelectionFromType(
         .filter(
           field =>
             isRequiredInputField(field) ||
-            customizeDefaultValue(field, { definition: arg, parentDefinition }),
+            customizeDefaultValue(field, { definition: arg, parent }),
         )
         .map(field => ({
           kind: 'ObjectField',
@@ -82,10 +82,10 @@ export function generateArgumentSelectionFromType(
             value: field.name,
           },
           value:
-            customizeDefaultValue(field, { definition: arg, parentDefinition }) ||
+            customizeDefaultValue(field, { definition: arg, parent }) ||
             getDefaultValueByType(
               field.type,
-              { definition: arg, parentDefinition },
+              { definition: arg, parent },
               customizeDefaultValue,
             ),
         })),
@@ -123,15 +123,15 @@ export function generateInlineFragmentFromType(type: GraphQLNamedType): InlineFr
 
 export function generateObjectFieldNodeFromInputField(
   field: GraphQLInputField,
-  parentDefinition: ParentDefinition,
+  parent: Parent,
   customizeDefaultValue: DefaultValueCustomizer,
 ): ObjectFieldNode {
   const { name, type } = field;
   const unwrappedType = unwrapType(type);
 
   let value: ValueNode =
-    customizeDefaultValue(field, parentDefinition) ||
-    getDefaultValueByType(type, parentDefinition, customizeDefaultValue);
+    customizeDefaultValue(field, parent) ||
+    getDefaultValueByType(type, parent, customizeDefaultValue);
 
   if (isInputObjectType(unwrappedType)) {
     value = {
@@ -140,7 +140,7 @@ export function generateObjectFieldNodeFromInputField(
         .filter(
           f =>
             isRequiredInputField(f) ||
-            customizeDefaultValue(f, { definition: field, parentDefinition }),
+            customizeDefaultValue(f, { definition: field, parent }),
         )
         .map(f => ({
           kind: 'ObjectField',
@@ -149,10 +149,10 @@ export function generateObjectFieldNodeFromInputField(
             value: f.name,
           },
           value:
-            customizeDefaultValue(f, { definition: field, parentDefinition }) ||
+            customizeDefaultValue(f, { definition: field, parent }) ||
             getDefaultValueByType(
               f.type,
-              { definition: field, parentDefinition },
+              { definition: field, parent },
               customizeDefaultValue,
             ),
         })),
@@ -221,7 +221,7 @@ export function generateDefaultQueryByQueryOrMutationName({
 
 export function generateOutputFieldSelectionFromType(
   field: GraphQLField<any, any>,
-  parentDefinition: ParentDefinition,
+  parent: Parent,
   customizeDefaultValue: DefaultValueCustomizer,
 ): SelectionNode {
   const { args = [], name, type } = field;
@@ -245,13 +245,13 @@ export function generateOutputFieldSelectionFromType(
       .filter(
         arg =>
           isRequiredArgument(arg) ||
-          customizeDefaultValue(arg, { definition: field, parentDefinition }),
+          customizeDefaultValue(arg, { definition: field, parent }),
       )
       .sort((a, b) => (a.name === 'id' ? -1 : b.name === 'id' ? 1 : a.name.localeCompare(b.name)))
       .map(arg =>
         generateArgumentSelectionFromType(
           arg,
-          { definition: field, parentDefinition },
+          { definition: field, parent },
           customizeDefaultValue,
         ),
       ),
@@ -261,21 +261,21 @@ export function generateOutputFieldSelectionFromType(
 
 export function getDefaultValueByType(
   type: GraphQLInputType,
-  parentDefinition: ParentDefinition,
+  parent: Parent,
   customizeDefaultValue: DefaultValueCustomizer,
 ): ValueNode {
   if (isNonNullType(type)) {
-    return getDefaultValueByType(type.ofType, parentDefinition, customizeDefaultValue);
+    return getDefaultValueByType(type.ofType, parent, customizeDefaultValue);
   }
   if (isListType(type)) {
     return {
       kind: 'ListValue',
-      values: [getDefaultValueByType(type.ofType, parentDefinition, customizeDefaultValue)],
+      values: [getDefaultValueByType(type.ofType, parent, customizeDefaultValue)],
     };
   }
   if (isInputObjectType(type)) {
     const cdv = (field: GraphQLInputField) =>
-      customizeDefaultValue(field, { definition: type, parentDefinition });
+      customizeDefaultValue(field, { definition: type, parent });
     return {
       kind: 'ObjectValue',
       fields: Object.values(type.getFields())
@@ -292,7 +292,7 @@ export function getDefaultValueByType(
                 cdv(field) ??
                 getDefaultValueByType(
                   field.type,
-                  { definition: type, parentDefinition },
+                  { definition: type, parent },
                   customizeDefaultValue,
                 ),
             } as ObjectFieldNode),

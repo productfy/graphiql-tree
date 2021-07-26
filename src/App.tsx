@@ -1,19 +1,24 @@
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import type {
+  DefaultValueCustomizer,
+  DescriptionCustomizer,
+  NodeCustomizerParams,
+} from './CustomizerTypes';
 import {
   GraphQLSchema,
   StringValueNode,
   buildClientSchema,
   getIntrospectionQuery,
+  isObjectType,
   isScalarType,
 } from 'graphql';
-import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 
 import Curl from './snippets/Curl';
-import DefaultValueCustomizer from './DefaultValueCustomizer';
 import type { FetcherParams } from '@graphiql/toolkit';
 import GraphiQLWithTree from './GraphiQLWithTree';
 import HttpJson from './snippets/HttpJson';
-import { NodeCustomizerParams } from './NodeCustomizer';
 import classnames from 'classnames';
+import find from 'lodash/find';
 import pickBy from 'lodash/pickBy';
 import styles from './GraphiQLTree.module.scss';
 import { unwrapType } from './graphqlHelper';
@@ -113,10 +118,17 @@ const queryWhitelist = [
   'whoAmI',
 ];
 
+type DescriptionOverrides = {
+  type: string;
+  field: string;
+  description: string;
+};
+
 const App = () => {
   const abortController = useRef<AbortController>(new AbortController());
   const [enums, setEnums] = useState<ProductfyEnum[]>([]);
   const [schema, setSchema] = useState<GraphQLSchema>();
+  const [descriptionOverrides, setDescriptionOverrides] = useState<DescriptionOverrides[]>([]);
 
   useEffect(() => {
     const controller = abortController.current;
@@ -149,7 +161,11 @@ const App = () => {
     return () => controller.abort();
   }, []);
 
-  const customizeDefaultValue: DefaultValueCustomizer = (_arg, _parentDefinition) => {
+  const customizeDefaultValue: DefaultValueCustomizer = (_arg, _parent) => {
+    return undefined;
+  };
+
+  const customizeDescription: DescriptionCustomizer = (_field, _parent) => {
     return undefined;
   };
 
@@ -193,12 +209,15 @@ const App = () => {
 
   return schema ? (
     <GraphiQLWithTree
-      customizeDefaultValue={customizeDefaultValue}
-      customizeNode={customizeNode}
-      fetcher={fetcher(abortController.current)}
-      schema={schema}
-      serverUrl={serverUrl}
-      snippets={[Curl, HttpJson]}
+      {...{
+        customizeDefaultValue,
+        customizeDescription,
+        customizeNode,
+        fetcher: fetcher(abortController.current),
+        schema,
+        serverUrl,
+        snippets: [Curl, HttpJson],
+      }}
     />
   ) : null;
 };

@@ -1,23 +1,29 @@
+import type {
+  DefaultValueCustomizer,
+  DescriptionCustomizer,
+  NodeCustomizer,
+} from './CustomizerTypes';
 import {
   DefaultValueCustomizerContext,
   DescriptionContext,
+  DescriptionCustomizerContext,
   NodeCustomizerContext,
   SchemaContext,
 } from './Context';
 import type { DocumentNode, GraphQLSchema } from 'graphql';
-import React, { useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 
-import DefaultValueCustomizer from './DefaultValueCustomizer';
+import ComposeProviders from './ComposeProviders';
 import Document from './Document';
-import NodeCustomizer from './NodeCustomizer';
 import classnames from 'classnames';
 import { parse } from 'graphql';
 import styles from './GraphiQLTree.module.scss';
 import { transformDocumentNodeToQueryString } from './graphqlHelper';
 
 export interface GraphiQLTreeProps {
-  customizeNode: NodeCustomizer;
   customizeDefaultValue: DefaultValueCustomizer;
+  customizeDescription: DescriptionCustomizer;
+  customizeNode: NodeCustomizer;
   onEdit: (
     prevQueryString: string,
     nextQueryString: string,
@@ -54,9 +60,10 @@ function parseQuery(queryString: string): DocumentNode | undefined {
   }
 }
 
-export default React.memo(function GraphiQLTree({
-  customizeNode,
+export default memo(function GraphiQLTree({
   customizeDefaultValue,
+  customizeDescription,
+  customizeNode,
   onEdit,
   query,
   schema,
@@ -104,15 +111,17 @@ export default React.memo(function GraphiQLTree({
         </label>
       </div>
       {schema && (
-        <SchemaContext.Provider value={schema}>
-          <DescriptionContext.Provider value={showDescription}>
-            <NodeCustomizerContext.Provider value={customizeNode}>
-              <DefaultValueCustomizerContext.Provider value={customizeDefaultValue}>
-                <Document documentNode={documentNode} onEdit={onEditDocument} />
-              </DefaultValueCustomizerContext.Provider>
-            </NodeCustomizerContext.Provider>
-          </DescriptionContext.Provider>
-        </SchemaContext.Provider>
+        <ComposeProviders
+          providers={[
+            [DefaultValueCustomizerContext.Provider, customizeDefaultValue],
+            [DescriptionContext.Provider, showDescription],
+            [DescriptionCustomizerContext.Provider, customizeDescription],
+            [NodeCustomizerContext.Provider, customizeNode],
+            [SchemaContext.Provider, schema],
+          ]}
+        >
+          <Document documentNode={documentNode} onEdit={onEditDocument} />
+        </ComposeProviders>
       )}
     </div>
   );

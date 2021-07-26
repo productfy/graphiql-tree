@@ -9,8 +9,12 @@ import {
   isInterfaceType,
   isObjectType,
 } from 'graphql';
-import { DefaultValueCustomizerContext, DescriptionContext, SchemaContext } from './Context';
-import React, { useCallback, useContext, useEffect, useRef } from 'react';
+import {
+  DefaultValueCustomizerContext,
+  DescriptionContext,
+  DescriptionCustomizerContext,
+  SchemaContext,
+} from './Context';
 import {
   generateInlineFragmentFromType,
   generateOutputFieldSelectionFromType,
@@ -21,9 +25,10 @@ import {
   sourcesAreEqual,
   unwrapType,
 } from './graphqlHelper';
+import { memo, useCallback, useContext, useEffect, useRef } from 'react';
 
 import { Argument } from './InputType';
-import ParentDefinition from './ParentDefinition';
+import type Parent from './ParentDefinition';
 import TypeName from './TypeName';
 import classnames from 'classnames';
 import styles from './GraphiQLTree.module.scss';
@@ -32,20 +37,24 @@ export interface FieldProps {
   depth: number;
   field: GraphQLField<any, any>;
   onEdit: (prevField?: FieldNode, nextField?: FieldNode) => void;
-  parentDefinition: ParentDefinition;
+  parent: Parent;
   selectionNode?: FieldNode;
 }
 
-const Field = React.memo(function Field({
+const nameSorter = (a: { name: string }, b: { name: string }) =>
+  a.name === 'id' ? -1 : b.name === 'id' ? 1 : a.name.localeCompare(b.name);
+
+const Field = memo(function Field({
   depth,
   field,
   onEdit,
-  parentDefinition,
+  parent,
   selectionNode,
 }: FieldProps) {
   const customizeDefaultValue = useContext(DefaultValueCustomizerContext);
+  const customizeDescription = useContext(DescriptionCustomizerContext);
   const showDescription = useContext(DescriptionContext);
-  const parentDefinitionRef = useRef({ definition: field, parentDefinition });
+  const parentRef = useRef({ definition: field, parent });
   const selectionNodeRef = useRef(selectionNode);
 
   useEffect(() => {
@@ -83,7 +92,7 @@ const Field = React.memo(function Field({
     if (!selectionNodeRef.current) {
       const nextSelectionNode = generateOutputFieldSelectionFromType(
         field,
-        parentDefinitionRef.current,
+        parentRef.current,
         customizeDefaultValue,
       );
       onEdit(selectionNodeRef.current, nextSelectionNode as FieldNode);
@@ -105,7 +114,10 @@ const Field = React.memo(function Field({
     isObjectType(unwrappedType) ||
     (isInterfaceType(unwrappedType) && Object.keys(unwrappedType.getFields()).length > 0);
   const isSelected = Boolean(selectionNode);
-  const description = field.description || unwrappedType.description;
+  const description =
+    customizeDescription(field, parentRef.current.parent) ||
+    field.description ||
+    unwrappedType.description;
 
   return (
     <div className={classnames(styles.node, styles.fieldNode, `depth-${depth}`)}>
@@ -161,28 +173,28 @@ const Field = React.memo(function Field({
         </div>
       )}
 
+      {/* field.astNode.directives[], where name.value === 'auth', then grab arguments[0].value.values.map(({ value }) => value) */}
+      {/* Add a DirectiveElement (where we pass in a element generator at the root component) */}
+      {/* {isSelected && <div>Directives</div>} */}
+
       {isSelected && (hasArgs || hasFields) && (
         <div className={classnames(styles.fieldNodeBody, `depth-${depth}`)}>
           {hasArgs && (
             <>
               {depth === 4 && <h5 className={styles.parameters}>Parameters</h5>}
               <div className={classnames(styles.arguments, `depth-${depth}`)}>
-                {(args || [])
-                  .sort((a, b) =>
-                    a.name === 'id' ? -1 : b.name === 'id' ? 1 : a.name.localeCompare(b.name),
-                  )
-                  .map(arg => (
-                    <Argument
-                      argument={arg}
-                      argumentNode={(selectionNode as FieldNode)?.arguments?.find(
-                        argument => argument.name.value === arg.name,
-                      )}
-                      depth={depth + 1}
-                      key={arg.name}
-                      onEdit={onEditArgument}
-                      parentDefinition={parentDefinitionRef.current}
-                    />
-                  ))}
+                {(args || []).sort(nameSorter).map(arg => (
+                  <Argument
+                    argument={arg}
+                    argumentNode={(selectionNode as FieldNode)?.arguments?.find(
+                      argument => argument.name.value === arg.name,
+                    )}
+                    depth={depth + 1}
+                    key={arg.name}
+                    onEdit={onEditArgument}
+                    parent={parentRef.current}
+                  />
+                ))}
               </div>
               {/* <div>
                   <span className={styles.spacer} />
@@ -203,7 +215,7 @@ const Field = React.memo(function Field({
             <Type
               depth={depth + 1}
               onEdit={onEditType}
-              parentDefinition={parentDefinitionRef.current}
+              parent={parentRef.current}
               selectionSetNode={selectionNode!.selectionSet!}
               type={type}
             />
@@ -220,20 +232,20 @@ sourcesAreEqual('selectionNode'));
 export interface ImplementationTypeProps {
   depth: number;
   onEdit: (prevSelection?: InlineFragmentNode, nextSelection?: InlineFragmentNode) => void;
-  parentDefinition: ParentDefinition;
+  parent: Parent;
   selectionNode?: InlineFragmentNode;
   type: GraphQLObjectType;
 }
 
-const ImplementationType = React.memo(function Type({
+const ImplementationType = memo(function Type({
   depth,
   onEdit,
-  parentDefinition,
+  parent,
   selectionNode,
   type,
 }: ImplementationTypeProps) {
   const unwrappedType = unwrapType(type);
-  const parentDefinitionRef = useRef({ definition: type, parentDefinition });
+  const parentRef = useRef({ definition: type, parent });
   const selectionNodeRef = useRef(selectionNode);
 
   useEffect(() => {
@@ -294,7 +306,7 @@ const ImplementationType = React.memo(function Type({
         return (
           <div className={classnames({ [styles.typeFields]: depth > 5 })}>
             {Object.values(fields)
-              .sort((a, b) => (a.name === 'id' ? -1 : a.name.localeCompare(b.name)))
+              .sort(nameSorter)
               .map(field => {
                 const subSelectionNode = (selectionSetNode?.selections as FieldNode[])?.find(
                   selection => selection.name?.value === field.name,
@@ -305,7 +317,7 @@ const ImplementationType = React.memo(function Type({
                     field={field}
                     key={field.name}
                     onEdit={onEditField}
-                    parentDefinition={parentDefinitionRef.current}
+                    parent={parentRef.current}
                     selectionNode={subSelectionNode}
                   />
                 );
@@ -321,20 +333,20 @@ sourcesAreEqual('selectionNode'));
 export interface TypeProps {
   depth: number;
   onEdit: (prevSelectionSet?: SelectionSetNode, nextSelectionSet?: SelectionSetNode) => void;
-  parentDefinition?: ParentDefinition;
+  parent?: Parent;
   selectionSetNode: SelectionSetNode;
   type: GraphQLOutputType;
 }
 
-const Type = React.memo(function Type({
+const Type = memo(function Type({
   depth,
   onEdit,
-  parentDefinition,
+  parent,
   selectionSetNode,
   type,
 }: TypeProps) {
   const schema = useContext(SchemaContext);
-  const parentDefinitionRef = useRef({ definition: type, parentDefinition });
+  const parentRef = useRef({ definition: type, parent });
   const selectionSetNodeRef = useRef(selectionSetNode);
 
   useEffect(() => {
@@ -379,7 +391,7 @@ const Type = React.memo(function Type({
         {
           // Interface part
           Object.values(fields)
-            .sort((a, b) => (a.name === 'id' ? -1 : a.name.localeCompare(b.name)))
+            .sort(nameSorter)
             .map(field => {
               const selectionNode = selectionSetNode?.selections?.find(
                 selection => selection.kind === 'Field' && selection.name?.value === field.name,
@@ -390,7 +402,7 @@ const Type = React.memo(function Type({
                   field={field}
                   key={field.name}
                   onEdit={onEditField}
-                  parentDefinition={parentDefinitionRef.current}
+                  parent={parentRef.current}
                   selectionNode={selectionNode}
                 />
               );
@@ -408,7 +420,7 @@ const Type = React.memo(function Type({
                 depth={depth + 1}
                 key={type.name}
                 onEdit={onEditType}
-                parentDefinition={parentDefinitionRef.current}
+                parent={parentRef.current}
                 selectionNode={selectionNode}
                 type={type}
               />
@@ -428,7 +440,7 @@ const Type = React.memo(function Type({
     return (
       <>
         {Object.values(fields)
-          .sort((a, b) => (a.name === 'id' ? -1 : a.name.localeCompare(b.name)))
+          .sort(nameSorter)
           .map(field => {
             const selectionNode = (selectionSetNode?.selections as FieldNode[])?.find(
               selection => selection.name?.value === field.name,
@@ -442,7 +454,7 @@ const Type = React.memo(function Type({
                 field={field}
                 key={field.name}
                 onEdit={onEditField}
-                parentDefinition={parentDefinitionRef.current}
+                parent={parentRef.current}
                 selectionNode={selectionNode}
               />
             );
