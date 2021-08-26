@@ -108,7 +108,7 @@ const Field = React.memo(function Field({
   const description = field.description || unwrappedType.description;
 
   return (
-    <div className={classnames(styles.node, styles.fieldNode, `depth-${depth}`)}>
+    <div className={classnames(styles.node, styles.fieldNode, `depth-${depth}`)} data-name={name}>
       <label className={classnames(styles.nameLine, styles.selectable)}>
         <span className={styles.checkboxGroup}>
           {hasFields && (
