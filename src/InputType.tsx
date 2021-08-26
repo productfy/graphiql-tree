@@ -168,7 +168,7 @@ const InputField = React.memo(function InputField({
   const isSelected = Boolean(objectFieldNode) || isRequired;
 
   return (
-    <div className={classnames(styles.inputField, `depth-${depth}`)}>
+    <div className={classnames(styles.inputField, `depth-${depth}`)} data-name={name}>
       <label>
         <span className={styles.checkboxGroup}>
           {hasFields && (
@@ -449,7 +449,7 @@ const Argument = React.memo(function Argument({
   const isSelected = Boolean(argumentNode) || isRequired;
 
   return (
-    <div className={classnames(styles.argument, styles.node, `depth-${depth}`)}>
+    <div className={classnames(styles.argument, styles.node, `depth-${depth}`)} data-name={name}>
       <label>
         <span className={styles.checkboxGroup}>
           {hasFields && (
