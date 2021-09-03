@@ -38,6 +38,9 @@ enum CodeMode {
 
 const DEFAULT_DEFAULT_VALUE_CUSTOMIZER = () => undefined;
 const DEFAULT_NODE_CUSTOMIZER = () => undefined;
+const DEFAULT_QUERY = `query myQuery {
+  __typename
+}`;
 
 const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
   context,
@@ -83,7 +86,7 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
   }, [query]);
 
   useEffect(() => {
-    setQuery(queryOverride || 'query myQuery {}');
+    setQuery(queryOverride || DEFAULT_QUERY);
   }, [customizeDefaultValue, queryOverride, schema]);
 
   useEffect(() => {
