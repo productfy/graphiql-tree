@@ -26,6 +26,7 @@ export interface GraphiQLWithTreeProps {
   customizeNode?: NodeCustomizer;
   fetcher: Fetcher;
   query?: string;
+  readOnly?: boolean;
   schema?: GraphQLSchema;
   serverUrl: string;
   snippets?: Snippet[];
@@ -48,6 +49,7 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
   customizeNode = DEFAULT_NODE_CUSTOMIZER,
   fetcher,
   query: queryOverride,
+  readOnly,
   schema,
   serverUrl,
   snippets,
@@ -125,7 +127,7 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
   }, [codeMode, context, parsedQuery, query, serverUrl, snippets, variables]);
 
   useEffect(() => {
-    if ((graphiqlRef.current as any)?.getQueryEditor()?.options?.readOnly === false) {
+    if (readOnly && (graphiqlRef.current as any)?.getQueryEditor()?.options?.readOnly === false) {
       (graphiqlRef.current as any).getQueryEditor().options.readOnly = true;
     }
   });
