@@ -93,7 +93,7 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
       setVariables(v || '');
       onChange?.(query, v || '');
     },
-    [onChange, setVariables],
+    [onChange, query, setVariables],
   );
   const parsedQuery = useMemo(() => {
     try {
