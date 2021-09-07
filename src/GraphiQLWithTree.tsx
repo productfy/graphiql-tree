@@ -25,6 +25,7 @@ export interface GraphiQLWithTreeProps {
   customizeDefaultValue?: DefaultValueCustomizer;
   customizeNode?: NodeCustomizer;
   fetcher: Fetcher;
+  onChange?: (query?: string, variables?: string) => void;
   query?: string;
   readOnly?: boolean;
   schema?: GraphQLSchema;
@@ -48,6 +49,7 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
   customizeDefaultValue = DEFAULT_DEFAULT_VALUE_CUSTOMIZER,
   customizeNode = DEFAULT_NODE_CUSTOMIZER,
   fetcher,
+  onChange,
   query: queryOverride,
   readOnly,
   schema,
@@ -63,8 +65,11 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
   const [variables, setVariables] = useState<string>('{}');
 
   const onEditQueryGraphiql = useCallback(
-    (nextQueryString?: string) => setQuery(nextQueryString || ''),
-    [setQuery],
+    (nextQueryString?: string) => {
+      setQuery(nextQueryString || '');
+      onChange?.(nextQueryString || '', variables);
+    },
+    [onChange, setQuery],
   );
   const onEditQueryTree = useCallback(
     (
@@ -74,11 +79,19 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
       nextDocumentNode: DocumentNode,
     ) => {
       setQuery(nextQueryString || '');
-      setVariables(mergeDocumentNodeIntoVariables(variables, nextDocumentNode));
+      const nextVariables = mergeDocumentNodeIntoVariables(variables, nextDocumentNode);
+      setVariables(nextVariables);
+      onChange?.(nextQueryString || '', nextVariables);
     },
-    [setQuery, setVariables, variables],
+    [onChange, setQuery, setVariables, variables],
   );
-  const onEditVariables = useCallback((v?: string) => setVariables(v || ''), [setVariables]);
+  const onEditVariables = useCallback(
+    (v?: string) => {
+      setVariables(v || '');
+      onChange?.(query, v || '');
+    },
+    [onChange, setVariables],
+  );
   const parsedQuery = useMemo(() => {
     try {
       return parse(query);
