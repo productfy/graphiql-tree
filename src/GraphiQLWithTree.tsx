@@ -31,6 +31,7 @@ export interface GraphiQLWithTreeProps {
   schema?: GraphQLSchema;
   serverUrl: string;
   snippets?: Snippet[];
+  variables?: string;
 }
 
 enum CodeMode {
@@ -43,6 +44,7 @@ const DEFAULT_NODE_CUSTOMIZER = () => undefined;
 const DEFAULT_QUERY = `query myQuery {
   __typename
 }`;
+const DEFAULT_VARIABLES = '{}';
 
 const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
   context,
@@ -55,6 +57,7 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
   schema,
   serverUrl,
   snippets,
+  variables: variablesOverride,
 }) => {
   const graphiqlRef = useRef(null);
 
@@ -62,7 +65,7 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
   const [exportCode, setExportCode] = useState<string>('');
   const [query, setQuery] = useState<string>('');
   const [showCopiedTooltip, setShowCopiedTooltip] = useState<boolean>(false);
-  const [variables, setVariables] = useState<string>('{}');
+  const [variables, setVariables] = useState<string>(variablesOverride || DEFAULT_VARIABLES);
 
   const onEditQueryGraphiql = useCallback(
     (nextQueryString?: string) => {
@@ -103,6 +106,10 @@ const GraphiQLWithTree: React.FC<GraphiQLWithTreeProps> = ({
   useEffect(() => {
     setQuery(queryOverride || DEFAULT_QUERY);
   }, [customizeDefaultValue, queryOverride, schema]);
+
+  useEffect(() => {
+    setVariables(variablesOverride || DEFAULT_VARIABLES);
+  }, [variablesOverride]);
 
   useEffect(() => {
     let nextExportCode = '';
