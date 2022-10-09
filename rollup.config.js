@@ -1,11 +1,9 @@
-import { nodeResolve } from '@rollup/plugin-node-resolve';
-import commonjs from '@rollup/plugin-commonjs';
+import css from 'rollup-plugin-css-only'
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
-  input: 'src/GraphiQLWithTree.tsx',
-  output: {
-    file: '/dist/GraphiQLWithTree.js',
-    format: 'cjs'
+  entry: 'dist/GraphiQLWithTree.es.js',
+  dest: {
+    file: '/dist/bundle.js',
   },
-  plugins: [nodeResolve(), commonjs]
+  plugins: [css({output: 'bundle.css'})]
 };
