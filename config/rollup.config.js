@@ -8,6 +8,8 @@ import resolve from '@rollup/plugin-node-resolve';
 import svg from 'rollup-plugin-svg';
 import typescript from 'rollup-plugin-typescript2';
 
+var path = require('path');
+
 const plugins = [
   peerDepsExternal(),
   resolve(),
@@ -16,7 +18,11 @@ const plugins = [
   postcss({
     extract: true,
     modules: true,
-    use: ['sass'],
+    use: [
+      ['sass', {
+        includePaths: [path.resolve('node_modules')]
+      }]
+    ]
   }),
   json(),
   svg(),

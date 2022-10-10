@@ -1,6 +1,3 @@
-import 'graphiql/graphiql.css';
-import 'rc-tooltip/assets/bootstrap.css';
-
 import { DocumentNode, GraphQLSchema, OperationDefinitionNode, parse } from 'graphql';
 import React, { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
